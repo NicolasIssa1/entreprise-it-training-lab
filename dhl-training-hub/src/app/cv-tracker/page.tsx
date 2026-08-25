@@ -4,14 +4,20 @@ import { useState } from "react";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Badge } from "@/components/Badge";
+import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { Disclaimer } from "@/components/Disclaimer";
+import { FormSection } from "@/components/FormSection";
+import { TextAreaField, InputField, SelectField } from "@/components/FormField";
 import { useLocalStorageList } from "@/lib/storage";
-import { teams } from "@/lib/data/teams";
+import { teams, getTeamLabel } from "@/lib/data/teams";
+import { internshipState } from "@/lib/data/internshipState";
+import { INVOLVEMENT_HELP, checkWordingAgainstLevel } from "@/lib/involvementHelp";
+import { toggleButtonClass } from "@/lib/ui";
 import { CvAchievement, INVOLVEMENT_LEVELS, InvolvementLevel, TeamId } from "@/lib/types";
 
-const TEAM_OPTIONS: { id: TeamId | "General"; label: string }[] = [
-  { id: "General", label: "General" },
-  ...teams.map((t) => ({ id: t.id, label: t.name })),
+const TEAM_OPTIONS: { value: string; label: string }[] = [
+  { value: "General", label: "General" },
+  ...teams.map((t) => ({ value: t.id, label: t.name })),
 ];
 
 const INVOLVEMENT_BADGE: Record<InvolvementLevel, "neutral" | "accent" | "success" | "warning"> = {
@@ -24,20 +30,17 @@ const INVOLVEMENT_BADGE: Record<InvolvementLevel, "neutral" | "accent" | "succes
   Implemented: "success",
 };
 
-const EMPTY_FORM = {
-  date: new Date().toISOString().slice(0, 10),
-  team: "infrastructure" as TeamId | "General",
-  rawNote: "",
-  involvementLevel: "Observed" as InvolvementLevel,
-  skillsInvolved: "",
-  whatLearned: "",
-  suggestedCvWording: "",
-  evidenceNotes: "",
-};
-
-function teamLabel(id: TeamId | "General") {
-  if (id === "General") return "General";
-  return teams.find((t) => t.id === id)?.name ?? id;
+function emptyForm() {
+  return {
+    date: internshipState.currentDate,
+    team: internshipState.currentTeam as TeamId | "General",
+    rawNote: "",
+    involvementLevel: "Observed" as InvolvementLevel,
+    skillsInvolved: "",
+    whatLearned: "",
+    suggestedCvWording: "",
+    evidenceNotes: "",
+  };
 }
 
 export default function CvTrackerPage() {
@@ -45,22 +48,25 @@ export default function CvTrackerPage() {
     "cv-achievements",
     [],
   );
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState(emptyForm);
 
   function addAchievement() {
     if (!form.rawNote) return;
     const achievement: CvAchievement = { id: crypto.randomUUID(), ...form };
     setAchievements([achievement, ...achievements]);
-    setForm(EMPTY_FORM);
+    setForm(emptyForm());
   }
 
   function removeAchievement(id: string) {
     setAchievements(achievements.filter((a) => a.id !== id));
   }
 
+  const wordingWarning = checkWordingAgainstLevel(form.suggestedCvWording, form.involvementLevel);
+
   return (
     <div className="space-y-8">
       <SectionHeading title="CV Achievement Tracker" subtitle="Honest, evidence-based CV bullets — never exaggerated" />
+      <PrivacyNotice context="Achievements should reflect your own honest involvement, without confidential specifics." />
       <Disclaimer>
         Never overstate what actually happened. If you only observed something, it must
         never be logged or worded as if you implemented, built, or performed it.
@@ -68,110 +74,75 @@ export default function CvTrackerPage() {
 
       <Card>
         <SectionHeading title="New achievement" />
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">Date</label>
-            <input
-              type="date"
-              value={form.date}
-              onChange={(e) => setForm({ ...form, date: e.target.value })}
-              className="w-full rounded-md border border-slate-300 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">Team</label>
-            <select
+        <div className="space-y-4">
+          <FormSection title="When">
+            <InputField label="Date" type="date" value={form.date} onChange={(v) => setForm({ ...form, date: v })} />
+            <SelectField
+              label="Team"
               value={form.team}
-              onChange={(e) => setForm({ ...form, team: e.target.value as TeamId | "General" })}
-              className="w-full rounded-md border border-slate-300 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
-            >
-              {TEAM_OPTIONS.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className="mb-1 block text-xs font-medium text-slate-500">
-              Raw note — what actually happened
-            </label>
-            <textarea
-              value={form.rawNote}
-              onChange={(e) => setForm({ ...form, rawNote: e.target.value })}
-              rows={2}
-              placeholder="e.g. Watched how the Infrastructure team manages tickets."
-              className="w-full resize-none rounded-md border border-slate-300 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+              onChange={(v) => setForm({ ...form, team: v as TeamId | "General" })}
+              options={TEAM_OPTIONS}
             />
-          </div>
+          </FormSection>
 
-          <div className="sm:col-span-2">
-            <label className="mb-1 block text-xs font-medium text-slate-500">
-              Level of involvement — be honest
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {INVOLVEMENT_LEVELS.map((level) => (
-                <button
-                  key={level}
-                  onClick={() => setForm({ ...form, involvementLevel: level })}
-                  className={`rounded-md border px-3 py-1.5 text-sm ${
-                    form.involvementLevel === level
-                      ? "border-blue-600 bg-blue-600 text-white"
-                      : "border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                  }`}
-                >
-                  {level}
-                </button>
-              ))}
+          <FormSection title="What happened">
+            <div className="sm:col-span-2">
+              <TextAreaField
+                label="Raw note — what actually happened"
+                value={form.rawNote}
+                onChange={(v) => setForm({ ...form, rawNote: v })}
+                placeholder="e.g. Watched how the Infrastructure team manages tickets."
+              />
             </div>
-          </div>
+          </FormSection>
 
-          <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">Skills involved</label>
-            <textarea
-              value={form.skillsInvolved}
-              onChange={(e) => setForm({ ...form, skillsInvolved: e.target.value })}
-              rows={2}
-              className="w-full resize-none rounded-md border border-slate-300 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">What I learned</label>
-            <textarea
-              value={form.whatLearned}
-              onChange={(e) => setForm({ ...form, whatLearned: e.target.value })}
-              rows={2}
-              className="w-full resize-none rounded-md border border-slate-300 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="mb-1 block text-xs font-medium text-slate-500">
-              Potential professional CV wording{" "}
-              <span className="font-normal text-slate-400">(must match involvement level)</span>
-            </label>
-            <textarea
-              value={form.suggestedCvWording}
-              onChange={(e) => setForm({ ...form, suggestedCvWording: e.target.value })}
-              rows={2}
-              placeholder="e.g. Developed familiarity with enterprise IT service-management workflows, including incident assignment, escalation and resolution tracking."
-              className="w-full resize-none rounded-md border border-slate-300 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="mb-1 block text-xs font-medium text-slate-500">Evidence / notes</label>
-            <textarea
-              value={form.evidenceNotes}
-              onChange={(e) => setForm({ ...form, evidenceNotes: e.target.value })}
-              rows={2}
-              className="w-full resize-none rounded-md border border-slate-300 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
-            />
-          </div>
+          <FormSection title="Level of involvement — be honest">
+            <div className="sm:col-span-2">
+              <div className="flex flex-wrap gap-2">
+                {INVOLVEMENT_LEVELS.map((level) => (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => setForm({ ...form, involvementLevel: level })}
+                    aria-pressed={form.involvementLevel === level}
+                    title={INVOLVEMENT_HELP[level]}
+                    className={toggleButtonClass(form.involvementLevel === level)}
+                  >
+                    {level}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                <span className="font-medium">{form.involvementLevel}:</span>{" "}
+                {INVOLVEMENT_HELP[form.involvementLevel]}
+              </p>
+            </div>
+          </FormSection>
+
+          <FormSection title="Reflection">
+            <TextAreaField label="Skills involved" value={form.skillsInvolved} onChange={(v) => setForm({ ...form, skillsInvolved: v })} />
+            <TextAreaField label="What I learned" value={form.whatLearned} onChange={(v) => setForm({ ...form, whatLearned: v })} />
+            <div className="sm:col-span-2">
+              <TextAreaField
+                label="Potential professional CV wording (must match involvement level)"
+                value={form.suggestedCvWording}
+                onChange={(v) => setForm({ ...form, suggestedCvWording: v })}
+                placeholder="e.g. Developed familiarity with enterprise IT service-management workflows, including incident assignment, escalation and resolution tracking."
+                hint={wordingWarning ?? undefined}
+              />
+              {wordingWarning && (
+                <p className="mt-1 text-xs font-medium text-amber-600 dark:text-amber-400">⚠ {wordingWarning}</p>
+              )}
+            </div>
+            <div className="sm:col-span-2">
+              <TextAreaField label="Evidence / notes" value={form.evidenceNotes} onChange={(v) => setForm({ ...form, evidenceNotes: v })} />
+            </div>
+          </FormSection>
         </div>
 
         <button
           onClick={addAchievement}
-          className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="mt-5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
         >
           Save achievement
         </button>
@@ -180,17 +151,23 @@ export default function CvTrackerPage() {
       <div className="space-y-4">
         <SectionHeading title="Logged achievements" />
         {achievements.length === 0 && (
-          <p className="text-sm text-slate-500">No achievements logged yet.</p>
+          <p className="text-sm text-slate-500">
+            No achievements recorded yet. Add your first internship activity when you
+            have something worth tracking.
+          </p>
         )}
         {achievements.map((a) => (
           <Card key={a.id}>
             <div className="flex items-start justify-between gap-2">
               <div>
                 <Badge variant={INVOLVEMENT_BADGE[a.involvementLevel]}>{a.involvementLevel}</Badge>{" "}
-                <Badge variant="neutral">{teamLabel(a.team)}</Badge>
+                <Badge variant="neutral">{getTeamLabel(a.team)}</Badge>
                 <p className="mt-1 text-xs text-slate-500">{a.date}</p>
               </div>
-              <button onClick={() => removeAchievement(a.id)} className="text-xs text-red-500 hover:underline">
+              <button
+                onClick={() => removeAchievement(a.id)}
+                className="text-xs text-red-500 hover:underline focus:outline-none focus:ring-2 focus:ring-red-400/40"
+              >
                 Delete
               </button>
             </div>

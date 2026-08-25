@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Nav } from "@/components/Nav";
+import { displayProductName, product } from "@/lib/product";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,9 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DHL IT Training Hub",
-  description:
-    "Personal internship training project — dashboard, team explainers, ticket simulator, learning journal, and CV tracker. Not an official DHL application.",
+  title: displayProductName,
+  description: `${product.subtitle} ${product.trainingDisclaimer}`,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -29,8 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Nav />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
         <footer className="border-t border-slate-200 py-4 text-center text-xs text-slate-400 dark:border-slate-800">
-          Personal training project — not an official DHL application. All ticket and
-          scenario data is fictional.
+          {product.trainingDisclaimer}
         </footer>
       </body>
     </html>

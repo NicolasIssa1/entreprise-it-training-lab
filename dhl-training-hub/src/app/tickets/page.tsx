@@ -1,73 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/Card";
 import { Badge } from "@/components/Badge";
 import { SectionHeading } from "@/components/SectionHeading";
-import { Disclaimer } from "@/components/Disclaimer";
-import { tickets } from "@/lib/data/tickets";
-import { teams } from "@/lib/data/teams";
+import { PrivacyNotice } from "@/components/PrivacyNotice";
+import { tickets, getTicketById } from "@/lib/data/tickets";
+import { teams, getTeamLabel } from "@/lib/data/teams";
+import { textareaClass, toggleButtonClass } from "@/lib/ui";
 import { Ticket, TeamId, UrgencyLevel } from "@/lib/types";
 
-const TEAM_OPTIONS: { id: TeamId; label: string }[] = teams.map((t) => ({ id: t.id, label: t.name }));
 const URGENCY_OPTIONS: UrgencyLevel[] = ["Critical", "High", "Medium", "Low"];
 
-function teamLabel(id: TeamId) {
-  return teams.find((t) => t.id === id)?.name ?? id;
-}
-
 export default function TicketSimulatorPage() {
-  const [selectedId, setSelectedId] = useState<string>(tickets[0].id);
-  const selected = tickets.find((t) => t.id === selectedId) as Ticket;
-
   return (
     <div className="space-y-6">
       <SectionHeading
         title="Ticket Simulator"
         subtitle="Fake, generic training tickets — not real DHL data or terminology"
       />
-      <Disclaimer>
-        All tickets below are fictional training scenarios. Urgency levels
-        (Critical/High/Medium/Low) and team categories are generic training
-        categories only — not confirmed DHL terminology or policy.
-      </Disclaimer>
+      <PrivacyNotice context="All tickets below are fictional training scenarios, not real DHL incidents." />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
-        <div className="space-y-3">
-          {tickets.map((ticket) => (
-            <button
-              key={ticket.id}
-              onClick={() => setSelectedId(ticket.id)}
-              className={`w-full rounded-xl border p-4 text-left transition ${
-                ticket.id === selectedId
-                  ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40"
-                  : "border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900"
-              }`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">{ticket.id}</span>
-                <Badge
-                  variant={
-                    ticket.status === "Resolved"
-                      ? "success"
-                      : ticket.status === "Escalated"
-                        ? "danger"
-                        : ticket.status === "In Progress"
-                          ? "warning"
-                          : "accent"
-                  }
-                >
-                  {ticket.status}
-                </Badge>
-              </div>
-              <p className="mt-1 font-medium text-slate-900 dark:text-slate-100">{ticket.title}</p>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{ticket.department}</p>
-            </button>
-          ))}
-        </div>
+      <Suspense fallback={null}>
+        <TicketSimulatorContent />
+      </Suspense>
+    </div>
+  );
+}
 
-        <TicketWorkbench key={selected.id} ticket={selected} />
+function TicketSimulatorContent() {
+  const searchParams = useSearchParams();
+  const requestedId = searchParams.get("ticket");
+  const initialId = (requestedId && getTicketById(requestedId)) ? requestedId : tickets[0].id;
+
+  const [selectedId, setSelectedId] = useState<string>(initialId);
+  const selected = tickets.find((t) => t.id === selectedId) as Ticket;
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
+      <div className="space-y-3">
+        {tickets.map((ticket) => (
+          <button
+            key={ticket.id}
+            onClick={() => setSelectedId(ticket.id)}
+            aria-pressed={ticket.id === selectedId}
+            className={`w-full rounded-xl border p-4 text-left transition focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+              ticket.id === selectedId
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40"
+                : "border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-mono text-slate-500 dark:text-slate-400">{ticket.id}</span>
+              <Badge
+                variant={
+                  ticket.status === "Resolved"
+                    ? "success"
+                    : ticket.status === "Escalated"
+                      ? "danger"
+                      : ticket.status === "In Progress"
+                        ? "warning"
+                        : "accent"
+                }
+              >
+                {ticket.status}
+              </Badge>
+            </div>
+            <p className="mt-1 font-medium text-slate-900 dark:text-slate-100">{ticket.title}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{ticket.department}</p>
+          </button>
+        ))}
       </div>
+
+      <TicketWorkbench key={selected.id} ticket={selected} />
     </div>
   );
 }
@@ -80,10 +87,11 @@ function TicketWorkbench({ ticket }: { ticket: Ticket }) {
 
   return (
     <Card>
-      <div className="mb-4 flex items-center justify-between gap-2">
+      <div className="mb-1 flex items-center justify-between gap-2">
         <span className="text-xs font-mono text-slate-500 dark:text-slate-400">{ticket.id}</span>
         <Badge variant="neutral">{ticket.department}</Badge>
       </div>
+      <p className="mb-3 text-xs italic text-slate-400">Training scenario — fictional data.</p>
       <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{ticket.title}</h3>
       <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">{ticket.problem}</p>
       <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
@@ -94,59 +102,54 @@ function TicketWorkbench({ ticket }: { ticket: Ticket }) {
       <div className="my-5 border-t border-slate-200 dark:border-slate-800" />
 
       <div className="space-y-4">
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-900 dark:text-slate-100">
+        <fieldset>
+          <legend className="mb-1.5 block text-sm font-medium text-slate-900 dark:text-slate-100">
             Which team should handle this?
-          </label>
+          </legend>
           <div className="flex flex-wrap gap-2">
-            {TEAM_OPTIONS.map((opt) => (
+            {teams.map((opt) => (
               <button
                 key={opt.id}
                 onClick={() => setTeam(opt.id)}
-                className={`rounded-md border px-3 py-1.5 text-sm ${
-                  team === opt.id
-                    ? "border-blue-600 bg-blue-600 text-white"
-                    : "border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                }`}
+                aria-pressed={team === opt.id}
+                className={toggleButtonClass(team === opt.id)}
               >
-                {opt.label}
+                {opt.name}
               </button>
             ))}
           </div>
-        </div>
+        </fieldset>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-900 dark:text-slate-100">
+        <fieldset>
+          <legend className="mb-1.5 block text-sm font-medium text-slate-900 dark:text-slate-100">
             How urgent is this?{" "}
             <span className="font-normal text-slate-400">(training category, not confirmed DHL terminology)</span>
-          </label>
+          </legend>
           <div className="flex flex-wrap gap-2">
             {URGENCY_OPTIONS.map((u) => (
               <button
                 key={u}
                 onClick={() => setUrgency(u)}
-                className={`rounded-md border px-3 py-1.5 text-sm ${
-                  urgency === u
-                    ? "border-blue-600 bg-blue-600 text-white"
-                    : "border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                }`}
+                aria-pressed={urgency === u}
+                className={toggleButtonClass(urgency === u)}
               >
                 {u}
               </button>
             ))}
           </div>
-        </div>
+        </fieldset>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-900 dark:text-slate-100">
+          <label htmlFor="first-check" className="mb-1.5 block text-sm font-medium text-slate-900 dark:text-slate-100">
             What would you check first?
           </label>
           <textarea
+            id="first-check"
             value={firstCheck}
             onChange={(e) => setFirstCheck(e.target.value)}
             rows={3}
             placeholder="Write your own first troubleshooting step..."
-            className="w-full resize-none rounded-md border border-slate-300 bg-white p-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            className={textareaClass}
           />
         </div>
 
@@ -154,7 +157,7 @@ function TicketWorkbench({ ticket }: { ticket: Ticket }) {
           <button
             onClick={() => setRevealed(true)}
             disabled={!team || !urgency}
-            className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
+            className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
           >
             Reveal guidance
           </button>
@@ -168,19 +171,30 @@ function TicketWorkbench({ ticket }: { ticket: Ticket }) {
 
 function TicketGuidance({ ticket, chosenTeam }: { ticket: Ticket; chosenTeam: TeamId }) {
   const correct = chosenTeam === ticket.recommendedTeam;
+  const otherPlausibleTeams = ticket.plausibleTeams.filter((t) => t !== ticket.recommendedTeam);
 
   return (
     <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/60">
       <div>
         <Badge variant={correct ? "success" : "warning"}>
           {correct
-            ? `Matches the suggested team: ${teamLabel(ticket.recommendedTeam)}`
-            : `Suggested team: ${teamLabel(ticket.recommendedTeam)} (you picked ${teamLabel(chosenTeam)})`}
+            ? `Matches the suggested team: ${getTeamLabel(ticket.recommendedTeam)}`
+            : `Suggested team: ${getTeamLabel(ticket.recommendedTeam)} (you picked ${getTeamLabel(chosenTeam)})`}
         </Badge>
-        {ticket.hasMultipleCauses && (
+        {ticket.hasMultipleCauses && otherPlausibleTeams.length > 0 && (
           <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            This ticket intentionally has more than one plausible team/cause — being
-            &ldquo;wrong&rdquo; here is normal and part of the training value.
+            This ticket intentionally has more than one plausible team involved —{" "}
+            <strong>{getTeamLabel(ticket.recommendedTeam)}</strong> would typically
+            investigate first, but{" "}
+            {otherPlausibleTeams.map((t, i) => (
+              <span key={t}>
+                {i > 0 && " and "}
+                <strong>{getTeamLabel(t)}</strong>
+              </span>
+            ))}{" "}
+            could also genuinely be involved depending on what&rsquo;s found. Being
+            &ldquo;wrong&rdquo; here is normal and part of the training value — real
+            troubleshooting is rarely one-team/one-answer.
           </p>
         )}
       </div>
@@ -191,6 +205,18 @@ function TicketGuidance({ ticket, chosenTeam }: { ticket: Ticket; chosenTeam: Te
       <GuidanceList title="Likely root cause(s)" items={ticket.likelyRootCauses} />
       <GuidanceSection title="Example resolution" text={ticket.exampleResolution} />
       <GuidanceSection title="What should be documented" text={ticket.documentationNotes} />
+
+      <div className="flex flex-wrap gap-3 border-t border-slate-200 pt-3 dark:border-slate-800">
+        {[ticket.recommendedTeam, ...otherPlausibleTeams].map((t) => (
+          <Link
+            key={t}
+            href={`/teams/${t}`}
+            className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+          >
+            Learn more about {getTeamLabel(t)} →
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

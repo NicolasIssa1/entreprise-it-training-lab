@@ -77,6 +77,19 @@ Do not copy DHL internal systems, branding, screenshots, interfaces, confidentia
 documentation, or proprietary architecture. Generic logistics/tech-inspired visual
 style only — no DHL red/yellow branding, no DHL logos.
 
+### Wording discipline
+
+Generic enterprise IT knowledge must never be phrased as if it were a confirmed
+description of a specific DHL team. Avoid "Infrastructure owns X" / "DHL uses
+Critical/High/Medium/Low" / "DHL's SLA is Y" — prefer "Infrastructure teams commonly
+manage X" / "this simulator uses generic training urgency categories" / "the
+internship introduced expected resolution timeframes; the official SLA structure has
+not yet been documented." Every Team page must keep "General Enterprise IT
+Knowledge" visually and structurally separate from "What I Have Observed During My
+Internship" — the former is generic industry content, the latter is only what
+Nicolas has actually recorded (see `dhl-training-hub/src/components/TeamObservations.tsx`,
+which sources this directly from Daily Log entries rather than inventing content).
+
 ## CV Achievement honesty rule
 
 Never exaggerate what Nicolas actually did. The CV tracker uses a strict involvement
@@ -115,9 +128,12 @@ Automation ↔ Programming, AI ↔ AI/ML.
 
 ---
 
-## Version 1 scope — what exists now
+## Phase 1 scope — what exists now
 
-V1 is intentionally limited to five sections in the Next.js app:
+Phase 1 (foundation) is complete and polished; see `PRODUCT-ROADMAP.md` for what
+Phases 2+ would add and `ENTERPRISE-READINESS.md` for what a real deployment would
+eventually require (neither is built — both are planning documents only). Phase 1 is
+intentionally limited to five sections in the Next.js app:
 
 1. **Dashboard** — current day/team, today's goals/questions/practice, quick notes,
    reflection, progress summary.
@@ -134,26 +150,41 @@ V1 is intentionally limited to five sections in the Next.js app:
 5. **CV Achievement Tracker** — raw note → involvement level → skills → what was
    learned → suggested (non-exaggerated) CV wording → evidence notes.
 
-Data storage in V1: **mock/local data only.**
+Data storage in Phase 1: **mock/local data only.**
 - Static content (dashboard defaults, teams, tickets, questions) lives in TypeScript
   data files under `dhl-training-hub/src/lib/data/`.
 - User-entered content (Daily Log entries, CV achievements) is persisted to the
   browser's `localStorage` via `dhl-training-hub/src/lib/storage.ts` — still fully
   local, no backend.
 
+### Shared-state architecture (do not duplicate these values)
+
+- `dhl-training-hub/src/lib/data/internshipState.ts` — the **single source of
+  truth** for the current internship day/team/date and personal organization context
+  (organization, role, department). Every page that needs "today" derives from this;
+  never hardcode a day number or team elsewhere.
+- `dhl-training-hub/src/lib/product.ts` — centralized product/brand config
+  (`namePrivate` / `namePublic` / disclaimer text). Reusable UI (Nav, layout
+  metadata, footer) reads from here instead of hardcoding "DHL" — this keeps the
+  product name swappable and keeps the architecture ready to support a different
+  organization/role/team later without touching component code. Personal context
+  (internshipState) and reusable product branding (product.ts) are deliberately kept
+  in separate files — don't merge them.
+
 ### Explicitly NOT built yet (do not add without being asked)
 
 - Supabase / any real database
 - Claude API integration
-- Authentication (even simple)
+- Authentication (even simple), SSO, RBAC
 - Deployment (Vercel or otherwise)
 - "How DHL Works" external/internal flow pages (placeholder folders only)
 - Explain Like I'm 10 topic library page
-- Daily quiz system
-- Skill tree
+- Daily quiz system, skill tree, analytics/manager view
+- Branching/multi-step ticket simulations (current simulator is fixed-scenario)
+- Multi-tenancy / multi-company accounts
 
-These are documented in `internship-plan.md` as future phases. Don't build ahead of
-what's been asked for.
+See `PRODUCT-ROADMAP.md` for when these are planned and `ENTERPRISE-READINESS.md` for
+deployment-readiness requirements. Don't build ahead of what's been asked for.
 
 ---
 
@@ -174,15 +205,19 @@ what's been asked for.
 
 ```
 DHL-Internship/
-  CLAUDE.md              — this file
-  README.md              — human-facing overview
-  internship-plan.md     — living tracker of internship stage & learning plan
-  teams/                 — markdown reference docs (source content for Teams pages)
-  daily/                 — markdown daily journal entries (day-01.md, day-02.md, ...)
-  learning/              — reserved for future ELI10 topic library content
-  practice-tickets/      — reserved for future expansion of ticket bank
-  quizzes/               — reserved for future quiz system
-  questions/             — reserved for future standalone questions bank
-  cv-achievements/       — reserved for future CV export/archive content
-  dhl-training-hub/      — the actual Next.js application (see its own README)
+  CLAUDE.md                — this file
+  README.md                — human-facing overview
+  internship-plan.md       — living tracker of internship stage & learning plan
+  PRODUCT-ROADMAP.md       — phase-by-phase product roadmap (Phase 1–10)
+  ENTERPRISE-READINESS.md  — future requirements before any real deployment
+  teams/                   — markdown reference docs (source content for Teams pages)
+  daily/                   — markdown daily journal entries (day-01.md, day-02.md, ...)
+  learning/                — reserved for future ELI10 topic library content
+  practice-tickets/        — reserved for future expansion of ticket bank
+  quizzes/                 — reserved for future quiz system
+  questions/               — reserved for future standalone questions bank
+  cv-achievements/         — reserved for future CV export/archive content
+  dhl-training-hub/        — the actual Next.js application (see its own README)
+    src/lib/data/internshipState.ts — single source of truth for current day/team
+    src/lib/product.ts              — product/brand config (private vs public name)
 ```

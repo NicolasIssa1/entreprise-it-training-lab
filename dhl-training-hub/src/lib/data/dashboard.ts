@@ -1,10 +1,12 @@
 import { DashboardData } from "@/lib/types";
+import { internshipState } from "@/lib/data/internshipState";
 
-// Reflects the current internship stage from ../../../internship-plan.md.
-// Update this as the internship progresses — no confidential DHL facts, see root CLAUDE.md.
+// Curated "today" content. Day/team come from internshipState (the single source of
+// truth) rather than being duplicated here — update internshipState, not this file,
+// when the day/team changes. See ../../../internship-plan.md for the full narrative.
 export const dashboardData: DashboardData = {
-  dayNumber: 2,
-  currentTeam: "infrastructure",
+  dayNumber: internshipState.currentDayNumber,
+  currentTeam: internshipState.currentTeam,
   todaysGoals: [
     "Understand the ticket lifecycle (open → investigate → document → resolve/close)",
     "Understand Infrastructure's core responsibilities",

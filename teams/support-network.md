@@ -1,8 +1,11 @@
 # Support & Network
 
-Generic enterprise IT knowledge — not DHL-specific. See `CLAUDE.md` for confidentiality
-rules. Note: this app's SLA/priority terminology (Critical/High/Medium/Low, etc.) is a
-generic training model, not confirmed DHL policy — see `CLAUDE.md` / `internship-plan.md`.
+Everything below the "What I Have Observed" section is **general enterprise IT
+knowledge** — generic industry concepts about what a team of this type commonly does,
+not a confirmed description of any specific DHL team's responsibilities, tools, or
+scope. See `CLAUDE.md` for confidentiality rules. Note: this app's SLA/priority
+terminology (Critical/High/Medium/Low, etc.) is a generic training model, not
+confirmed DHL policy — see `CLAUDE.md` / `internship-plan.md`.
 
 ## Simple explanation
 
@@ -13,7 +16,7 @@ or Applications.
 
 ## Technical explanation
 
-Support & Network typically owns:
+Support & Network teams typically manage:
 
 - **IT support / ticketing** — receiving, triaging, and resolving (or escalating)
   reported issues.
@@ -76,3 +79,15 @@ don't need their level of expertise.
 - [ ] Can explain what a VPN is for
 - [ ] Can explain what SLA means and why it matters
 - [ ] Can explain when a ticket should be escalated vs resolved directly
+
+## What I Have Observed During My Internship
+
+No observations recorded yet — I have not yet rotated onto Support & Network. This
+section will be filled in with only what I actually observe, once I do.
+
+## Things I Still Want to Learn
+
+- Which categories of tickets does this team receive most often?
+- How is ticket priority/urgency actually determined here?
+- What tools do they use to triage and route tickets?
+- How does this team interact with Infrastructure and Applications day to day?

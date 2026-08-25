@@ -17,13 +17,19 @@ export function useLocalStorageList<T>(key: string, initial: T[]) {
     try {
       const raw = window.localStorage.getItem(key);
       if (raw) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setItems(JSON.parse(raw) as T[]);
+        const parsed = JSON.parse(raw);
+        // Guard against corrupted/unexpected-shape data (e.g. hand-edited storage,
+        // a future schema change) rather than crashing every page that renders it.
+        if (Array.isArray(parsed)) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setItems(parsed as T[]);
+        }
       } else {
         window.localStorage.setItem(key, JSON.stringify(initial));
       }
     } catch {
-      // localStorage unavailable (e.g. private browsing) — fall back to in-memory only.
+      // Malformed JSON or localStorage unavailable (e.g. private browsing) —
+      // fall back to in-memory `initial` only.
     }
     setLoaded(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps

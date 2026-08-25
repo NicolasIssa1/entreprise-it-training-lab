@@ -1,7 +1,9 @@
 # Applications
 
-Generic enterprise IT knowledge — not DHL-specific. See `CLAUDE.md` for confidentiality
-rules.
+Everything below the "What I Have Observed" section is **general enterprise IT
+knowledge** — generic industry concepts about what a team of this type commonly does,
+not a confirmed description of any specific DHL team's responsibilities, tools, or
+scope. See `CLAUDE.md` for confidentiality rules.
 
 ## Simple explanation
 
@@ -11,7 +13,7 @@ Infrastructure's servers and networks.
 
 ## Technical explanation
 
-Applications typically owns:
+Application teams typically manage:
 
 - **Business applications** — internal tools (HR systems, logistics tracking,
   finance tools) and customer-facing software.
@@ -70,3 +72,15 @@ function, every department would be stuck with unreliable, unmaintained tools.
 - [ ] Can explain why an app might be "slow" for reasons unrelated to its own code
 - [ ] Can explain authentication vs authorization
 - [ ] Can describe the software lifecycle in 4–5 stages
+
+## What I Have Observed During My Internship
+
+No observations recorded yet — I have not yet rotated onto Applications. This section
+will be filled in with only what I actually observe, once I do.
+
+## Things I Still Want to Learn
+
+- Which categories of tickets does this team receive most often?
+- How do they find out an application issue is actually an infrastructure issue?
+- What does their deployment/release process look like?
+- Which tools does the team use day to day?

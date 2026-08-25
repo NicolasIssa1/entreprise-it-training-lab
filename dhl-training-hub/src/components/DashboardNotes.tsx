@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
+import { textareaClass } from "@/lib/ui";
 
 /** Simple free-text notes/reflection boxes, persisted locally so they survive a refresh. */
 export function DashboardNotes() {
@@ -35,21 +36,23 @@ export function DashboardNotes() {
       <Card>
         <SectionHeading title="Quick notes" subtitle="Jot anything down as it happens today" />
         <textarea
+          aria-label="Quick notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={6}
           placeholder="e.g. Team mentioned they use a shared ticket dashboard..."
-          className="w-full resize-none rounded-md border border-slate-300 bg-white p-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          className={textareaClass}
         />
       </Card>
       <Card>
         <SectionHeading title="End-of-day reflection" subtitle="What went well? What's still unclear?" />
         <textarea
+          aria-label="End-of-day reflection"
           value={reflection}
           onChange={(e) => setReflection(e.target.value)}
           rows={6}
           placeholder="e.g. I understand the ticket lifecycle now, but still unsure how urgency is decided..."
-          className="w-full resize-none rounded-md border border-slate-300 bg-white p-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          className={textareaClass}
         />
       </Card>
     </div>

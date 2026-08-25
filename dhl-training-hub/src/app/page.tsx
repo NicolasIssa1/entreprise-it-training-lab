@@ -5,6 +5,7 @@ import { Badge } from "@/components/Badge";
 import { DashboardNotes } from "@/components/DashboardNotes";
 import { dashboardData } from "@/lib/data/dashboard";
 import { getTeamById } from "@/lib/data/teams";
+import { internshipState } from "@/lib/data/internshipState";
 
 export default function DashboardPage() {
   const team = getTeamById(dashboardData.currentTeam);
@@ -16,7 +17,10 @@ export default function DashboardPage() {
         <h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
           Day {dashboardData.dayNumber} — {team?.name}
         </h1>
-        <p className="mt-1 text-slate-600 dark:text-slate-400">{dashboardData.progressSummary}</p>
+        <p className="mt-1 text-xs text-slate-400">
+          {internshipState.organization} &middot; {internshipState.role} &middot; {internshipState.department}
+        </p>
+        <p className="mt-2 text-slate-600 dark:text-slate-400">{dashboardData.progressSummary}</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

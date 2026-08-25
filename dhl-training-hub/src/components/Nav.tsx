@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { displayProductName, product } from "@/lib/product";
 
 const LINKS = [
   { href: "/", label: "Dashboard" },
@@ -23,15 +24,13 @@ export function Nav() {
           </span>
           <div className="leading-tight">
             <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              DHL IT Training Hub
+              {displayProductName}
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Personal internship training project — not an official DHL application
-            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{product.trainingDisclaimer}</p>
           </div>
         </div>
 
-        <nav className="flex flex-wrap gap-1">
+        <nav className="flex flex-wrap gap-1" aria-label="Main">
           {LINKS.map((link) => {
             const isActive =
               link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
@@ -39,7 +38,8 @@ export function Nav() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                aria-current={isActive ? "page" : undefined}
+                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
                   isActive
                     ? "bg-blue-600 text-white"
                     : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"

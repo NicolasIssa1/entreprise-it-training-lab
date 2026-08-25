@@ -7,12 +7,16 @@ export interface Team {
   id: TeamId;
   name: string;
   tagline: string;
+  /** General enterprise IT knowledge — not a confirmed description of any specific
+   * organization's team. See root CLAUDE.md. */
   simpleExplanation: string;
   technicalExplanation: string;
   responsibilities: string[];
   exampleProblems: string[];
   universityConnections: { area: string; connection: string }[];
   checklist: string[];
+  /** Generic, open learning prompts — not confirmed answers. */
+  thingsToLearn: string[];
 }
 
 export type UrgencyLevel = "Critical" | "High" | "Medium" | "Low";

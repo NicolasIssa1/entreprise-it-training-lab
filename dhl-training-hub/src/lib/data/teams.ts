@@ -1,7 +1,9 @@
-import { Team } from "@/lib/types";
+import { Team, TeamId } from "@/lib/types";
 
-// Generic enterprise IT knowledge — mirrors the root ../../teams/*.md docs.
-// No DHL-specific facts. See root CLAUDE.md.
+// General enterprise IT knowledge — mirrors the root ../../teams/*.md docs. This
+// describes what a team of this TYPE commonly does industry-wide, not a confirmed
+// description of any specific organization's team. No DHL-specific facts are
+// asserted here — see root CLAUDE.md.
 export const teams: Team[] = [
   {
     id: "infrastructure",
@@ -10,7 +12,7 @@ export const teams: Team[] = [
     simpleExplanation:
       "Infrastructure is the team that keeps the \"computer stuff underneath everything\" running: servers, storage, and cloud resources that every business application depends on.",
     technicalExplanation:
-      "Owns servers (physical/virtual), cloud provisioning, virtual machines, operating systems, storage (SAN/NAS, backups, capacity), identity & access (directory services, permissions), monitoring, availability (redundancy, failover, load balancing), and disaster recovery.",
+      "Infrastructure teams commonly manage servers (physical/virtual), cloud provisioning, virtual machines, operating systems, storage (SAN/NAS, backups, capacity), identity & access (directory services, permissions), monitoring, availability (redundancy, failover, load balancing), and disaster recovery.",
     responsibilities: [
       "Provisioning and decommissioning servers/VMs",
       "Patching operating systems and applying security updates",
@@ -43,6 +45,12 @@ export const teams: Team[] = [
       "Can name 3 things that could cause a server-side outage",
       "Can explain identity/access management in simple terms",
     ],
+    thingsToLearn: [
+      "Which ticket categories does this team receive most often?",
+      "How is escalation actually handled here?",
+      "Which tools does the team use day to day?",
+      "Which systems are managed locally versus centrally?",
+    ],
   },
   {
     id: "applications",
@@ -51,7 +59,7 @@ export const teams: Team[] = [
     simpleExplanation:
       "The Applications team builds and supports the software employees and customers use day to day — the programs and internal tools that sit on top of Infrastructure's servers and networks.",
     technicalExplanation:
-      "Owns business applications, APIs, databases, bug triage/fixes, integrations between systems, deployments/releases, authentication, application monitoring, and the overall software lifecycle.",
+      "Application teams commonly manage business applications, APIs, databases, bug triage/fixes, integrations between systems, deployments/releases, authentication, application monitoring, and the overall software lifecycle.",
     responsibilities: [
       "Fixing bugs reported by users or found through monitoring",
       "Building and maintaining integrations between systems",
@@ -83,6 +91,12 @@ export const teams: Team[] = [
       "Can explain authentication vs authorization",
       "Can describe the software lifecycle in 4–5 stages",
     ],
+    thingsToLearn: [
+      "Which categories of tickets does this team receive most often?",
+      "How do they find out an application issue is actually an infrastructure issue?",
+      "What does their deployment/release process look like?",
+      "Which tools does the team use day to day?",
+    ],
   },
   {
     id: "support-network",
@@ -91,7 +105,7 @@ export const teams: Team[] = [
     simpleExplanation:
       "Support & Network is the team employees talk to first when something isn't working. They handle tickets, keep people connected (Wi-Fi, VPN, network access), and decide when to escalate.",
     technicalExplanation:
-      "Owns IT support/ticketing, troubleshooting, escalation, SLA tracking, Wi-Fi/LAN/WAN, VPN, DNS, DHCP, routers/switches, and IP addressing/connectivity.",
+      "Support & Network teams commonly manage IT support/ticketing, troubleshooting, escalation, SLA tracking, Wi-Fi/LAN/WAN, VPN, DNS, DHCP, routers/switches, and IP addressing/connectivity.",
     responsibilities: [
       "Answering and triaging incoming tickets",
       "Resolving common issues directly (password resets, Wi-Fi, printers)",
@@ -124,9 +138,21 @@ export const teams: Team[] = [
       "Can explain what SLA means and why it matters",
       "Can explain when a ticket should be escalated vs resolved directly",
     ],
+    thingsToLearn: [
+      "Which categories of tickets does this team receive most often?",
+      "How is ticket priority/urgency actually determined here?",
+      "What tools do they use to triage and route tickets?",
+      "How does this team interact with Infrastructure and Applications day to day?",
+    ],
   },
 ];
 
 export function getTeamById(id: string): Team | undefined {
   return teams.find((t) => t.id === id);
+}
+
+/** Shared label lookup so pages don't each re-implement TeamId → display name. */
+export function getTeamLabel(id: TeamId | "General" | string): string {
+  if (id === "General") return "General";
+  return getTeamById(id)?.name ?? id;
 }

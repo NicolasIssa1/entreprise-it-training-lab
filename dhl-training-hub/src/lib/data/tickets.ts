@@ -1,4 +1,4 @@
-import { Ticket } from "@/lib/types";
+import { Ticket, TeamId } from "@/lib/types";
 
 // All tickets are fake/generic training scenarios — no real DHL data. See root CLAUDE.md.
 // Urgency levels (Critical/High/Medium/Low) are generic training categories, NOT
@@ -384,4 +384,14 @@ export const tickets: Ticket[] = [
 
 export function getTicketById(id: string): Ticket | undefined {
   return tickets.find((t) => t.id === id);
+}
+
+/**
+ * Tickets relevant to a team, for the Team page's "Common Training Tickets" section.
+ * Filters the existing ticket bank rather than duplicating ticket data per team.
+ */
+export function getTicketsForTeam(teamId: TeamId, limit = 4): Ticket[] {
+  return tickets
+    .filter((t) => t.recommendedTeam === teamId || t.plausibleTeams.includes(teamId))
+    .slice(0, limit);
 }
