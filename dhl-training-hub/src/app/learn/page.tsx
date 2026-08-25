@@ -2,7 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { Card } from "@/components/Card";
+import { SectionHeading } from "@/components/SectionHeading";
 import { LearningTopicCard } from "@/components/LearningTopicCard";
+import { TroubleshootingFramework } from "@/components/TroubleshootingFramework";
 import { learningTopics, LEARNING_CATEGORIES, searchTopics } from "@/lib/data/learning";
 import { useLearningProgress } from "@/lib/learningProgress";
 import { teams } from "@/lib/data/teams";
@@ -51,6 +53,14 @@ export default function LearnPage() {
             style={{ width: `${progressPercent}%` }}
           />
         </div>
+      </Card>
+
+      <Card>
+        <SectionHeading
+          title="The troubleshooting mindset"
+          subtitle="Every lesson's specific troubleshooting steps are an application of this general approach"
+        />
+        <TroubleshootingFramework />
       </Card>
 
       <div className="space-y-3">

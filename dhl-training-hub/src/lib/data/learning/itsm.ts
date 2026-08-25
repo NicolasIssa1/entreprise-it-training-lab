@@ -99,18 +99,19 @@ export const itsmTopics: LearningTopic[] = [
     eli10:
       "An SLA is like a pizza place promising \"30 minutes or it's free.\" It's a promise about time, agreed in advance — not a guarantee of a specific outcome beyond that timing commitment.",
     technicalExplanation:
-      "SLAs typically define response-time and resolution-time targets per priority level, often paired with escalation rules for when targets are at risk of being missed. They're set independently by each organization — there is no universal SLA standard, and definitions vary widely between companies.",
+      "SLAs commonly define two distinct kinds of targets per priority level. Response time is how quickly the issue should be acknowledged — someone has looked at it and confirmed it's being worked, even if it isn't fixed yet. Resolution time is how quickly the underlying problem should ideally be fixed or the service restored. These are often paired with escalation rules for when either target is at risk of being missed. Every organization defines its own response and resolution targets and priority categories — there is no universal SLA standard, and definitions vary widely between companies.",
     businessPurpose:
-      "SLAs let a business predict how disruptions will be handled, and let IT teams justify staffing/prioritization decisions with agreed targets rather than ad hoc judgment calls. Important: this project's Ticket Simulator uses generic training urgency labels (Critical/High/Medium/Low) for practice purposes only — DHL's official SLA structure has not been confirmed anywhere in this project, and nothing here should be read as DHL's actual policy.",
+      "SLAs let a business predict how disruptions will be handled, and let IT teams justify staffing/prioritization decisions with agreed targets rather than ad hoc judgment calls. Important: this project's Ticket Simulator uses generic training urgency labels (Critical/High/Medium/Low) for practice purposes only, and none of this describes real response/resolution time targets — DHL's official SLA structure, including any specific response or resolution times, has not been confirmed anywhere in this project, and nothing here should be read as DHL's actual policy.",
     commonProblems: [
       "An SLA target is missed without anyone noticing until the reporter complains.",
       "SLA targets exist but priority is assigned inconsistently, so the \"clock\" starts at the wrong urgency.",
+      "Response time is met (someone acknowledged it quickly) but resolution time is missed, and the reporter reasonably still feels ignored.",
       "SLA compliance is tracked, but the root causes of repeated breaches are never investigated.",
     ],
     troubleshootingSteps: [
-      "Check what SLA target applies to this ticket's priority level, if any is defined.",
-      "Confirm when the clock actually started (report time vs. acknowledgement time).",
-      "Check whether the SLA is at risk or already breached, and flag it early rather than late.",
+      "Check what SLA target applies to this ticket's priority level — both response time (acknowledgement) and resolution time (fix), if defined.",
+      "Confirm when each clock actually started (report time vs. acknowledgement time).",
+      "Check whether either target is at risk or already breached, and flag it early rather than late.",
       "If breach is likely, communicate proactively rather than waiting to be asked.",
     ],
     universityConnections: [

@@ -26,7 +26,7 @@ export const applicationsTopics: LearningTopic[] = [
       "Check logs on both sides for failed API calls around when the problem started.",
       "Check whether anything changed recently — a deployment, a credential rotation, an API version change.",
       "Try manually triggering the integration/API call and observe the exact error.",
-      "Escalate to whichever team owns the API being called, once you can point to a specific failing call.",
+      "Escalate to whichever team is responsible for the API being called, once you can point to a specific failing call.",
     ],
     universityConnections: [
       { area: "Web Services / REST APIs", connection: "Directly matches — request/response design, HTTP methods, status codes." },
@@ -103,7 +103,7 @@ export const applicationsTopics: LearningTopic[] = [
       "Check what error is actually shown — \"invalid credentials\" points to authentication; \"access denied\" points to authorization.",
       "Check the user's current permissions/group membership against what's required for the specific resource.",
       "Confirm with the resource owner or manager whether access should be granted, before just changing settings.",
-      "Escalate to whichever team owns the affected system's access model.",
+      "Escalate to whichever team is responsible for the affected system's access model.",
     ],
     universityConnections: [
       { area: "Secure Computing", connection: "Authentication and authorization (access control) are foundational security concepts." },

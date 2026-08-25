@@ -68,7 +68,7 @@ export const networkingTopics: LearningTopic[] = [
     ],
     universityConnections: [
       { area: "Networking", connection: "Name resolution, DNS hierarchy, and caching are core networking curriculum topics." },
-      { area: "Databases / SQL", connection: "DNS is conceptually a large, distributed, heavily-cached lookup system." },
+      { area: "Operating Systems", connection: "DNS resolution and caching happen through the OS's resolver and network stack on each device." },
     ],
     practiceScenario: {
       scenario: "An employee can access a server by IP address but not by hostname.",

@@ -15,7 +15,7 @@ export const tickets: Ticket[] = [
     plausibleTeams: ["support-network", "infrastructure"],
     recommendedTeam: "support-network",
     reasoning:
-      "Wi-Fi connectivity for a single user is a classic first-line Support & Network issue — it's about network access, not a server or application problem.",
+      "Wi-Fi connectivity for a single user is commonly investigated first by Support & Network — it's about network access, not a server or application problem — though exact ownership varies by organization.",
     suggestedTroubleshooting: [
       "Ask if other employees nearby are also affected (isolated vs widespread).",
       "Check the device's IP address — does it have a valid one, or a self-assigned 169.254.x.x address?",
@@ -71,7 +71,7 @@ export const tickets: Ticket[] = [
     plausibleTeams: ["applications"],
     recommendedTeam: "applications",
     reasoning:
-      "A specific form throwing an error on submission points to application logic — this is squarely an Applications issue, not network or server.",
+      "A specific form throwing an error on submission points to application logic, not a network or server problem — this is commonly treated as an Applications matter, though exact team ownership varies by organization.",
     suggestedTroubleshooting: [
       "Reproduce the error with the same form inputs.",
       "Check application logs around the time of the reported errors.",
@@ -101,7 +101,7 @@ export const tickets: Ticket[] = [
     plausibleTeams: ["infrastructure", "support-network"],
     recommendedTeam: "infrastructure",
     reasoning:
-      "Multiple users failing to reach the same server (not just one network segment) points toward the server itself being down or overloaded — an Infrastructure issue. Support & Network would be involved first to rule out a shared network path, but the underlying fix is likely Infrastructure's.",
+      "Multiple users failing to reach the same server (not just one network segment) points toward the server itself being down or overloaded, which commonly falls under Infrastructure. Support & Network would often be involved first to rule out a shared network path, but the underlying fix more often requires Infrastructure's involvement — exact ownership varies by organization.",
     suggestedTroubleshooting: [
       "Confirm it's the same server for all affected users (not a coincidence of separate issues).",
       "Check if affected users share a network segment/site (network cause) or are spread across sites (server cause).",
@@ -130,7 +130,7 @@ export const tickets: Ticket[] = [
     status: "Open",
     plausibleTeams: ["support-network"],
     recommendedTeam: "support-network",
-    reasoning: "Printer connectivity issues are a routine first-line Support & Network ticket.",
+    reasoning: "Printer connectivity issues are commonly handled as a routine first-line Support & Network matter.",
     suggestedTroubleshooting: [
       "Check if the printer has power and is connected to the network.",
       "Ping the printer's IP address to check network reachability.",
@@ -153,7 +153,7 @@ export const tickets: Ticket[] = [
     status: "Open",
     plausibleTeams: ["support-network"],
     recommendedTeam: "support-network",
-    reasoning: "VPN connectivity issues for remote access are owned by Support & Network.",
+    reasoning: "VPN connectivity issues for remote access are commonly investigated first by Support & Network, though exact ownership varies by organization.",
     suggestedTroubleshooting: [
       "Confirm the employee's internet connection is otherwise working.",
       "Check if the VPN service/gateway is having a wider outage affecting other remote users.",
@@ -209,14 +209,15 @@ export const tickets: Ticket[] = [
     plausibleTeams: ["support-network"],
     recommendedTeam: "support-network",
     reasoning:
-      "A \"server not found\" browser error for a working internal address, affecting multiple users, is a classic symptom of a DNS resolution problem — owned by Support & Network.",
+      "A \"server not found\" browser error for a working internal address, affecting multiple users, strongly suggests a name-resolution/DNS problem rather than the target system itself being down. Support & Network may commonly investigate this first, while exact ownership varies by organization.",
     suggestedTroubleshooting: [
       "Try reaching the internal system by its IP address directly instead of its name.",
       "Check if the issue affects all employees or only some (site/segment-specific DNS server).",
       "Check the DNS server's health and recent configuration changes.",
       "Flush local DNS cache on an affected machine as a quick test.",
     ],
-    escalationNote: "Escalate to Infrastructure if the DNS server itself needs to be restarted or rebuilt.",
+    escalationNote:
+      "Escalate to the team responsible for the DNS service if investigation suggests the DNS infrastructure/service itself is unavailable or misconfigured.",
     likelyRootCauses: ["DNS record misconfigured or missing", "DNS server outage", "Stale DNS cache on affected machines"],
     exampleResolution: "A DNS record had been accidentally removed during maintenance; re-adding it resolved access for everyone.",
     documentationNotes: "Record which DNS record/server was affected and the change that caused it, to prevent repeat incidents.",
@@ -312,7 +313,7 @@ export const tickets: Ticket[] = [
     status: "In Progress",
     plausibleTeams: ["applications"],
     recommendedTeam: "applications",
-    reasoning: "A regression appearing right after a deployment is a textbook Applications issue tied to the software release process.",
+    reasoning: "A regression appearing right after a deployment commonly points to an Applications-led investigation, tied to the software release process.",
     suggestedTroubleshooting: [
       "Confirm the timing correlation between the deployment and the first error reports.",
       "Review what changed in the deployment (release notes / change log).",
@@ -335,7 +336,7 @@ export const tickets: Ticket[] = [
     status: "Open",
     plausibleTeams: ["infrastructure"],
     recommendedTeam: "infrastructure",
-    reasoning: "Backup jobs, monitoring, and alerting for servers are core Infrastructure responsibilities.",
+    reasoning: "Backup jobs, monitoring, and alerting for servers commonly fall under Infrastructure's remit.",
     suggestedTroubleshooting: [
       "Check the backup job logs to find why it's been failing (storage full, credentials expired, target unreachable).",
       "Check why the failure alert didn't fire — is monitoring itself misconfigured?",
@@ -358,7 +359,7 @@ export const tickets: Ticket[] = [
     status: "Open",
     plausibleTeams: ["applications"],
     recommendedTeam: "applications",
-    reasoning: "Integration/sync failures between two business applications are an Applications responsibility.",
+    reasoning: "Integration/sync failures between two business applications commonly fall under Applications.",
     suggestedTroubleshooting: [
       "Check the integration/API logs for failed sync calls around when the discrepancy started.",
       "Manually trigger a sync and observe whether it succeeds or fails.",
@@ -381,7 +382,7 @@ export const tickets: Ticket[] = [
     status: "In Progress",
     plausibleTeams: ["infrastructure"],
     recommendedTeam: "infrastructure",
-    reasoning: "Server-level resource monitoring and response is core Infrastructure work, and catching this before it causes an outage is exactly the point of proactive monitoring.",
+    reasoning: "Server-level resource monitoring and response commonly falls under Infrastructure, and catching this before it causes an outage is exactly the point of proactive monitoring.",
     suggestedTroubleshooting: [
       "Identify which process(es) are consuming the CPU.",
       "Check if this correlates with a scheduled job, a deployment, or unusual traffic.",
@@ -401,14 +402,30 @@ export function getTicketById(id: string): Ticket | undefined {
   return tickets.find((t) => t.id === id);
 }
 
+export interface TeamTicketGroups {
+  /** Tickets this team is the recommended/primary owner for — a team should not
+   * appear here just for being a plausible secondary participant. */
+  likely: Ticket[];
+  /** Tickets recommended to a different team, but genuinely ambiguous and where
+   * this team is a plausible participant — kept separate so ambiguity is
+   * preserved rather than implied to be this team's routine work. */
+  crossTeam: Ticket[];
+}
+
 /**
- * Tickets relevant to a team, for the Team page's "Common Training Tickets" section.
- * Filters the existing ticket bank rather than duplicating ticket data per team.
+ * Tickets relevant to a team, for the Team page's "Common Training Tickets"
+ * section. Filters the existing ticket bank rather than duplicating ticket data
+ * per team, and splits results into "likely" (this team is the recommended owner)
+ * vs. "cross-team" (this team is a plausible secondary participant in a genuinely
+ * ambiguous ticket) so the likely list stays representative of this team's actual
+ * day-to-day work.
  */
-export function getTicketsForTeam(teamId: TeamId, limit = 4): Ticket[] {
-  return tickets
-    .filter((t) => t.recommendedTeam === teamId || t.plausibleTeams.includes(teamId))
+export function getTicketsForTeam(teamId: TeamId, limit = 6): TeamTicketGroups {
+  const likely = tickets.filter((t) => t.recommendedTeam === teamId).slice(0, limit);
+  const crossTeam = tickets
+    .filter((t) => t.recommendedTeam !== teamId && t.hasMultipleCauses && t.plausibleTeams.includes(teamId))
     .slice(0, limit);
+  return { likely, crossTeam };
 }
 
 /**

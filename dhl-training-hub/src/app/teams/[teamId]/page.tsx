@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
+import { PageGroupHeading } from "@/components/PageGroupHeading";
 import { Checklist } from "@/components/Checklist";
 import { TeamObservations } from "@/components/TeamObservations";
 import { teams, getTeamById } from "@/lib/data/teams";
@@ -21,17 +22,18 @@ export default async function TeamDetailPage(props: PageProps<"/teams/[teamId]">
     notFound();
   }
 
-  const commonTickets = getTicketsForTeam(team.id);
+  const { likely: likelyTickets, crossTeam: crossTeamTickets } = getTicketsForTeam(team.id);
   const questions = getQuestionsForTeam(team.id)?.questions ?? [];
   const recommendedLearning = getTopicsForTeam(team.id);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{team.name}</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">{team.tagline}</p>
       </div>
 
+      <PageGroupHeading label="Overview Knowledge" />
       <section className="space-y-4">
         <SectionHeading
           title="General Enterprise IT Knowledge"
@@ -91,6 +93,7 @@ export default async function TeamDetailPage(props: PageProps<"/teams/[teamId]">
         </Card>
       </section>
 
+      <PageGroupHeading label="Learning" />
       <section className="space-y-4">
         <SectionHeading title="Recommended Learning" subtitle="Lessons connected to this team, in the Learn library" />
         <div className="grid gap-3 sm:grid-cols-2">
@@ -105,13 +108,14 @@ export default async function TeamDetailPage(props: PageProps<"/teams/[teamId]">
         </div>
       </section>
 
+      <PageGroupHeading label="Practice" />
       <section className="space-y-4">
         <SectionHeading
           title="Common Training Tickets"
-          subtitle="Generic fictional problems associated with this team — not real DHL incidents"
+          subtitle="Generic fictional problems this team is the likely/recommended owner for — not real DHL incidents"
         />
         <div className="grid gap-3 sm:grid-cols-2">
-          {commonTickets.map((ticket) => (
+          {likelyTickets.map((ticket) => (
             <Card key={ticket.id}>
               <span className="text-xs font-mono text-slate-500">{ticket.id}</span>
               <p className="mt-2 text-sm font-medium text-slate-900 dark:text-slate-100">{ticket.title}</p>
@@ -127,8 +131,35 @@ export default async function TeamDetailPage(props: PageProps<"/teams/[teamId]">
             </Card>
           ))}
         </div>
+
+        {crossTeamTickets.length > 0 && (
+          <>
+            <SectionHeading
+              title="Cross-Team Scenarios"
+              subtitle="Genuinely ambiguous tickets where this team could plausibly be involved, even though another team is the primary recommendation"
+            />
+            <div className="grid gap-3 sm:grid-cols-2">
+              {crossTeamTickets.map((ticket) => (
+                <Card key={ticket.id}>
+                  <span className="text-xs font-mono text-slate-500">{ticket.id}</span>
+                  <p className="mt-2 text-sm font-medium text-slate-900 dark:text-slate-100">{ticket.title}</p>
+                  <p className="mt-1 text-xs italic text-slate-400">
+                    Generic training example — not a real DHL incident.
+                  </p>
+                  <Link
+                    href={`/tickets?ticket=${ticket.id}`}
+                    className="mt-3 inline-block text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+                  >
+                    Practice this scenario →
+                  </Link>
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
       </section>
 
+      <PageGroupHeading label="Internship" />
       <section className="space-y-4">
         <SectionHeading title="Questions to Ask This Team" subtitle="Generic prompts — update with real answers once you know them" />
         <Card>

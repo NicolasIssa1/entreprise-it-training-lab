@@ -9,6 +9,7 @@ import { PracticeScenario } from "@/components/PracticeScenario";
 import { CompletionButton } from "@/components/CompletionButton";
 import { RelatedTopics } from "@/components/RelatedTopics";
 import { RelatedTickets } from "@/components/RelatedTickets";
+import { TroubleshootingFramework } from "@/components/TroubleshootingFramework";
 import { learningTopics, getTopicById } from "@/lib/data/learning";
 import { getTeamLabel } from "@/lib/data/teams";
 import { getTicketsForTopic } from "@/lib/data/tickets";
@@ -73,7 +74,11 @@ export default async function LearningTopicPage(props: PageProps<"/learn/[topicI
       </LearningSection>
 
       <LearningSection title="Troubleshooting approach" subtitle="A thought process, not just a checklist">
-        <ol className="space-y-2">
+        <p className="mb-3 text-xs font-medium text-slate-400">
+          General mindset this applies:
+        </p>
+        <TroubleshootingFramework compact />
+        <ol className="mt-4 space-y-2 border-t border-slate-100 pt-4 dark:border-slate-800">
           {topic.troubleshootingSteps.map((step, i) => (
             <li key={step} className="flex items-start gap-3 text-sm text-slate-700 dark:text-slate-300">
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">

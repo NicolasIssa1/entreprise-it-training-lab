@@ -13,6 +13,10 @@ export const product = {
   namePrivate: "DHL IT Training Hub",
   namePublic: "Enterprise IT Training Lab",
   subtitle: "Personal enterprise IT internship training and simulation platform.",
+  /** Short header/nav tagline — the full disclaimer below stays in the footer and
+   * PrivacyNotice components; this exists only so the nav has room to keep all
+   * items on one line at normal desktop/laptop widths. */
+  navTagline: "Personal enterprise IT training platform",
   trainingDisclaimer:
     "Personal training project — not an official product of any company it references. All ticket and scenario data is fictional.",
 } as const;
