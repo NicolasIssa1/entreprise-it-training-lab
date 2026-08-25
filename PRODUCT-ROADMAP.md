@@ -83,21 +83,35 @@ during the internship — paths and search get real use, not just topic count.
 
 ---
 
-## Phase 2C — Security Fundamentals (not started)
+## Phase 2C — Security Fundamentals ✅ (complete — Phase 2 now frozen)
 
 **Objective:** Add the deferred Security Fundamentals learning category with a
 small, focused set of defensive-basics topics junior IT employees need — not a
 full cybersecurity course.
 
-**Candidate topics:** MFA, Least Privilege, Endpoint Security, Phishing Awareness,
-Encryption Basics, Security Patch / Vulnerability Concept (~6 topics).
+**Delivered:** 6 topics (MFA, Least Privilege, Endpoint Security, Phishing &
+Social Engineering Awareness, Encryption Basics, Vulnerabilities & Security
+Patching), bringing the library to **56 topics** across 5 categories. A 6th
+Learning Path ("Security Fundamentals") was added, plus reciprocal links from
+existing topics (Authentication vs. Authorization, HTTP & HTTPS, Patching &
+Updates, Directory Services). 4 existing tickets were retagged and 4 new
+fictional, defensive-only tickets were added (MFA re-enrollment, a least-privilege
+access-review finding, an unhealthy endpoint-protection report, and a reported
+phishing email), bringing the ticket bank to **34**. Content is explicitly
+foundational security *awareness* — no exploit, bypass, or offensive-technique
+content, and no invented "DHL security team"; ownership is framed as
+cross-team ("may involve X, varies by organization") throughout, consistent with
+how the rest of the curriculum treats team ownership.
 
-**Major risks:** Scope creep into a full security curriculum; security topics not
-mapping cleanly onto the existing primary-team model (security is inherently
-cross-cutting across all three teams).
+**Major risks (as anticipated):** Scope creep into a full security curriculum —
+avoided by holding to exactly 6 topics as scoped. Security topics not mapping
+cleanly onto the existing primary-team model — resolved the same way IT Service
+Management topics were: category-based, cross-team recommendation logic in
+`getTopicsForTeam()`, rather than forcing a single "owning" team.
 
-**Must be validated before proceeding:** Phase 2B's 50-topic library is in active
-use and stable; a security category would add clear value rather than dilute focus.
+**Phase 2 status:** With 2A, 2B, and 2C complete, **Phase 2 (Learning Engine) is
+now frozen.** Any further topic/path/ticket additions are a deliberate future
+increment, not part of the current baseline.
 
 ---
 
@@ -113,7 +127,7 @@ choices, richer ambiguity, "escalate vs. keep investigating" decision points.
 authoring cost per scenario growing much faster than the value it adds.
 
 **Must be validated before proceeding:** The Phase 2 fixed-scenario simulator (now
-30 tickets) is genuinely being outgrown, not just theoretically limited.
+34 tickets) is genuinely being outgrown, not just theoretically limited.
 
 ---
 

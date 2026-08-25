@@ -3,6 +3,7 @@ import { itsmTopics } from "./itsm";
 import { infrastructureTopics } from "./infrastructure";
 import { networkingTopics } from "./networking";
 import { applicationsTopics } from "./applications";
+import { securityTopics } from "./security";
 import { learningPaths } from "./paths";
 import { tickets } from "@/lib/data/tickets";
 
@@ -15,6 +16,7 @@ export const learningTopics: LearningTopic[] = [
   ...infrastructureTopics,
   ...networkingTopics,
   ...applicationsTopics,
+  ...securityTopics,
 ];
 
 export { learningPaths };
@@ -24,6 +26,7 @@ export const LEARNING_CATEGORIES: LearningCategory[] = [
   "Infrastructure",
   "Networking",
   "Applications",
+  "Security Fundamentals",
 ];
 
 export function getTopicById(id: string): LearningTopic | undefined {
@@ -39,22 +42,26 @@ export function getTopicsByCategory(category: LearningCategory): LearningTopic[]
 }
 
 /** Each team's "home" learning category, for the Team page's "Recommended
- * Learning" section. IT Service Management topics apply broadly (any team can own
- * a ticket/incident/escalation), so they're shown across all three teams rather
- * than assigned to one. This is deliberately category-based, not derived from each
- * topic's primaryTeam/relatedTeams (which describe the topic's own most-involved
- * teams, not "which team page should recommend it") — using team fields here would
- * make ITSM topics flood every team's list rather than staying a clean, curated
- * recommendation set. */
+ * Learning" section. IT Service Management and Security Fundamentals topics apply
+ * broadly (any team can own a ticket/incident/escalation, and security genuinely
+ * crosses all three teams — see root CLAUDE.md, no dedicated "security team" is
+ * assumed), so both are shown across all three teams rather than assigned to one.
+ * This is deliberately category-based, not derived from each topic's
+ * primaryTeam/relatedTeams (which describe the topic's own most-involved teams,
+ * not "which team page should recommend it") — using team fields here would make
+ * these cross-cutting categories flood every team's list rather than staying a
+ * clean, curated recommendation set. */
 const TEAM_HOME_CATEGORY: Record<TeamId, LearningCategory> = {
   infrastructure: "Infrastructure",
   applications: "Applications",
   "support-network": "Networking",
 };
 
+const CROSS_TEAM_CATEGORIES: LearningCategory[] = ["IT Service Management", "Security Fundamentals"];
+
 export function getTopicsForTeam(teamId: TeamId): LearningTopic[] {
   const homeCategory = TEAM_HOME_CATEGORY[teamId];
-  return learningTopics.filter((t) => t.category === homeCategory || t.category === "IT Service Management");
+  return learningTopics.filter((t) => t.category === homeCategory || CROSS_TEAM_CATEGORIES.includes(t.category));
 }
 
 /** Simple client-side search over title/category/short description/keywords — no
@@ -96,7 +103,7 @@ export function getNextIncompleteTopicId(
 // `next build` and in dev) and throws if content is internally inconsistent —
 // catching a bad topic/path/ticket reference at build time instead of a broken
 // link discovered later at runtime. Intentionally a small typed check, not a
-// validation library — the dataset is small (50 topics, ~5 paths, 30 tickets).
+// validation library — the dataset is small (56 topics, 6 paths, ~34 tickets).
 // ---------------------------------------------------------------------------
 function validateLearningContent(): void {
   const errors: string[] = [];

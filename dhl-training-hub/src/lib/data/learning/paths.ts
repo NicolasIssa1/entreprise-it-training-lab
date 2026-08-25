@@ -88,4 +88,20 @@ export const learningPaths: LearningPath[] = [
       "authentication",
     ],
   },
+  {
+    id: "security-fundamentals",
+    title: "Security Fundamentals",
+    purpose: "Foundational, defensive security awareness every enterprise IT employee should have — not a specialist track.",
+    topicIds: [
+      "authentication",
+      "mfa",
+      "least-privilege",
+      "encryption-basics",
+      "http-https",
+      "endpoint-security",
+      "vulnerabilities-patching",
+      "phishing-awareness",
+      "change-management",
+    ],
+  },
 ];

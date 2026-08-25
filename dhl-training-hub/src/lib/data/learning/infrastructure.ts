@@ -463,7 +463,7 @@ export const infrastructureTopics: LearningTopic[] = [
         "Check exactly what was patched, whether the outage timing lines up precisely with the patch window, and whether similar systems that received the same patch show the same symptom — this separates \"caused by the patch\" from \"coincidentally happened at the same time.\"",
     },
     questionToAskAtWork: "How are patch windows scheduled and communicated here, and how urgent security patches get handled differently from routine ones?",
-    relatedTopicIds: ["change-management", "server", "monitoring"],
+    relatedTopicIds: ["change-management", "server", "monitoring", "vulnerabilities-patching"],
     keywords: ["updates", "vulnerability fix", "maintenance window"],
   },
   {
@@ -508,7 +508,7 @@ export const infrastructureTopics: LearningTopic[] = [
         "Check the employee's group memberships in the directory service first — if access to several unrelated systems is missing at once, it's more efficient to check whether they were added to the right groups centrally than to investigate each application's permissions individually.",
     },
     questionToAskAtWork: "What identity/directory platform is used here, and how are group memberships kept in sync with role changes?",
-    relatedTopicIds: ["authentication", "high-availability"],
+    relatedTopicIds: ["authentication", "high-availability", "endpoint-security", "mfa"],
     keywords: ["Active Directory", "identity provider", "user groups"],
     dontConfuseWith: [
       { topicId: "authentication", note: "A directory service stores identities and group memberships; authentication is the act of verifying who someone is, often checking against that directory." },

@@ -101,7 +101,8 @@ export type LearningCategory =
   | "IT Service Management"
   | "Infrastructure"
   | "Networking"
-  | "Applications";
+  | "Applications"
+  | "Security Fundamentals";
 
 export type LearningLevel = "Foundation" | "Intermediate";
 

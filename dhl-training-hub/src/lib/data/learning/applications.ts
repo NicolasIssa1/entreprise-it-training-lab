@@ -145,7 +145,7 @@ export const applicationsTopics: LearningTopic[] = [
         "This is authentication — the system is failing to verify who they are (rejecting their credentials) before authorization would ever come into play. If the user could log in fine but then got blocked from a specific report, that would be authorization instead.",
     },
     questionToAskAtWork: "When access issues come in, how do you quickly tell whether it's a login/authentication problem or a permissions/authorization problem?",
-    relatedTopicIds: ["directory-services", "vpn", "ticket"],
+    relatedTopicIds: ["directory-services", "vpn", "ticket", "mfa", "least-privilege"],
     keywords: ["login", "permissions", "access control"],
   },
   {
@@ -190,7 +190,7 @@ export const applicationsTopics: LearningTopic[] = [
         "Check whether the site's HTTPS certificate has expired — a lapsed certificate is one of the most common causes of a sudden, unexplained security warning on a previously-working site, and is often simply a missed renewal rather than an attack or deeper fault.",
     },
     questionToAskAtWork: "How are certificate renewals tracked here, so they don't lapse unexpectedly?",
-    relatedTopicIds: ["rest-apis", "api"],
+    relatedTopicIds: ["rest-apis", "api", "encryption-basics"],
     keywords: ["HTTP status code", "TLS", "certificate"],
   },
   {
