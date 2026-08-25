@@ -9,7 +9,7 @@ confidentiality rules that apply across every phase.
 
 ---
 
-## Phase 1 — Foundation ✅ (current)
+## Phase 1 — Foundation ✅ (frozen)
 
 **Objective:** A clean, consistent, honest, reasonably polished foundation — proof
 that the product concept works — without overbuilding.
@@ -28,21 +28,31 @@ split holds up in practice; `npm run lint` / `npm run build` stay clean.
 
 ---
 
-## Phase 2 — Learning Engine
+## Phase 2A — Learning Engine ✅ (current)
 
 **Objective:** Turn the static Explain-Like-I'm-10 style content into a proper,
 navigable learning library independent of the Ticket Simulator.
 
-**Major features:** Topic library (DNS, DHCP, VPN, server, cloud, VM, API, database,
-firewall, router, switch, authentication, authorization, ticket, SLA, incident,
-escalation, backup, monitoring, logging, load balancer), each using the 10-part
-structure from `CLAUDE.md`.
+**Major features:** `/learn` library (search, category/team filter, persisted
+completion) + one reusable `/learn/[topicId]` page for all topics. 16 topics across
+four categories (IT Service Management: ticket, incident, SLA, priority & business
+impact, escalation; Infrastructure: server, virtual machine, cloud, monitoring;
+Networking: IP address, DNS, DHCP, VPN; Applications: API, database, authentication
+vs. authorization), each using the 10-part structure from `CLAUDE.md`. Cross-linked
+both ways with Team Explorer ("Recommended Learning") and Ticket Simulator
+("Recommended learning" / "Related training tickets", via tags on tickets — one
+source of truth). Lightweight "Add to today's research" link into Daily Log.
 
 **Major risks:** Content becoming generic filler with no real learning value;
 duplicating what's already in the Team Explorer instead of complementing it.
 
 **Must be validated before proceeding:** The library is actually referenced during
 real work conversations, not just browsed once.
+
+**Phase 2B candidate scope (not started):** additional topics not yet covered
+(firewall, router, switch, backup, logging, load balancer, and others as they come
+up during the internship); anything beyond the 16-topic set is a deliberate later
+increment, not an oversight.
 
 ---
 

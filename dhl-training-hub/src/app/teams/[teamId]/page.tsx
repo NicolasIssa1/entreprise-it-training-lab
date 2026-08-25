@@ -7,6 +7,7 @@ import { TeamObservations } from "@/components/TeamObservations";
 import { teams, getTeamById } from "@/lib/data/teams";
 import { getTicketsForTeam } from "@/lib/data/tickets";
 import { getQuestionsForTeam } from "@/lib/data/questions";
+import { getTopicsForTeam } from "@/lib/data/learning";
 
 export function generateStaticParams() {
   return teams.map((team) => ({ teamId: team.id }));
@@ -22,6 +23,7 @@ export default async function TeamDetailPage(props: PageProps<"/teams/[teamId]">
 
   const commonTickets = getTicketsForTeam(team.id);
   const questions = getQuestionsForTeam(team.id)?.questions ?? [];
+  const recommendedLearning = getTopicsForTeam(team.id);
 
   return (
     <div className="space-y-10">
@@ -87,6 +89,20 @@ export default async function TeamDetailPage(props: PageProps<"/teams/[teamId]">
           <SectionHeading title="Learning checklist" />
           <Checklist teamId={team.id} items={team.checklist} />
         </Card>
+      </section>
+
+      <section className="space-y-4">
+        <SectionHeading title="Recommended Learning" subtitle="Lessons connected to this team, in the Learn library" />
+        <div className="grid gap-3 sm:grid-cols-2">
+          {recommendedLearning.map((topic) => (
+            <Link key={topic.id} href={`/learn/${topic.id}`} className="block">
+              <Card className="h-full transition hover:border-blue-400">
+                <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{topic.title}</p>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{topic.shortDescription}</p>
+              </Card>
+            </Link>
+          ))}
+        </div>
       </section>
 
       <section className="space-y-4">

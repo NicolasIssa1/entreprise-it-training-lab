@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Badge } from "@/components/Badge";
@@ -41,11 +42,28 @@ function emptyForm() {
 }
 
 export default function DailyLogPage() {
+  return (
+    <Suspense fallback={null}>
+      <DailyLogContent />
+    </Suspense>
+  );
+}
+
+function DailyLogContent() {
+  const searchParams = useSearchParams();
+  const researchTopic = searchParams.get("research");
+
   const { items: entries, setItems: setEntries } = useLocalStorageList<DailyLogEntry>(
     "daily-log-entries",
     seedDailyLogEntries,
   );
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(() => {
+    const initial = emptyForm();
+    if (researchTopic) {
+      initial.toResearchLater = `Learn more about: ${researchTopic}`;
+    }
+    return initial;
+  });
   const [activeQuestionsTeam, setActiveQuestionsTeam] = useState<TeamId>(internshipState.currentTeam);
 
   function addEntry() {

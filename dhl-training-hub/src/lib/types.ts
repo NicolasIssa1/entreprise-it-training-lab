@@ -41,6 +41,10 @@ export interface Ticket {
   documentationNotes: string;
   /** True when the ticket intentionally has more than one plausible cause/team. */
   hasMultipleCauses: boolean;
+  /** LearningTopic ids this ticket illustrates — the single source of truth for
+   * Learn ↔ Ticket Simulator links (see lib/data/learning). Not forced onto every
+   * ticket; empty when no topic genuinely applies. */
+  topicIds: string[];
 }
 
 export interface DashboardData {
@@ -84,6 +88,53 @@ export interface DailyLogEntry {
   toResearchLater: string;
   practiceCompleted: string;
   tomorrowsGoals: string;
+}
+
+// ---------------------------------------------------------------------------
+// Learning library (Phase 2A). Content lives in src/lib/data/learning/ — these
+// types just describe its shape so it could later move to Supabase/a CMS without
+// the UI changing. All content is general enterprise IT knowledge, never a
+// confirmed description of DHL specifically — see root CLAUDE.md.
+// ---------------------------------------------------------------------------
+
+export type LearningCategory =
+  | "IT Service Management"
+  | "Infrastructure"
+  | "Networking"
+  | "Applications";
+
+export interface LearningPracticeScenario {
+  scenario: string;
+  question: string;
+  /** Model reasoning shown after "Reveal guidance" — not a scored answer. */
+  guidance: string;
+}
+
+export interface LearningTopic {
+  id: string;
+  title: string;
+  category: LearningCategory;
+  shortDescription: string;
+
+  /** Team most likely to be involved — framed as "commonly," never absolute. */
+  primaryTeam: TeamId;
+  relatedTeams: TeamId[];
+
+  simpleExplanation: string;
+  eli10: string;
+  technicalExplanation: string;
+  businessPurpose: string;
+
+  commonProblems: string[];
+  /** Ordered steps teaching a troubleshooting thought process, not just facts. */
+  troubleshootingSteps: string[];
+
+  universityConnections: { area: string; connection: string }[];
+
+  practiceScenario: LearningPracticeScenario;
+  questionToAskAtWork: string;
+
+  relatedTopicIds: string[];
 }
 
 export interface CvAchievement {

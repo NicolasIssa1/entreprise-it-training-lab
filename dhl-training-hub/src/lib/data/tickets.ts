@@ -34,6 +34,7 @@ export const tickets: Ticket[] = [
     documentationNotes:
       "Record the device, the symptom (connected but no internet), and the fix (reconnect / DHCP renew) for future reference.",
     hasMultipleCauses: false,
+    topicIds: ["ip-address", "dhcp"],
   },
   {
     id: "TCK-1002",
@@ -57,6 +58,7 @@ export const tickets: Ticket[] = [
     exampleResolution: "Identity verified, password reset, employee regained access immediately.",
     documentationNotes: "Log that a reset occurred and confirm identity verification was completed — never log the password itself.",
     hasMultipleCauses: false,
+    topicIds: ["authentication"],
   },
   {
     id: "TCK-1003",
@@ -86,6 +88,7 @@ export const tickets: Ticket[] = [
     exampleResolution: "Logs showed a null-value exception introduced in yesterday's deployment; a hotfix resolved it.",
     documentationNotes: "Document the exact input that triggers it, the log evidence, and the fix/deployment that resolved it.",
     hasMultipleCauses: false,
+    topicIds: [],
   },
   {
     id: "TCK-1004",
@@ -116,6 +119,7 @@ export const tickets: Ticket[] = [
     documentationNotes:
       "Document impact scope (which teams/sites), root cause, and any monitoring/alerting changes made to catch it earlier.",
     hasMultipleCauses: true,
+    topicIds: ["server", "monitoring", "incident", "escalation"],
   },
   {
     id: "TCK-1005",
@@ -138,6 +142,7 @@ export const tickets: Ticket[] = [
     exampleResolution: "Printer had dropped off Wi-Fi after a power cycle; reconnecting it to the network resolved the issue.",
     documentationNotes: "Note printer ID/location and the specific fix so recurring printer issues can be tracked.",
     hasMultipleCauses: false,
+    topicIds: [],
   },
   {
     id: "TCK-1006",
@@ -160,6 +165,7 @@ export const tickets: Ticket[] = [
     exampleResolution: "The employee's VPN certificate had expired; reissuing it resolved the connection.",
     documentationNotes: "Record whether this was isolated or part of a wider VPN issue, and the exact fix applied.",
     hasMultipleCauses: false,
+    topicIds: ["vpn", "authentication"],
   },
   {
     id: "TCK-1007",
@@ -190,6 +196,7 @@ export const tickets: Ticket[] = [
       "Investigation found a slow, unindexed database query that only became a bottleneck under peak load; adding an index resolved it.",
     documentationNotes: "Document the investigation trail across teams — this is a good example of a ticket needing cross-team collaboration.",
     hasMultipleCauses: true,
+    topicIds: ["database", "server", "monitoring", "priority"],
   },
   {
     id: "TCK-1008",
@@ -214,6 +221,7 @@ export const tickets: Ticket[] = [
     exampleResolution: "A DNS record had been accidentally removed during maintenance; re-adding it resolved access for everyone.",
     documentationNotes: "Record which DNS record/server was affected and the change that caused it, to prevent repeat incidents.",
     hasMultipleCauses: false,
+    topicIds: ["dns"],
   },
   {
     id: "TCK-1009",
@@ -241,6 +249,7 @@ export const tickets: Ticket[] = [
     exampleResolution: "Employee was missing from the relevant access group after a recent role change; adding them resolved it.",
     documentationNotes: "Document manager approval and the exact group/permission granted — access changes should always be traceable.",
     hasMultipleCauses: true,
+    topicIds: ["authentication"],
   },
   {
     id: "TCK-1010",
@@ -269,6 +278,7 @@ export const tickets: Ticket[] = [
     exampleResolution: "A scheduled credential rotation on the database wasn't updated in the application's configuration; updating it restored the connection.",
     documentationNotes: "Document exactly where in the chain the failure was (app config vs database server) — important for the postmortem.",
     hasMultipleCauses: true,
+    topicIds: ["database", "escalation"],
   },
   {
     id: "TCK-1011",
@@ -291,6 +301,7 @@ export const tickets: Ticket[] = [
     exampleResolution: "A driver update for the laptop's network adapter resolved the intermittent drops.",
     documentationNotes: "Record whether it was hardware- or driver-related, since it affects whether a device swap is needed.",
     hasMultipleCauses: false,
+    topicIds: [],
   },
   {
     id: "TCK-1012",
@@ -313,6 +324,7 @@ export const tickets: Ticket[] = [
     exampleResolution: "The deployment had missed a required configuration update; applying it and redeploying fixed the feature.",
     documentationNotes: "Document the root cause and add a check to the deployment process to prevent recurrence.",
     hasMultipleCauses: false,
+    topicIds: [],
   },
   {
     id: "TCK-1013",
@@ -335,6 +347,7 @@ export const tickets: Ticket[] = [
     exampleResolution: "The backup storage target had filled up; freeing space and re-running the backup restored coverage, and the alert rule was fixed.",
     documentationNotes: "This is a good example of documenting both the fix AND the monitoring gap that let it go unnoticed for a week.",
     hasMultipleCauses: false,
+    topicIds: ["server", "monitoring"],
   },
   {
     id: "TCK-1014",
@@ -357,6 +370,7 @@ export const tickets: Ticket[] = [
     exampleResolution: "One system's API had deprecated a field the integration relied on; updating the integration's mapping and backfilling missed data resolved it.",
     documentationNotes: "Document the sync gap window and how the backfill was verified for completeness.",
     hasMultipleCauses: false,
+    topicIds: ["api"],
   },
   {
     id: "TCK-1015",
@@ -379,6 +393,7 @@ export const tickets: Ticket[] = [
     exampleResolution: "A stuck background process was identified and safely restarted, returning CPU usage to normal before any user-facing impact occurred.",
     documentationNotes: "Document this as a proactive catch — good example of monitoring working as intended.",
     hasMultipleCauses: false,
+    topicIds: ["monitoring", "server"],
   },
 ];
 
@@ -394,4 +409,14 @@ export function getTicketsForTeam(teamId: TeamId, limit = 4): Ticket[] {
   return tickets
     .filter((t) => t.recommendedTeam === teamId || t.plausibleTeams.includes(teamId))
     .slice(0, limit);
+}
+
+/**
+ * Tickets tagged with a given learning topic, for the Learn topic page's "Related
+ * training tickets" section. Tags live only on tickets (topicIds) — this derives
+ * the reverse relationship rather than duplicating it on LearningTopic, so there's
+ * one source of truth for Learn ↔ Ticket Simulator links.
+ */
+export function getTicketsForTopic(topicId: string, limit = 4): Ticket[] {
+  return tickets.filter((t) => t.topicIds.includes(topicId)).slice(0, limit);
 }

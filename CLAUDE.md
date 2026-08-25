@@ -171,6 +171,40 @@ Data storage in Phase 1: **mock/local data only.**
   (internshipState) and reusable product branding (product.ts) are deliberately kept
   in separate files — don't merge them.
 
+---
+
+## Phase 2A scope — Learning Engine (built)
+
+Adds a **Learn** section: `/learn` (library landing — search, category/team filter,
+overall progress) and `/learn/[topicId]` (one reusable dynamic page for all topics,
+via `generateStaticParams` — never add a hardcoded page per topic). 16 topics across
+four categories (IT Service Management, Infrastructure, Networking, Applications),
+each following the same 10-part structure as the learning methodology above, plus a
+practice scenario with reveal-guidance and a question to ask at work.
+
+- Content lives in `dhl-training-hub/src/lib/data/learning/` (`itsm.ts`,
+  `infrastructure.ts`, `networking.ts`, `applications.ts`, aggregated by `index.ts`)
+  as typed `LearningTopic[]` data — structured so it could move to Supabase/a CMS
+  later without the UI changing. Pages render data; they don't hardcode lessons.
+- Completion is tracked via `dhl-training-hub/src/lib/learningProgress.ts`
+  (`useLearningProgress`), built on the same `useLocalStorageState` core as every
+  other storage hook (Checklist, Daily Log, CV Tracker) — key
+  `learning-topic-progress`, schema `Record<topicId, boolean>`. Don't create a
+  second, inconsistent storage pattern for future progress-tracking features.
+- **Learn ↔ Teams**: Team pages show a "Recommended Learning" section derived from
+  `getTopicsForTeam()` (category-based: each team's own category + IT Service
+  Management topics, which apply broadly) — see `lib/data/learning/index.ts`.
+- **Learn ↔ Ticket Simulator**: tickets carry a `topicIds: string[]` tag (only where
+  a topic genuinely applies — never forced) in `lib/data/tickets.ts`. The Ticket
+  Simulator's guidance panel shows "Recommended learning" derived from a ticket's
+  own tags; a Learn topic page's "Related training tickets" derives the reverse
+  relationship via `getTicketsForTopic()`. The tag lives only on the ticket — don't
+  duplicate the relationship on `LearningTopic`.
+- **Learn ↔ Daily Log**: each topic page has a lightweight "Add to today's research"
+  link (`/daily-log?research=<topic title>`) that pre-fills the new entry's "things
+  to research later" field. This intentionally stops short of any deeper Daily Log
+  restructuring.
+
 ### Explicitly NOT built yet (do not add without being asked)
 
 - Supabase / any real database
@@ -178,8 +212,8 @@ Data storage in Phase 1: **mock/local data only.**
 - Authentication (even simple), SSO, RBAC
 - Deployment (Vercel or otherwise)
 - "How DHL Works" external/internal flow pages (placeholder folders only)
-- Explain Like I'm 10 topic library page
-- Daily quiz system, skill tree, analytics/manager view
+- Daily quiz system, skill tree, analytics/manager view (Learn tracks simple
+  completion only — no scoring, no quiz mechanics)
 - Branching/multi-step ticket simulations (current simulator is fixed-scenario)
 - Multi-tenancy / multi-company accounts
 
@@ -212,7 +246,8 @@ DHL-Internship/
   ENTERPRISE-READINESS.md  — future requirements before any real deployment
   teams/                   — markdown reference docs (source content for Teams pages)
   daily/                   — markdown daily journal entries (day-01.md, day-02.md, ...)
-  learning/                — reserved for future ELI10 topic library content
+  learning/                — reserved (the actual Learn library lives in the app —
+                              see dhl-training-hub/src/lib/data/learning/ below)
   practice-tickets/        — reserved for future expansion of ticket bank
   quizzes/                 — reserved for future quiz system
   questions/               — reserved for future standalone questions bank
@@ -220,4 +255,6 @@ DHL-Internship/
   dhl-training-hub/        — the actual Next.js application (see its own README)
     src/lib/data/internshipState.ts — single source of truth for current day/team
     src/lib/product.ts              — product/brand config (private vs public name)
+    src/lib/data/learning/          — Learn topic content (Phase 2A)
+    src/lib/learningProgress.ts     — Learn completion tracking hook
 ```

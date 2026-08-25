@@ -9,6 +9,7 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { tickets, getTicketById } from "@/lib/data/tickets";
 import { teams, getTeamLabel } from "@/lib/data/teams";
+import { getTopicsByIds } from "@/lib/data/learning";
 import { textareaClass, toggleButtonClass } from "@/lib/ui";
 import { Ticket, TeamId, UrgencyLevel } from "@/lib/types";
 
@@ -205,6 +206,23 @@ function TicketGuidance({ ticket, chosenTeam }: { ticket: Ticket; chosenTeam: Te
       <GuidanceList title="Likely root cause(s)" items={ticket.likelyRootCauses} />
       <GuidanceSection title="Example resolution" text={ticket.exampleResolution} />
       <GuidanceSection title="What should be documented" text={ticket.documentationNotes} />
+
+      {getTopicsByIds(ticket.topicIds).length > 0 && (
+        <div>
+          <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Recommended learning</p>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {getTopicsByIds(ticket.topicIds).map((topic) => (
+              <Link
+                key={topic.id}
+                href={`/learn/${topic.id}`}
+                className="rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950"
+              >
+                Review {topic.title} →
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-3 border-t border-slate-200 pt-3 dark:border-slate-800">
         {[ticket.recommendedTeam, ...otherPlausibleTeams].map((t) => (

@@ -21,22 +21,29 @@ Tracker**, covering three generic enterprise IT team types:
 - **Applications** — business apps, APIs, databases, integrations, deployments, auth
 - **Support & Network** — tickets, escalation, SLA, Wi-Fi, LAN/WAN, VPN, DNS, DHCP
 
-## Current features (Phase 1)
+## Current features
 
 1. **Dashboard** — current day/team (from one shared internship state), goals,
    questions, practice exercise, quick notes, reflection
-2. **Team Explorer** — Infrastructure / Applications / Support & Network pages, each
+2. **Learn** (Phase 2A) — a 16-topic enterprise IT learning library (IT Service
+   Management, Infrastructure, Networking, Applications), each lesson following a
+   consistent 10-part structure (what is it, ELI10, technical explanation, business
+   purpose, team connection, troubleshooting approach, university connection,
+   practice scenario, question to ask at work, related topics/tickets), with
+   search, category/team filtering, and persisted completion tracking
+3. **Team Explorer** — Infrastructure / Applications / Support & Network pages, each
    split into general enterprise IT knowledge vs. personally observed facts, plus
-   common training tickets, questions to ask, and open learning prompts
-3. **Ticket Simulator** — 15 fake IT tickets to triage, prioritize, and troubleshoot,
-   cross-linked with the Team Explorer
-4. **Daily Log** — structured journal + "questions to ask" reference per team
-5. **CV Achievement Tracker** — honest, non-exaggerated CV bullet building with an
+   recommended learning, common training tickets, questions to ask, and open
+   learning prompts
+4. **Ticket Simulator** — 15 fake IT tickets to triage, prioritize, and troubleshoot,
+   cross-linked with the Team Explorer and the Learn library
+5. **Daily Log** — structured journal + "questions to ask" reference per team
+6. **CV Achievement Tracker** — honest, non-exaggerated CV bullet building with an
    involvement scale (Observed → Implemented) and wording-vs-level validation
 
 See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
 `internship-plan.md` for the current learning state, and `PRODUCT-ROADMAP.md` /
-`ENTERPRISE-READINESS.md` for what comes after Phase 1.
+`ENTERPRISE-READINESS.md` for what comes next.
 
 ## What it is NOT
 
@@ -56,12 +63,11 @@ See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
 
 ## Future roadmap (not built yet)
 
-Briefly, in rough order: a generic learning-topic library, daily quizzes, more
-advanced branching ticket simulations, skill tracking, a persistent backend, an AI
-tutor, and — much later — real enterprise pilot/production readiness. See
-`PRODUCT-ROADMAP.md` for the full phase-by-phase breakdown and
-`ENTERPRISE-READINESS.md` for what a real corporate deployment would eventually
-require.
+Briefly, in rough order: daily quizzes, more advanced branching ticket simulations,
+skill tracking, a persistent backend, an AI tutor, and — much later — real
+enterprise pilot/production readiness. See `PRODUCT-ROADMAP.md` for the full
+phase-by-phase breakdown and `ENTERPRISE-READINESS.md` for what a real corporate
+deployment would eventually require.
 
 ## Repository layout
 

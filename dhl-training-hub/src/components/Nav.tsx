@@ -6,6 +6,7 @@ import { displayProductName, product } from "@/lib/product";
 
 const LINKS = [
   { href: "/", label: "Dashboard" },
+  { href: "/learn", label: "Learn" },
   { href: "/teams", label: "Teams" },
   { href: "/tickets", label: "Ticket Simulator" },
   { href: "/daily-log", label: "Daily Log" },
