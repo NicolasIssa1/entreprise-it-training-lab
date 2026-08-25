@@ -25,18 +25,22 @@ Tracker**, covering three generic enterprise IT team types:
 
 1. **Dashboard** — current day/team (from one shared internship state), goals,
    questions, practice exercise, quick notes, reflection
-2. **Learn** (Phase 2A) — a 16-topic enterprise IT learning library (IT Service
-   Management, Infrastructure, Networking, Applications), each lesson following a
-   consistent 10-part structure (what is it, ELI10, technical explanation, business
-   purpose, team connection, troubleshooting approach, university connection,
-   practice scenario, question to ask at work, related topics/tickets), with
-   search, category/team filtering, and persisted completion tracking
+2. **Learn** — a 50-topic enterprise IT learning library across four categories
+   (IT Service Management, Infrastructure, Networking, Applications), each lesson
+   following a consistent structure (learning outcomes, what is it, ELI10,
+   technical explanation, business purpose, common problems, troubleshooting
+   approach, team connection, university connection, practice scenario, question
+   to ask at work, related topics/tickets — plus optional recommended
+   prerequisites and "don't confuse this with" callouts where genuinely useful).
+   Includes 5 curated Learning Paths, search (title/description/category/keyword),
+   category/team/level filtering, a deterministic "continue learning" suggestion,
+   and persisted completion tracking
 3. **Team Explorer** — Infrastructure / Applications / Support & Network pages, each
    split into general enterprise IT knowledge vs. personally observed facts, plus
-   recommended learning, common training tickets, questions to ask, and open
-   learning prompts
-4. **Ticket Simulator** — 15 fake IT tickets to triage, prioritize, and troubleshoot,
-   cross-linked with the Team Explorer and the Learn library
+   recommended learning, common training tickets (split into likely-owner vs.
+   cross-team scenarios), questions to ask, and open learning prompts
+4. **Ticket Simulator** — 30 fake IT tickets to triage, prioritize, and
+   troubleshoot, cross-linked with the Team Explorer and the Learn library
 5. **Daily Log** — structured journal + "questions to ask" reference per team
 6. **CV Achievement Tracker** — honest, non-exaggerated CV bullet building with an
    involvement scale (Observed → Implemented) and wording-vs-level validation
@@ -63,11 +67,13 @@ See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
 
 ## Future roadmap (not built yet)
 
-Briefly, in rough order: daily quizzes, more advanced branching ticket simulations,
-skill tracking, a persistent backend, an AI tutor, and — much later — real
-enterprise pilot/production readiness. See `PRODUCT-ROADMAP.md` for the full
-phase-by-phase breakdown and `ENTERPRISE-READINESS.md` for what a real corporate
-deployment would eventually require.
+Briefly, in rough order: an optional Security Fundamentals topic category
+(deliberately deferred out of Phase 2B — see `PRODUCT-ROADMAP.md`), a branching
+multi-step ticket simulator, daily quizzes, skill tracking, a persistent backend,
+an AI tutor, and — much later — real enterprise pilot/production readiness. See
+`PRODUCT-ROADMAP.md` for the full phase-by-phase breakdown and
+`ENTERPRISE-READINESS.md` for what a real corporate deployment would eventually
+require.
 
 ## Repository layout
 

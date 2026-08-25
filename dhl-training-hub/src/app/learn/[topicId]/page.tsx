@@ -10,7 +10,7 @@ import { CompletionButton } from "@/components/CompletionButton";
 import { RelatedTopics } from "@/components/RelatedTopics";
 import { RelatedTickets } from "@/components/RelatedTickets";
 import { TroubleshootingFramework } from "@/components/TroubleshootingFramework";
-import { learningTopics, getTopicById } from "@/lib/data/learning";
+import { learningTopics, getTopicById, getTopicsByIds } from "@/lib/data/learning";
 import { getTeamLabel } from "@/lib/data/teams";
 import { getTicketsForTopic } from "@/lib/data/tickets";
 
@@ -29,7 +29,11 @@ export default async function LearningTopicPage(props: PageProps<"/learn/[topicI
   return (
     <div className="space-y-6">
       <div>
-        <Badge variant="neutral">{topic.category}</Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="neutral">{topic.category}</Badge>
+          <Badge variant="neutral">{topic.level}</Badge>
+          <span className="text-xs text-slate-400">{topic.estimatedMinutes} min read</span>
+        </div>
         <h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">{topic.title}</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">{topic.shortDescription}</p>
       </div>
@@ -46,9 +50,50 @@ export default async function LearningTopicPage(props: PageProps<"/learn/[topicI
         </div>
       </Card>
 
+      {topic.prerequisiteTopicIds && topic.prerequisiteTopicIds.length > 0 && (
+        <LearningSection title="Recommended before this lesson" subtitle="Helpful context, not required — nothing here is locked">
+          <RelatedTopics topicIds={topic.prerequisiteTopicIds} />
+        </LearningSection>
+      )}
+
+      <LearningSection title="After this lesson, you should be able to">
+        <ul className="space-y-2">
+          {topic.learningOutcomes.map((o) => (
+            <li key={o} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+              {o}
+            </li>
+          ))}
+        </ul>
+      </LearningSection>
+
       <LearningSection title="What is it?">
         <p className="text-sm text-slate-700 dark:text-slate-300">{topic.simpleExplanation}</p>
       </LearningSection>
+
+      {topic.dontConfuseWith && topic.dontConfuseWith.length > 0 && (
+        <div className="space-y-2">
+          {getTopicsByIds(topic.dontConfuseWith.map((c) => c.topicId)).map((other) => {
+            const contrast = topic.dontConfuseWith!.find((c) => c.topicId === other.id);
+            if (!contrast) return null;
+            return (
+              <div
+                key={other.id}
+                className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
+              >
+                <span className="font-medium">
+                  Don&rsquo;t confuse this with{" "}
+                  <Link href={`/learn/${other.id}`} className="underline">
+                    {other.title}
+                  </Link>
+                  :
+                </span>{" "}
+                {contrast.note}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <LearningSection title="Explain Like I'm 10" emphasized>
         <p className="text-sm text-slate-800 dark:text-slate-200">{topic.eli10}</p>

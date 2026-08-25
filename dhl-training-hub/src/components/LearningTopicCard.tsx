@@ -14,6 +14,9 @@ export function LearningTopicCard({ topic, completed }: { topic: LearningTopic; 
         </div>
         <h2 className="mt-2 text-base font-semibold text-slate-900 dark:text-slate-100">{topic.title}</h2>
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{topic.shortDescription}</p>
+        <p className="mt-1 text-xs text-slate-400">
+          {topic.level} &middot; {topic.estimatedMinutes} min
+        </p>
         <div className="mt-3 flex items-center justify-between gap-2">
           <TeamBadge teamId={topic.primaryTeam} variant="primary" />
           <span className="text-sm font-medium text-blue-600 dark:text-blue-400">

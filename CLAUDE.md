@@ -173,19 +173,34 @@ Data storage in Phase 1: **mock/local data only.**
 
 ---
 
-## Phase 2A scope — Learning Engine (built)
+## Phase 2 scope — Learning Engine (built)
 
-Adds a **Learn** section: `/learn` (library landing — search, category/team filter,
-overall progress) and `/learn/[topicId]` (one reusable dynamic page for all topics,
-via `generateStaticParams` — never add a hardcoded page per topic). 16 topics across
-four categories (IT Service Management, Infrastructure, Networking, Applications),
-each following the same 10-part structure as the learning methodology above, plus a
-practice scenario with reveal-guidance and a question to ask at work.
+Adds a **Learn** section: `/learn` (library landing — suggested next topic, 5
+Learning Paths, search, category/team/level filter, overall progress) and
+`/learn/[topicId]` (one reusable dynamic page for all topics, via
+`generateStaticParams` — never add a hardcoded page per topic). **50 topics** across
+four categories (IT Service Management, Infrastructure, Networking, Applications —
+a fifth category, Security Fundamentals, was deliberately deferred; see
+`PRODUCT-ROADMAP.md` Phase 2C), each following the same structure as the learning
+methodology above (now including 2–4 explicit learning outcomes, a Foundation/
+Intermediate level, and an estimated read time), plus a practice scenario with
+reveal-guidance and a question to ask at work. Optional `prerequisiteTopicIds`
+(recommendations, never hard locks) and `dontConfuseWith` callouts exist only where
+genuinely useful — not on every topic.
 
 - Content lives in `dhl-training-hub/src/lib/data/learning/` (`itsm.ts`,
-  `infrastructure.ts`, `networking.ts`, `applications.ts`, aggregated by `index.ts`)
-  as typed `LearningTopic[]` data — structured so it could move to Supabase/a CMS
-  later without the UI changing. Pages render data; they don't hardcode lessons.
+  `infrastructure.ts`, `networking.ts`, `applications.ts`, `paths.ts`, aggregated by
+  `index.ts`) as typed `LearningTopic[]` / `LearningPath[]` data — structured so it
+  could move to Supabase/a CMS later without the UI changing. Pages render data;
+  they don't hardcode lessons.
+- `index.ts` runs a lightweight `validateLearningContent()` check at module load
+  (so it fires on every `npm run build` and in dev) that throws on duplicate topic
+  ids or any `relatedTopicIds`/`prerequisiteTopicIds`/`dontConfuseWith`/path/ticket
+  reference to a topic id that doesn't exist. Keep this passing — it's the guard
+  against a typo silently breaking a link.
+- **Learning Paths** (`lib/data/learning/paths.ts`) are just curated, ordered
+  `topicIds` lists — there is no separate path-completion storage. Path progress is
+  always derived from topic completion at render time via `getPathProgress()`.
 - Completion is tracked via `dhl-training-hub/src/lib/learningProgress.ts`
   (`useLearningProgress`), built on the same `useLocalStorageState` core as every
   other storage hook (Checklist, Daily Log, CV Tracker) — key
@@ -199,11 +214,18 @@ practice scenario with reveal-guidance and a question to ask at work.
   Simulator's guidance panel shows "Recommended learning" derived from a ticket's
   own tags; a Learn topic page's "Related training tickets" derives the reverse
   relationship via `getTicketsForTopic()`. The tag lives only on the ticket — don't
-  duplicate the relationship on `LearningTopic`.
+  duplicate the relationship on `LearningTopic`. `getTicketsForTeam()` further
+  splits a team's tickets into `likely` (this team is the recommended owner) vs.
+  `crossTeam` (a plausible secondary participant in a genuinely ambiguous ticket) —
+  never blend these back into one undifferentiated list.
 - **Learn ↔ Daily Log**: each topic page has a lightweight "Add to today's research"
   link (`/daily-log?research=<topic title>`) that pre-fills the new entry's "things
   to research later" field. This intentionally stops short of any deeper Daily Log
   restructuring.
+- 30 fictional training tickets in `lib/data/tickets.ts` (up from 15) — still
+  fixed-scenario (read → choose team → choose urgency → write initial
+  troubleshooting → reveal guidance). Do not add branching/multi-step behavior;
+  that's Phase 3.
 
 ### Explicitly NOT built yet (do not add without being asked)
 
@@ -212,6 +234,8 @@ practice scenario with reveal-guidance and a question to ask at work.
 - Authentication (even simple), SSO, RBAC
 - Deployment (Vercel or otherwise)
 - "How DHL Works" external/internal flow pages (placeholder folders only)
+- Security Fundamentals learning category (deferred from Phase 2B — see
+  `PRODUCT-ROADMAP.md`)
 - Daily quiz system, skill tree, analytics/manager view (Learn tracks simple
   completion only — no scoring, no quiz mechanics)
 - Branching/multi-step ticket simulations (current simulator is fixed-scenario)
@@ -255,6 +279,6 @@ DHL-Internship/
   dhl-training-hub/        — the actual Next.js application (see its own README)
     src/lib/data/internshipState.ts — single source of truth for current day/team
     src/lib/product.ts              — product/brand config (private vs public name)
-    src/lib/data/learning/          — Learn topic content (Phase 2A)
+    src/lib/data/learning/          — Learn topic content (50 topics) + paths.ts
     src/lib/learningProgress.ts     — Learn completion tracking hook
 ```

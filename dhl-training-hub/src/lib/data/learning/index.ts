@@ -1,10 +1,12 @@
-import { LearningCategory, LearningTopic, TeamId } from "@/lib/types";
+import { LearningCategory, LearningPath, LearningTopic, TeamId } from "@/lib/types";
 import { itsmTopics } from "./itsm";
 import { infrastructureTopics } from "./infrastructure";
 import { networkingTopics } from "./networking";
 import { applicationsTopics } from "./applications";
+import { learningPaths } from "./paths";
+import { tickets } from "@/lib/data/tickets";
 
-// Single combined topic list. Kept as flat, typed local data for Phase 2A — could
+// Single combined topic list. Kept as flat, typed local data for Phase 2 — could
 // move to Supabase/a CMS later without the UI changing, since pages only ever read
 // through the helpers below. See root CLAUDE.md: general enterprise IT knowledge
 // only, never a confirmed description of DHL specifically.
@@ -14,6 +16,8 @@ export const learningTopics: LearningTopic[] = [
   ...networkingTopics,
   ...applicationsTopics,
 ];
+
+export { learningPaths };
 
 export const LEARNING_CATEGORIES: LearningCategory[] = [
   "IT Service Management",
@@ -53,8 +57,8 @@ export function getTopicsForTeam(teamId: TeamId): LearningTopic[] {
   return learningTopics.filter((t) => t.category === homeCategory || t.category === "IT Service Management");
 }
 
-/** Simple client-side substring search over title/category/short description —
- * no external search package, matches Phase 2A scope. */
+/** Simple client-side search over title/category/short description/keywords — no
+ * external search package, matches Phase 2 scope. */
 export function searchTopics(query: string): LearningTopic[] {
   const q = query.trim().toLowerCase();
   if (!q) return learningTopics;
@@ -62,6 +66,84 @@ export function searchTopics(query: string): LearningTopic[] {
     (t) =>
       t.title.toLowerCase().includes(q) ||
       t.category.toLowerCase().includes(q) ||
-      t.shortDescription.toLowerCase().includes(q),
+      t.shortDescription.toLowerCase().includes(q) ||
+      t.keywords.some((k) => k.toLowerCase().includes(q)),
   );
 }
+
+export function getPathById(id: string): LearningPath | undefined {
+  return learningPaths.find((p) => p.id === id);
+}
+
+/** Path progress is always derived from topic completion — never stored
+ * separately, so it can never drift out of sync with actual topic state. */
+export function getPathProgress(path: LearningPath, completed: Record<string, boolean>) {
+  const completedCount = path.topicIds.filter((id) => completed[id]).length;
+  return { completedCount, total: path.topicIds.length };
+}
+
+/** First not-yet-completed topic in a given ordered list — used for the Learn
+ * landing page's deterministic "suggested next topic," not an AI recommendation. */
+export function getNextIncompleteTopicId(
+  topicIds: string[],
+  completed: Record<string, boolean>,
+): string | undefined {
+  return topicIds.find((id) => !completed[id]);
+}
+
+// ---------------------------------------------------------------------------
+// Lightweight content validation. Runs once at module load (so it fires during
+// `next build` and in dev) and throws if content is internally inconsistent —
+// catching a bad topic/path/ticket reference at build time instead of a broken
+// link discovered later at runtime. Intentionally a small typed check, not a
+// validation library — the dataset is small (50 topics, ~5 paths, 30 tickets).
+// ---------------------------------------------------------------------------
+function validateLearningContent(): void {
+  const errors: string[] = [];
+  const ids = new Set<string>();
+
+  for (const topic of learningTopics) {
+    if (ids.has(topic.id)) errors.push(`Duplicate learning topic id: "${topic.id}"`);
+    ids.add(topic.id);
+  }
+
+  for (const topic of learningTopics) {
+    for (const relatedId of topic.relatedTopicIds) {
+      if (!ids.has(relatedId)) {
+        errors.push(`Topic "${topic.id}" has relatedTopicIds referencing unknown id "${relatedId}"`);
+      }
+    }
+    for (const prereqId of topic.prerequisiteTopicIds ?? []) {
+      if (!ids.has(prereqId)) {
+        errors.push(`Topic "${topic.id}" has prerequisiteTopicIds referencing unknown id "${prereqId}"`);
+      }
+    }
+    for (const contrast of topic.dontConfuseWith ?? []) {
+      if (!ids.has(contrast.topicId)) {
+        errors.push(`Topic "${topic.id}" has dontConfuseWith referencing unknown id "${contrast.topicId}"`);
+      }
+    }
+  }
+
+  for (const path of learningPaths) {
+    for (const topicId of path.topicIds) {
+      if (!ids.has(topicId)) {
+        errors.push(`Learning path "${path.id}" references unknown topic id "${topicId}"`);
+      }
+    }
+  }
+
+  for (const ticket of tickets) {
+    for (const topicId of ticket.topicIds) {
+      if (!ids.has(topicId)) {
+        errors.push(`Ticket "${ticket.id}" references unknown learning topic id "${topicId}"`);
+      }
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`Learning content validation failed:\n${errors.join("\n")}`);
+  }
+}
+
+validateLearningContent();

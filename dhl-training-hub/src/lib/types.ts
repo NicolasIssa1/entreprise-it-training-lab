@@ -103,6 +103,8 @@ export type LearningCategory =
   | "Networking"
   | "Applications";
 
+export type LearningLevel = "Foundation" | "Intermediate";
+
 export interface LearningPracticeScenario {
   scenario: string;
   question: string;
@@ -110,15 +112,28 @@ export interface LearningPracticeScenario {
   guidance: string;
 }
 
+/** A lightweight "don't confuse this with..." callout — only added where mixing
+ * two concepts up is a genuinely common beginner mistake, not on every topic. */
+export interface LearningContrast {
+  topicId: string;
+  note: string;
+}
+
 export interface LearningTopic {
   id: string;
   title: string;
   category: LearningCategory;
+  level: LearningLevel;
+  /** Realistic, not scientifically precise — most topics read in ~5-10 min. */
+  estimatedMinutes: number;
   shortDescription: string;
 
   /** Team most likely to be involved — framed as "commonly," never absolute. */
   primaryTeam: TeamId;
   relatedTeams: TeamId[];
+
+  /** 2-4 short "after this lesson you should be able to..." outcomes. */
+  learningOutcomes: string[];
 
   simpleExplanation: string;
   eli10: string;
@@ -135,6 +150,21 @@ export interface LearningTopic {
   questionToAskAtWork: string;
 
   relatedTopicIds: string[];
+  /** Extra search terms (synonyms/jargon) beyond title/description/category. */
+  keywords: string[];
+  /** Recommended, not required — lessons are never hard-locked. */
+  prerequisiteTopicIds?: string[];
+  /** Only where mixing the two up is a common beginner mistake. */
+  dontConfuseWith?: LearningContrast[];
+}
+
+export interface LearningPath {
+  id: string;
+  title: string;
+  purpose: string;
+  /** Ordered topic ids — path progress is derived from topic completion at
+   * render time, never stored separately. */
+  topicIds: string[];
 }
 
 export interface CvAchievement {

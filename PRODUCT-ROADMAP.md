@@ -28,31 +28,76 @@ split holds up in practice; `npm run lint` / `npm run build` stay clean.
 
 ---
 
-## Phase 2A — Learning Engine ✅ (current)
+## Phase 2A — Learning Engine ✅ (complete)
 
 **Objective:** Turn the static Explain-Like-I'm-10 style content into a proper,
 navigable learning library independent of the Ticket Simulator.
 
-**Major features:** `/learn` library (search, category/team filter, persisted
-completion) + one reusable `/learn/[topicId]` page for all topics. 16 topics across
-four categories (IT Service Management: ticket, incident, SLA, priority & business
-impact, escalation; Infrastructure: server, virtual machine, cloud, monitoring;
-Networking: IP address, DNS, DHCP, VPN; Applications: API, database, authentication
-vs. authorization), each using the 10-part structure from `CLAUDE.md`. Cross-linked
-both ways with Team Explorer ("Recommended Learning") and Ticket Simulator
-("Recommended learning" / "Related training tickets", via tags on tickets — one
-source of truth). Lightweight "Add to today's research" link into Daily Log.
+**Delivered:** `/learn` library + one reusable `/learn/[topicId]` page for all
+topics. Initial 16-topic set across four categories, each using the 10-part
+structure from `CLAUDE.md`. Cross-linked both ways with Team Explorer and Ticket
+Simulator. Superseded in scope by Phase 2B below.
 
-**Major risks:** Content becoming generic filler with no real learning value;
-duplicating what's already in the Team Explorer instead of complementing it.
+---
 
-**Must be validated before proceeding:** The library is actually referenced during
-real work conversations, not just browsed once.
+## Phase 2B — Complete Learning Library ✅ (current)
 
-**Phase 2B candidate scope (not started):** additional topics not yet covered
-(firewall, router, switch, backup, logging, load balancer, and others as they come
-up during the internship); anything beyond the 16-topic set is a deliberate later
-increment, not an oversight.
+**Objective:** Expand Phase 2A's 16-topic proof of concept into a comprehensive,
+still-focused enterprise IT fundamentals curriculum — suitable for interns,
+graduate hires, service-desk/application-support/network-support trainees, and CS
+students entering enterprise IT.
+
+**Delivered:** **50 topics** across the same four categories (IT Service
+Management: ticket, incident, SLA, priority & business impact, escalation, service
+request, problem management, root cause analysis, change management, knowledge
+base, ticket assignment & queue management; Infrastructure: server, virtual
+machine, cloud, monitoring, storage, backup & restore, high availability, disaster
+recovery, load balancer, patching & updates, directory services, logging, capacity
+& performance; Networking: IP address, DNS, DHCP, VPN, router, switch, firewall,
+subnet, VLAN, NAT, Wi-Fi, proxy, SD-WAN; Applications: API, database, authentication
+vs. authorization, HTTP & HTTPS, REST APIs, JSON, system integration, deployment &
+release, application logs, application monitoring, database connectivity, caching,
+application performance). Each topic now also has 2–4 explicit learning outcomes, a
+Foundation/Intermediate level, an estimated read time, optional recommended
+prerequisites, and — where confusion is genuinely common — a "don't confuse this
+with" callout. 5 curated Learning Paths (Enterprise IT Foundations, Infrastructure
+Foundations, Network Foundations, Application Support Foundations, IT Support
+Foundations) with path progress always derived from topic completion. Search
+extended to keywords; added a Level filter and a deterministic "continue learning"
+suggestion (no AI). Ticket bank expanded 15 → 30, with topic tags reviewed and
+extended across the full set. A lightweight build-time content validator catches
+broken topic/path/ticket references before they ship.
+
+**Deliberately deferred:** an optional fifth "Security Fundamentals" category (MFA,
+least privilege, endpoint security, phishing awareness, encryption basics,
+vulnerability concept) was scoped but not built in Phase 2B, to keep this already
+large expansion focused — see Phase 2C below.
+
+**Major risks:** Content volume outpacing actual quality/usefulness; topic
+relationships (prerequisites, "don't confuse with", paths) drifting out of sync
+with the content — mitigated by the build-time validator, but worth re-checking
+whenever topics are added or renamed.
+
+**Must be validated before proceeding:** The expanded library is actually used
+during the internship — paths and search get real use, not just topic count.
+
+---
+
+## Phase 2C — Security Fundamentals (not started)
+
+**Objective:** Add the deferred Security Fundamentals learning category with a
+small, focused set of defensive-basics topics junior IT employees need — not a
+full cybersecurity course.
+
+**Candidate topics:** MFA, Least Privilege, Endpoint Security, Phishing Awareness,
+Encryption Basics, Security Patch / Vulnerability Concept (~6 topics).
+
+**Major risks:** Scope creep into a full security curriculum; security topics not
+mapping cleanly onto the existing primary-team model (security is inherently
+cross-cutting across all three teams).
+
+**Must be validated before proceeding:** Phase 2B's 50-topic library is in active
+use and stable; a security category would add clear value rather than dilute focus.
 
 ---
 
@@ -67,8 +112,8 @@ choices, richer ambiguity, "escalate vs. keep investigating" decision points.
 **Major risks:** Overengineering a simulation the intern doesn't have time to use;
 authoring cost per scenario growing much faster than the value it adds.
 
-**Must be validated before proceeding:** Phase 1's fixed-scenario simulator is
-genuinely being outgrown, not just theoretically limited.
+**Must be validated before proceeding:** The Phase 2 fixed-scenario simulator (now
+30 tickets) is genuinely being outgrown, not just theoretically limited.
 
 ---
 
