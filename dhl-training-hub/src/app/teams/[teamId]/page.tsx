@@ -85,7 +85,7 @@ export default async function TeamDetailPage(props: PageProps<"/teams/[teamId]">
 
         <Card>
           <SectionHeading title="Learning checklist" />
-          <Checklist items={team.checklist} />
+          <Checklist teamId={team.id} items={team.checklist} />
         </Card>
       </section>
 

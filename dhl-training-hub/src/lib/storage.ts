@@ -3,11 +3,23 @@
 import { useEffect, useState } from "react";
 
 /**
- * Persists an array of items to localStorage, seeded with `initial` the first
- * time the key is empty. Fully local — no backend, consistent with V1 scope.
+ * Persists arbitrary JSON-serializable state to localStorage, seeded with `initial`
+ * the first time the key is empty. Fully local — no backend, consistent with V1
+ * scope. This is the one shared hydration/persist implementation — other storage
+ * hooks (e.g. useLocalStorageList below) should wrap this rather than reimplement
+ * the read/write/guard logic.
+ *
+ * `isValid` guards against corrupted or unexpected-shape saved data (e.g.
+ * hand-edited storage, a future schema change) rather than trusting `JSON.parse`'s
+ * result blindly. Defaults to accepting anything that parsed.
  */
-export function useLocalStorageList<T>(key: string, initial: T[]) {
-  const [items, setItems] = useState<T[]>(initial);
+export function useLocalStorageState<T>(
+  key: string,
+  initial: T,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- required by the type predicate syntax
+  isValid: (value: unknown) => value is T = (value): value is T => true,
+) {
+  const [state, setState] = useState<T>(initial);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -17,13 +29,13 @@ export function useLocalStorageList<T>(key: string, initial: T[]) {
     try {
       const raw = window.localStorage.getItem(key);
       if (raw) {
-        const parsed = JSON.parse(raw);
-        // Guard against corrupted/unexpected-shape data (e.g. hand-edited storage,
-        // a future schema change) rather than crashing every page that renders it.
-        if (Array.isArray(parsed)) {
+        const parsed: unknown = JSON.parse(raw);
+        if (isValid(parsed)) {
           // eslint-disable-next-line react-hooks/set-state-in-effect
-          setItems(parsed as T[]);
+          setState(parsed);
         }
+        // If `parsed` fails validation, silently keep `initial` rather than crash —
+        // this is what protects every consumer from malformed/legacy saved data.
       } else {
         window.localStorage.setItem(key, JSON.stringify(initial));
       }
@@ -38,11 +50,20 @@ export function useLocalStorageList<T>(key: string, initial: T[]) {
   useEffect(() => {
     if (!loaded) return;
     try {
-      window.localStorage.setItem(key, JSON.stringify(items));
+      window.localStorage.setItem(key, JSON.stringify(state));
     } catch {
       // ignore write failures
     }
-  }, [key, items, loaded]);
+  }, [key, state, loaded]);
 
-  return { items, setItems, loaded };
+  return { state, setState, loaded };
+}
+
+const isArray = (value: unknown): value is unknown[] => Array.isArray(value);
+
+/** Array-specific convenience wrapper over useLocalStorageState (existing API
+ * preserved — same key/shape as before for daily log entries and CV achievements). */
+export function useLocalStorageList<T>(key: string, initial: T[]) {
+  const { state, setState, loaded } = useLocalStorageState<T[]>(key, initial, isArray as (value: unknown) => value is T[]);
+  return { items: state, setItems: setState, loaded };
 }
