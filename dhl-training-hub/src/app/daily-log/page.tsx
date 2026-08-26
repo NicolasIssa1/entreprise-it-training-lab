@@ -8,8 +8,8 @@ import { Badge } from "@/components/Badge";
 import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { FormSection } from "@/components/FormSection";
 import { TextAreaField, InputField, SelectField } from "@/components/FormField";
-import { useLocalStorageList } from "@/lib/storage";
-import { seedDailyLogEntries } from "@/lib/data/seedDailyLog";
+import { SyncErrorNotice } from "@/components/SyncErrorNotice";
+import { useDailyLogEntries } from "@/lib/dailyLog";
 import { teamQuestions } from "@/lib/data/questions";
 import { teams, getTeamLabel } from "@/lib/data/teams";
 import { internshipState } from "@/lib/data/internshipState";
@@ -53,10 +53,7 @@ function DailyLogContent() {
   const searchParams = useSearchParams();
   const researchTopic = searchParams.get("research");
 
-  const { items: entries, setItems: setEntries } = useLocalStorageList<DailyLogEntry>(
-    "daily-log-entries",
-    seedDailyLogEntries,
-  );
+  const { entries, addEntry, removeEntry, syncError } = useDailyLogEntries();
   const [form, setForm] = useState(() => {
     const initial = emptyForm();
     if (researchTopic) {
@@ -66,15 +63,11 @@ function DailyLogContent() {
   });
   const [activeQuestionsTeam, setActiveQuestionsTeam] = useState<TeamId>(internshipState.currentTeam);
 
-  function addEntry() {
+  function handleAddEntry() {
     if (!form.observed && !form.learned) return;
     const entry: DailyLogEntry = { id: crypto.randomUUID(), ...form };
-    setEntries([entry, ...entries]);
+    addEntry(entry);
     setForm(emptyForm());
-  }
-
-  function removeEntry(id: string) {
-    setEntries(entries.filter((e) => e.id !== id));
   }
 
   const sortedEntries = [...entries].sort((a, b) => b.dayNumber - a.dayNumber);
@@ -129,11 +122,16 @@ function DailyLogContent() {
         </div>
 
         <button
-          onClick={addEntry}
+          onClick={handleAddEntry}
           className="mt-5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
         >
           Save entry
         </button>
+        {syncError && (
+          <div className="mt-3">
+            <SyncErrorNotice />
+          </div>
+        )}
       </Card>
 
       <div className="space-y-4">

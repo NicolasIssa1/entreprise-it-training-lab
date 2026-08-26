@@ -454,6 +454,148 @@ side — never a second hand-maintained list):
 
 ---
 
+## Phase 5 scope — Supabase backend, authentication, data migration (structurally built)
+
+Phase 5 adds real persistence and accounts on top of Phases 1-4, without
+moving any static curriculum into a database. **Static training content
+(Learn topics, learning paths, quizzes, tickets, investigation scenarios, team
+definitions) stays application code/config — Supabase stores USER-GENERATED
+data only.** Never move curriculum into Supabase without being asked; that
+would turn this into a CMS project, which is explicitly out of scope.
+
+### Local Demo Mode is first-class, not an afterthought
+
+With no `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` set, the
+whole app runs exactly as it did at the end of Phase 4 — pure `localStorage`,
+zero network calls, zero crashes, no dead-end UI. `isSupabaseConfigured`
+(`dhl-training-hub/src/lib/supabase/client.ts`) is the single switch every
+other file branches on. Never require Supabase configuration for the app to
+run or build — that would break the repo's "clone and `npm run dev`" story
+that's existed since Phase 1.
+
+### Auth architecture
+
+Client-only — deliberately **no** `@supabase/ssr`, no middleware, no server
+Supabase client. Every page in this app is (and has always been) a client
+component that hydrates its own state after mount; there is no
+server-rendered personalized content that would need session-refreshing
+middleware. `AuthProvider` (`lib/auth/AuthProvider.tsx`) wraps the whole app
+in `layout.tsx`, exposes `useAuth()` (`user`, `session`, `loading`,
+`isConfigured`, `signUp`/`signIn`/`signOut`, `migrationMessage`), and is where
+the one-time migration (below) gets triggered after sign-in. Email+password
+only — no SSO, no magic links, no org accounts, no admin roles (see
+`PRODUCT-ROADMAP.md` "explicitly not built yet" for the full exclusion list).
+Auth errors are translated to plain language (`friendlyAuthError()`) — never
+show a raw Supabase/Postgres error to the learner.
+
+**Route protection is intentionally NOT hard-gated.** Personal pages
+(`/progress`, `/daily-log`, `/cv-tracker`, Advanced Investigations, Learn
+completion) all work signed-out too — signed-out means "your data lives only
+in this browser," not "page unavailable." This preserves the "no regression
+from Phases 1-4" requirement and keeps Local Demo Mode genuinely first-class.
+**Row Level Security is the real security boundary, not client-side route
+guarding** — see `supabase/migrations/0001_init.sql`.
+
+### Repository layer — the only code that talks to Supabase directly
+
+`dhl-training-hub/src/lib/repositories/` (one file per domain: profile,
+learning progress, quiz attempts, investigation progress/completions, daily
+logs, CV achievements, team checklist). Each repository exposes typed
+`fetch*`/`upsert*`/`delete*`/`bulkUpsert*` functions built on the Supabase
+client from `lib/supabase/client.ts`. **UI components never query Supabase
+directly** — they call a domain hook, which calls a repository.
+
+### Domain hooks stay dual-mode with an unchanged external API
+
+Every Phase 1-4 hook (`useLearningProgress`, `useQuizAttempts`,
+`useInvestigationProgress`/`useInvestigationCompletions`, plus the newly
+extracted `useTeamChecklist`, `useDailyLogEntries`, `useCvAchievements`) keeps
+exactly the shape components already consumed — Phase 5 only changed each
+hook's *internals*, so almost no consuming component needed to change beyond
+a couple of call-site renames (`addEntry`/`removeEntry` instead of raw
+`setEntries`, etc.). Internally, each hook still always calls
+`useLocalStorageState`/`useLocalStorageList` first (this is what makes Local
+Demo Mode, optimistic UI, and the migration source all work from one place),
+then layers cloud behavior on top only when `isConfigured && !!user`:
+
+1. **On mount, when cloud mode**: fetch from Supabase and overwrite local
+   state with it — cloud is authoritative once signed in.
+2. **On every write**: update local state optimistically first (so the UI
+   never blocks on a network round-trip), then fire the matching repository
+   call in the background. A failure sets a `syncError` flag the hook returns
+   (surfaced via the `SyncErrorNotice` component in the relevant page/section)
+   — it **never** reverts or clears what the learner just did.
+
+Don't reintroduce a second, inconsistent pattern for a future storage domain —
+follow this exact shape (`lib/learningProgress.ts` is the reference
+implementation; every other domain hook mirrors it).
+
+### Legacy `localStorage` migration
+
+`dhl-training-hub/src/lib/migration.ts`, `migrateLocalDataToCloud(userId)`,
+triggered once from `AuthProvider` right after a user's first sign-in. Reads
+the 7 legacy keys directly (not through the hooks, so it works even before
+any hook has mounted): `learning-topic-progress`, `quiz-attempts`,
+`investigation-progress`, `investigation-completions`, `daily-log-entries`,
+`cv-achievements`, and the three `checklist-<teamId>` keys. Each domain is
+migrated independently inside its own try/catch — one malformed/corrupt
+domain can never block the rest. **Idempotent** because every upsert targets
+the same natural key the app already uses as a record id (topic id, quiz id +
+attempt id, scenario id, or the client-generated entry id) — running it twice
+just re-upserts the same rows. **Migration status lives on
+`profiles.local_migration_version`**, checked explicitly before running —
+never inferred from "does the cloud table have rows," since a legitimately
+empty new account must not look unmigrated forever. `localStorage` is never
+cleared afterward — it keeps serving as the optimistic cache described above;
+data loss is worse than duplication. The learner sees exactly one dismissible
+banner line (`MigrationBanner`) — "synced" or "mostly synced, some records
+couldn't be imported" — never technical detail.
+
+### Database schema, indexes, RLS
+
+`supabase/migrations/0001_init.sql` — 8 tables (`profiles` +
+`learning_progress`, `quiz_attempts`, `investigation_progress`,
+`investigation_completions`, `daily_logs`, `cv_achievements`,
+`team_checklist_progress`), each with the natural unique constraint the app
+already relies on (`user_id + topic_id`, `user_id + scenario_id`, etc.) plus
+an index on `user_id`. `investigation_completions` intentionally stays
+one-row-per-`(user, scenario)`, matching Phase 4's "latest completion only"
+behavior — not a history table. `quiz_attempts` keeps the Phase 4
+10-attempts-per-quiz cap via a client-side delete-after-insert
+(`trimOldAttempts()` in the repository) rather than a DB trigger — simplest
+place to keep it, and matches how the cap already worked locally. **RLS is
+enabled on every table, no exceptions**, with `auth.uid() = user_id` (or
+`= id` on `profiles`) policies for select/insert/update/delete. Never weaken
+these to make development easier, and never let the service-role key anywhere
+near browser code.
+
+### Types
+
+`dhl-training-hub/src/lib/supabase/database.types.ts` is **hand-written**, not
+CLI-generated (no real remote project exists in this dev environment yet).
+Must satisfy `@supabase/supabase-js`'s `GenericSchema` shape exactly — each
+table needs `Row`/`Insert`/`Update`/`Relationships: []`, and the schema needs
+`Tables`/`Views`/`Functions` (see the file's own header comment for the
+regeneration command once a real project exists). Keep this file in sync with
+the SQL migration by hand until then — they're edited together, in the same
+commit, whenever the schema changes.
+
+### Explicitly NOT built in Phase 5 (do not add without being asked)
+
+- Password reset (`/forgot-password`) — deliberately deferred; straightforward
+  to add later (Supabase's `resetPasswordForEmail` + a `PASSWORD_RECOVERY`
+  auth-state handler), just not done yet
+- Any server-side Supabase client, `@supabase/ssr`, or Next.js middleware
+- Real-time subscriptions, CRDTs, or any multi-device conflict resolution —
+  cloud is simply authoritative post-auth, per `PRODUCT-ROADMAP.md`
+- A second stored "skill/readiness score" — Phase 4's calculations still read
+  the three evidence sources directly, now optionally cloud-backed
+- Moving static curriculum into Supabase
+- Anything from the Phase 5 "do not add yet" list in `PRODUCT-ROADMAP.md`
+  (AI tutor, RAG, vector DB, admin portal, SSO, multi-tenancy, payments, etc.)
+
+---
+
 ## Tech stack & conventions
 
 - Next.js (App Router) + React + TypeScript + Tailwind CSS.
@@ -493,8 +635,16 @@ DHL-Internship/
     src/lib/investigationProgress.ts — Advanced Investigations progress/storage hook
     src/lib/investigationScoring.ts  — generic, scenario-agnostic scoring engine
     src/lib/data/quizzes/           — Quiz content (12 quizzes, 99 questions)
-    src/lib/quizAttempts.ts         — quiz attempt storage hook
+    src/lib/quizAttempts.ts         — quiz attempt storage hook (cloud-aware, Phase 5)
     src/lib/data/skills.ts          — skill definitions + derived topic/quiz/investigation mapping
     src/lib/skillProgress.ts        — skill/readiness calculation (30/30/40 weighting)
     src/lib/recommendations.ts      — deterministic next-action recommendation engine
+    src/lib/supabase/client.ts      — browser Supabase client + isSupabaseConfigured switch
+    src/lib/supabase/database.types.ts — hand-written DB types (see file header to regenerate)
+    src/lib/auth/AuthProvider.tsx   — auth context/provider, wraps the whole app
+    src/lib/repositories/           — the only code that talks to Supabase directly
+    src/lib/migration.ts            — one-time legacy localStorage -> cloud migration
+    src/lib/teamChecklist.ts, dailyLog.ts, cvAchievements.ts — cloud-aware domain hooks
+    supabase/migrations/0001_init.sql — schema, indexes, RLS policies
+    docs/SUPABASE-SETUP.md          — step-by-step cloud setup guide
 ```

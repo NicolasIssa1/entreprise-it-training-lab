@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { displayProductName, product } from "@/lib/product";
+import { useAuth } from "@/lib/auth/AuthProvider";
 
 const LINKS = [
   { href: "/", label: "Dashboard" },
@@ -17,6 +18,13 @@ const LINKS = [
 
 export function Nav() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { isConfigured, user, loading, signOut } = useAuth();
+
+  async function handleSignOut() {
+    await signOut();
+    router.push("/");
+  }
 
   return (
     <header className="border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
@@ -53,6 +61,43 @@ export function Nav() {
             );
           })}
         </nav>
+
+        <div className="flex shrink-0 items-center gap-2">
+          {!isConfigured ? (
+            <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+              Local Demo Mode
+            </span>
+          ) : loading ? (
+            <span className="text-xs text-slate-400">…</span>
+          ) : user ? (
+            <>
+              <span className="hidden text-xs text-slate-500 sm:inline dark:text-slate-400" title={user.email ?? undefined}>
+                {(user.user_metadata?.display_name as string | undefined) || user.email}
+              </span>
+              <button
+                onClick={handleSignOut}
+                className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/signup"
+                className="whitespace-nowrap rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+              >
+                Create Account
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );

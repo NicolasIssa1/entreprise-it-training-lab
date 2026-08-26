@@ -232,20 +232,77 @@ correct.
 
 ---
 
-## Phase 5 — Backend / Supabase
+## Phase 5 — Supabase Backend + Authentication + Data Migration ✅ (structurally complete)
 
-**Objective:** Move from `localStorage` to a real persistent backend so data survives
-device changes and isn't lost to browser storage limits/clearing.
+**Objective:** Move from a browser-only local prototype to real persistent
+architecture — per-user cloud storage with authentication — while keeping
+static curriculum (topics, paths, quizzes, tickets, investigation scenarios,
+team definitions) as application code, not a CMS.
 
-**Major features:** Supabase (or equivalent) database, data migration path from
-existing `localStorage` entries, basic single-user auth.
+**Delivered:** A Supabase-backed cloud layer that sits *alongside* every
+Phase 1-4 `localStorage` key, never replacing it. Email+password
+**authentication** (`/login`, `/signup`, no SSO/magic-links/org accounts) via
+`AuthProvider` (`lib/auth/AuthProvider.tsx`), with friendly error messages,
+loading/disabled states, and a Nav that shows Sign In/Create Account (signed
+out), an account indicator + Sign Out (signed in), or an amber **Local Demo
+Mode** badge when no Supabase project is configured. **8 tables**
+(`profiles`, `learning_progress`, `quiz_attempts`, `investigation_progress`,
+`investigation_completions`, `daily_logs`, `cv_achievements`,
+`team_checklist_progress`) defined in `supabase/migrations/0001_init.sql`,
+every one with **Row Level Security** enabled and `auth.uid() = user_id` (or
+`= id` for `profiles`) policies for select/insert/update/delete — no table is
+reachable by any other user's rows, and the browser only ever holds the
+public anon key.
 
-**Major risks:** Introducing a backend before there's a real need; auth complexity
-creeping in ahead of schedule; data-loss risk during migration from local storage.
+**Local Demo Mode is first-class, not a fallback bolted on**: with no
+`NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` configured, the app
+behaves exactly as it did at the end of Phase 4 — pure `localStorage`, zero
+network calls, zero crashes. Every domain hook (`useLearningProgress`,
+`useQuizAttempts`, `useInvestigationProgress`, `useTeamChecklist`,
+`useDailyLogEntries`, `useCvAchievements`) keeps its Phase 1-4 external API
+unchanged and internally branches on `isConfigured && !!user`: signed out or
+unconfigured → pure local (identical to before); signed in → fetches cloud
+data on mount (cloud becomes authoritative), and every write updates local
+state optimistically *and* writes through to Supabase in the background,
+surfacing a friendly (never raw-Postgres) `SyncErrorNotice` on failure without
+ever clearing what the learner just did. A thin **repository layer**
+(`lib/repositories/`) is the only code that talks to Supabase directly — no
+component queries the database itself.
 
-**Must be validated before proceeding:** `localStorage` has actually become a
-limitation in practice (device switching, storage limits) — not just "backends are
-more proper."
+**Legacy `localStorage` migration** (`lib/migration.ts`) runs once per user,
+right after their first sign-in: reads all 7 legacy keys (`learning-topic-progress`,
+`quiz-attempts`, `investigation-progress`, `investigation-completions`,
+`daily-log-entries`, `cv-achievements`, the three `checklist-<teamId>` keys)
+directly, safely (malformed JSON never crashes it), and bulk-upserts whatever
+it finds into the matching tables — idempotent because every upsert targets
+the same natural key the app already uses as a record id (topic/quiz/scenario
+id, or the client-generated entry id). A `local_migration_version` column on
+`profiles` — checked explicitly, never inferred from "does the cloud table
+have rows" — prevents re-running for an already-migrated user while still
+correctly recognizing a legitimately empty account. `localStorage` is never
+cleared after migration; it keeps working as the optimistic cache described
+above. The learner sees a one-line, dismissible banner ("Your existing local
+progress has been synced to your account" / "...but some legacy records could
+not be imported") — never a stack trace.
+
+**No duplicate derived state**: skill/readiness calculations (Phase 4) are
+untouched — they still compute purely from the same three evidence sources,
+now optionally cloud-backed rather than local-only. No "skill score" or
+"readiness score" is ever written to Supabase.
+
+**Major risks (as anticipated):** None of the actual remote-Supabase behavior
+(sign-up, sign-in, RLS enforcement, migration against a live table) has been
+tested against a real project in this environment — see
+`docs/SUPABASE-SETUP.md` for the exact verification steps Nicolas needs to run
+himself after connecting a real project. Hand-written `database.types.ts`
+(no real project to run `supabase gen types` against yet) could drift from
+the SQL if either is edited without the other — both are kept in the same
+commit and cross-referenced in comments to reduce that risk.
+
+**Must be validated before proceeding:** A real Supabase project is connected
+and the full checklist in `docs/SUPABASE-SETUP.md` / the Phase 5 report passes
+— sign-up, sign-in, cross-device investigation resume, migration banner, and
+RLS isolation between two accounts.
 
 ---
 

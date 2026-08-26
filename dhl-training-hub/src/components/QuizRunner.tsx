@@ -7,6 +7,7 @@ import { Badge } from "@/components/Badge";
 import { SectionHeading } from "@/components/SectionHeading";
 import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { RelatedTopics } from "@/components/RelatedTopics";
+import { SyncErrorNotice } from "@/components/SyncErrorNotice";
 import { useQuizAttempts } from "@/lib/quizAttempts";
 import { Quiz, QuizAnswer, QuizAttempt, QuizQuestion, QuizResultGuidance } from "@/lib/types";
 
@@ -173,7 +174,7 @@ export function QuizRunner({ quiz }: { quiz: Quiz }) {
 }
 
 function QuizReview({ quiz, attempt, onRetake }: { quiz: Quiz; attempt: QuizAttempt; onRetake: () => void }) {
-  const { best } = useQuizAttempts(quiz.id);
+  const { best, syncError } = useQuizAttempts(quiz.id);
   const guidance = resultGuidance(attempt.percentage);
 
   return (
@@ -190,6 +191,11 @@ function QuizReview({ quiz, attempt, onRetake }: { quiz: Quiz; attempt: QuizAtte
           <Badge variant={guidance.variant}>{guidance.label}</Badge>
         </div>
         <p className="mt-3 text-xs text-slate-400">{quiz.passingGuidance}</p>
+        {syncError && (
+          <div className="mt-3">
+            <SyncErrorNotice message="We couldn't save this result to your account right now. It's saved on this device and will sync on your next attempt." />
+          </div>
+        )}
       </Card>
 
       {best && (

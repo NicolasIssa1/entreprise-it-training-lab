@@ -1,20 +1,16 @@
 "use client";
 
-import { useLocalStorageList } from "@/lib/storage";
-import { seedDailyLogEntries } from "@/lib/data/seedDailyLog";
-import { DailyLogEntry, TeamId } from "@/lib/types";
+import { useDailyLogEntries } from "@/lib/dailyLog";
+import { TeamId } from "@/lib/types";
 
 /**
- * Shows personal observations for a team, sourced directly from Daily Log entries
- * (same localStorage key the Daily Log page reads/writes) — never invented content.
- * Keeps "what I actually observed" clearly separate from the generic knowledge above
- * it on the Team page.
+ * Shows personal observations for a team, sourced directly from Daily Log
+ * entries (via the same useDailyLogEntries hook the Daily Log page itself
+ * uses) — never invented content. Keeps "what I actually observed" clearly
+ * separate from the generic knowledge above it on the Team page.
  */
 export function TeamObservations({ teamId }: { teamId: TeamId }) {
-  const { items: entries } = useLocalStorageList<DailyLogEntry>(
-    "daily-log-entries",
-    seedDailyLogEntries,
-  );
+  const { entries } = useDailyLogEntries();
 
   const relevant = entries
     .filter((e) => e.team === teamId && (e.observed || e.learned))

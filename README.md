@@ -10,6 +10,11 @@ of Leeds) during an internship in DHL Dubai's IT/BPU department.
 > real DHL data. All tickets, scenarios, and examples are fake and generic, built for
 > personal training purposes only. This is an early product foundation, not
 > enterprise-production-ready software — see `ENTERPRISE-READINESS.md`.
+>
+> As of Phase 5, the app optionally supports real accounts and cloud sync via
+> Supabase — but works with **zero setup** in Local Demo Mode (pure browser
+> storage, no account, no network calls) if you don't connect one. See
+> `dhl-training-hub/docs/SUPABASE-SETUP.md` to enable accounts.
 
 ## What this product is
 
@@ -72,25 +77,29 @@ See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
 - Not connected to any real DHL system
 - Contains no real ticket data, no real employee/customer data, no internal company
   data of any kind
-- No production integrations, no authentication, no backend database (yet)
+- No production integrations, no SSO/enterprise auth, no admin/manager portal
 - Not enterprise-production-ready — this is a polished early foundation, not a
   finished commercial product
 
 ## Current technology
 
 - Next.js (App Router) + React + TypeScript + Tailwind CSS
-- Data: local mock data files + browser `localStorage` (no database, no auth, no
-  external API calls, no deployment)
+- Data: static curriculum (topics, paths, quizzes, tickets, investigation
+  scenarios, team definitions) lives in application code/config — never a CMS
+- Persistence: browser `localStorage` always; optionally Supabase (Postgres +
+  Auth) for real accounts and cross-device sync — see **Cloud setup** below.
+  With no Supabase project configured, the app runs entirely locally with zero
+  setup ("Local Demo Mode")
 
 ## Future roadmap (not built yet)
 
 Phase 2 (the Learning Engine), Phase 3 (the Advanced Investigations branching
-simulator), and Phase 4 (Quizzes + Skill/Readiness Tracking) are now complete
-and frozen. Briefly, in rough order for what's next: a persistent backend, an AI
-tutor, and — much later — real enterprise pilot/production readiness. See
-`PRODUCT-ROADMAP.md` for the full phase-by-phase breakdown and
-`ENTERPRISE-READINESS.md` for what a real corporate deployment would eventually
-require.
+simulator), Phase 4 (Quizzes + Skill/Readiness Tracking), and Phase 5
+(Supabase backend + auth + data migration) are now complete. Briefly, in rough
+order for what's next: an AI tutor, and — much later — real enterprise
+pilot/production readiness. See `PRODUCT-ROADMAP.md` for the full
+phase-by-phase breakdown and `ENTERPRISE-READINESS.md` for what a real
+corporate deployment would eventually require.
 
 ## Repository layout
 
@@ -104,6 +113,9 @@ daily/                  daily journal markdown entries
 learning/ practice-tickets/ quizzes/ questions/ cv-achievements/
                          reserved for future phases
 dhl-training-hub/        the Next.js application
+  docs/SUPABASE-SETUP.md          step-by-step cloud setup guide
+  supabase/migrations/0001_init.sql  database schema + Row Level Security
+  .env.example                    env vars needed for cloud mode
 ```
 
 ## Running the app
@@ -114,4 +126,13 @@ npm install   # first time only
 npm run dev
 ```
 
-Then open http://localhost:3000
+Then open http://localhost:3000 — this works immediately with **zero setup**,
+in Local Demo Mode (pure browser storage, no account).
+
+## Cloud setup (optional)
+
+To enable real accounts and cross-device sync instead of Local Demo Mode, see
+[`dhl-training-hub/docs/SUPABASE-SETUP.md`](dhl-training-hub/docs/SUPABASE-SETUP.md)
+for the full step-by-step guide (create a Supabase project, run the SQL
+migration, configure `.env.local`). Existing local progress is migrated to
+your account automatically the first time you sign in.

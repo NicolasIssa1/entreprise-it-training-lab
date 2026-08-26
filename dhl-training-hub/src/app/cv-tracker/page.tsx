@@ -8,7 +8,8 @@ import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { Disclaimer } from "@/components/Disclaimer";
 import { FormSection } from "@/components/FormSection";
 import { TextAreaField, InputField, SelectField } from "@/components/FormField";
-import { useLocalStorageList } from "@/lib/storage";
+import { SyncErrorNotice } from "@/components/SyncErrorNotice";
+import { useCvAchievements } from "@/lib/cvAchievements";
 import { teams, getTeamLabel } from "@/lib/data/teams";
 import { internshipState } from "@/lib/data/internshipState";
 import { INVOLVEMENT_HELP, checkWordingAgainstLevel } from "@/lib/involvementHelp";
@@ -44,21 +45,14 @@ function emptyForm() {
 }
 
 export default function CvTrackerPage() {
-  const { items: achievements, setItems: setAchievements } = useLocalStorageList<CvAchievement>(
-    "cv-achievements",
-    [],
-  );
+  const { achievements, addAchievement, removeAchievement, syncError } = useCvAchievements();
   const [form, setForm] = useState(emptyForm);
 
-  function addAchievement() {
+  function handleAddAchievement() {
     if (!form.rawNote) return;
     const achievement: CvAchievement = { id: crypto.randomUUID(), ...form };
-    setAchievements([achievement, ...achievements]);
+    addAchievement(achievement);
     setForm(emptyForm());
-  }
-
-  function removeAchievement(id: string) {
-    setAchievements(achievements.filter((a) => a.id !== id));
   }
 
   const wordingWarning = checkWordingAgainstLevel(form.suggestedCvWording, form.involvementLevel);
@@ -141,11 +135,16 @@ export default function CvTrackerPage() {
         </div>
 
         <button
-          onClick={addAchievement}
+          onClick={handleAddAchievement}
           className="mt-5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
         >
           Save achievement
         </button>
+        {syncError && (
+          <div className="mt-3">
+            <SyncErrorNotice />
+          </div>
+        )}
       </Card>
 
       <div className="space-y-4">

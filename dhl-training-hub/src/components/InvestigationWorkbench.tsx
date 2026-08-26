@@ -6,6 +6,7 @@ import { Badge } from "@/components/Badge";
 import { SectionHeading } from "@/components/SectionHeading";
 import { PageGroupHeading } from "@/components/PageGroupHeading";
 import { PrivacyNotice } from "@/components/PrivacyNotice";
+import { SyncErrorNotice } from "@/components/SyncErrorNotice";
 import { TeamBadge } from "@/components/TeamBadge";
 import { HypothesisSelector } from "@/components/HypothesisSelector";
 import { InvestigationTimeline } from "@/components/InvestigationTimeline";
@@ -36,7 +37,7 @@ function makeEntryId(kind: string) {
 }
 
 export function InvestigationWorkbench({ scenario }: { scenario: InvestigationScenario }) {
-  const { progress, update, restart, recordCompletion } = useInvestigationProgress(scenario.id, scenario.startNodeId);
+  const { progress, update, restart, recordCompletion, syncError } = useInvestigationProgress(scenario.id, scenario.startNodeId);
   const [lastAction, setLastAction] = useState<InvestigationAction | null>(null);
 
   const node = scenario.nodes[progress.currentNodeId] ?? scenario.nodes[scenario.startNodeId];
@@ -269,6 +270,8 @@ export function InvestigationWorkbench({ scenario }: { scenario: InvestigationSc
                 <InvestigationTimeline history={progress.history} />
               </div>
             </Card>
+
+            {syncError && <SyncErrorNotice message="We couldn't sync this investigation to your account right now. Your progress is still saved on this device." />}
 
             <button
               onClick={handleRestart}
