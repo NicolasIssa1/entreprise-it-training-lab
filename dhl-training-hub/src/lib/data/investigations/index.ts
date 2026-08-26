@@ -1,5 +1,5 @@
 import { InvestigationScenario, TeamId } from "@/lib/types";
-import { learningTopics } from "@/lib/data/learning";
+import { learningTopics, learningPaths } from "@/lib/data/learning";
 import { dnsResolutionScenario } from "./dnsResolution";
 import { applicationPerformanceScenario } from "./applicationPerformance";
 import { vpnConnectivityScenario } from "./vpnConnectivity";
@@ -45,6 +45,18 @@ export function getScenariosForTeam(teamId: TeamId, limit = 4): InvestigationSce
  */
 export function getScenariosForTopic(topicId: string, limit = 3): InvestigationScenario[] {
   return investigationScenarios.filter((s) => s.relatedTopicIds.includes(topicId)).slice(0, limit);
+}
+
+/**
+ * Scenarios relevant to a Learning Path — derived from whether a scenario's own
+ * relatedTopicIds overlap with the path's topicIds, rather than a second
+ * hand-maintained path->scenario list. Used by the Learn Path cards.
+ */
+export function getScenariosForPath(pathId: string, limit = 3): InvestigationScenario[] {
+  const path = learningPaths.find((p) => p.id === pathId);
+  if (!path) return [];
+  const pathTopicIds = new Set(path.topicIds);
+  return investigationScenarios.filter((s) => s.relatedTopicIds.some((id) => pathTopicIds.has(id))).slice(0, limit);
 }
 
 // ---------------------------------------------------------------------------

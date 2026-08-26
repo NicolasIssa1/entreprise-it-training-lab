@@ -18,6 +18,9 @@ import {
 } from "@/lib/data/learning";
 import { useLearningProgress } from "@/lib/learningProgress";
 import { teams } from "@/lib/data/teams";
+import { getQuizzesForPath } from "@/lib/data/quizzes";
+import { getScenariosForPath } from "@/lib/data/investigations";
+import { useQuizAttempts, bestAttempt } from "@/lib/quizAttempts";
 import { inputClass, toggleButtonClass } from "@/lib/ui";
 import { LearningCategory, LearningLevel, TeamId } from "@/lib/types";
 
@@ -49,6 +52,7 @@ export default function LearnPage() {
   const [team, setTeam] = useState<TeamId | typeof ALL_TEAMS>(ALL_TEAMS);
   const [level, setLevel] = useState<LearningLevel | typeof ALL_LEVELS>(ALL_LEVELS);
   const { completed, completedCount } = useLearningProgress();
+  const { allAttempts } = useQuizAttempts();
 
   const filtered = useMemo(() => {
     let list = searchTopics(query);
@@ -119,6 +123,9 @@ export default function LearnPage() {
           {learningPaths.map((path) => {
             const { completedCount: pathCompleted, total: pathTotal } = getPathProgress(path, completed);
             const pathPercent = pathTotal === 0 ? 0 : Math.round((pathCompleted / pathTotal) * 100);
+            const checkpointQuiz = getQuizzesForPath(path.id)[0];
+            const checkpointBest = checkpointQuiz ? bestAttempt(allAttempts[checkpointQuiz.id] ?? []) : undefined;
+            const pathInvestigations = getScenariosForPath(path.id);
             return (
               <Card key={path.id}>
                 <p className="font-semibold text-slate-900 dark:text-slate-100">{path.title}</p>
@@ -150,6 +157,32 @@ export default function LearnPage() {
                     );
                   })}
                 </div>
+
+                {(checkpointQuiz || pathInvestigations.length > 0) && (
+                  <div className="mt-4 space-y-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+                    {checkpointQuiz && (
+                      <Link
+                        href={`/quizzes/${checkpointQuiz.id}`}
+                        className="block text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+                      >
+                        {checkpointBest ? `Checkpoint assessment — best ${checkpointBest.percentage}% →` : "Take checkpoint assessment →"}
+                      </Link>
+                    )}
+                    {pathInvestigations.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {pathInvestigations.map((s) => (
+                          <Link
+                            key={s.id}
+                            href={`/tickets/investigate/${s.id}`}
+                            className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+                          >
+                            Practice: {s.title}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </Card>
             );
           })}

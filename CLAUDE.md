@@ -338,6 +338,122 @@ outcome node's own `modelResolution` text) — never just a percentage.
 
 ---
 
+## Phase 4 scope — Quizzes + Skill/Readiness Tracking (built and frozen)
+
+Phase 4 adds a knowledge-check and progress layer on top of Learn (Phase 2) and
+Advanced Investigations (Phase 3), without changing either. Everything here is
+**local, private, fictional, explainable, deterministic, and useful without
+AI** — and it is a **learning indicator, not a scientifically validated
+professional assessment**. Never claim, imply, or word anything as "the user is
+job ready," "certified," or "expert" — see Skill Level Labels below.
+
+**Quizzes** (`/quizzes`, `/quizzes/[quizId]`, one reusable dynamic page via
+`generateStaticParams` — same rule as `/learn/[topicId]` and
+`/tickets/investigate/[scenarioId]`, never a hardcoded page per quiz): 12
+quizzes, 99 questions total, in
+`dhl-training-hub/src/lib/data/quizzes/` — 6 Foundation Assessments (one per
+skill area: IT Service Management, Infrastructure, Networking, Applications,
+Security Fundamentals, Enterprise Troubleshooting) plus 6 Learning Path
+checkpoints (fresh questions, not copies of the foundation assessments).
+Questions are scenario-based, testing applied judgment ("users can reach a
+service by IP but not by hostname — what do you investigate first?"), never
+bare definitions ("what does DNS stand for?") — this is a hard content-quality
+rule, not just a stylistic preference. Supports `single-choice` and
+`multi-select` question types. During a quiz: one question at a time, a
+progress indicator, Back/Next plus a question-jump strip, and no correctness
+leaked before submission. After submission: score, a learning-descriptor-only
+result guidance (Strong understanding / Good foundation / Developing / Review
+recommended — never "Certified"/"Expert"/"Job Ready"), and a full answer
+review (learner's answer, correct answer, correct/incorrect **stated in text**
+not just color, an explanation, a targeted misconception explanation for
+common wrong answers where one exists, and related Learn topic links).
+
+- **Storage**: `dhl-training-hub/src/lib/quizAttempts.ts` (`useQuizAttempts`),
+  same `useLocalStorageState` core as everything else. Key `quiz-attempts`,
+  schema `Record<quizId, QuizAttempt[]>`, capped at the last 10 attempts per
+  quiz (older attempts are trimmed, not the whole history wiped). Retakes are
+  unlimited and never erase prior attempts; best/latest are both always shown.
+- **Content validation** lives in `lib/data/quizzes/index.ts`
+  (`validateQuizzes()`, mirroring Learn/Investigations): duplicate quiz ids,
+  duplicate question ids, every single-choice question has exactly one correct
+  answer, every option id referenced in `correctOptionIds`/
+  `misconceptionExplanations` actually exists, every quiz has questions, and
+  every `relatedTopicIds`/`relatedPathIds` reference resolves. Keep this
+  passing.
+
+**Skill Progress** (`dhl-training-hub/src/lib/data/skills.ts` +
+`skillProgress.ts`): 6 skills — IT Service Management, Infrastructure,
+Networking, Applications, Security, Troubleshooting. **Every skill's evidence
+is derived, never separately stored** — there is exactly one source of truth
+for each: `learning-topic-progress` (Learning, 30%), `quiz-attempts`
+(Knowledge, 30%, best score per relevant quiz, unattempted quizzes count as 0
+so cherry-picking one easy quiz can't inflate the score), and
+`investigation-completions` (Practical, 40% — **weighted highest on purpose**,
+so completing lesson checkboxes alone caps a skill at 30/100). 5 of the 6
+skills map straight onto a Learn category (`SKILL_LEARNING_CATEGORY` in
+`skills.ts` is the *only* place this mapping lives — topics, quizzes, and
+investigations for a skill are all derived from it, never hand-listed
+per-skill, so there is nothing else that can drift out of sync).
+Troubleshooting is cross-cutting: no Learn category is dedicated to it, so its
+learning evidence comes from a small curated set of process-focused topics
+(`TROUBLESHOOTING_TOPIC_IDS`) and its practical evidence is *every* Advanced
+Investigation (all 8 exercise the same scope/evidence/diagnose/escalate/verify
+framework regardless of technical domain). Grounded level labels only — **Not
+Started / Getting Started / Building Foundation / Practicing / Strong
+Foundation**, at thresholds 0 / 1-24 / 25-49 / 50-74 / 75-100 — never
+"Expert"/"Professional"/"Certified".
+
+- Content validation (`validateSkills()` in `skills.ts`) fails loudly if any
+  skill maps to zero topics, zero quizzes, or zero investigations — the fixed
+  30/30/40 weighting assumes every skill has a non-empty evidence pool in each
+  category; don't add a 7th skill or narrow a mapping without checking this.
+
+**`/progress`** is the dedicated readiness page: Overall Training Progress
+(mean of the 6 skill scores), a per-skill breakdown card (level, percentage,
+and the learning/knowledge/practical evidence numbers behind it), a visible
+but non-obnoxious disclaimer ("these scores are educational progress
+indicators... not validated measures of professional competence and do not
+certify job readiness"), and Recommended Next Actions from the deterministic
+engine below.
+
+**Recommendations** (`dhl-training-hub/src/lib/recommendations.ts`,
+`getRecommendations()`) — no AI. Inspects five signals and returns the top 3-5,
+deduplicated by link: weak quiz topics (derived from *which specific questions
+were actually missed* on the latest sub-70% attempt, not just "you did
+poorly"), never-attempted quizzes for a skill with real lesson progress,
+never-completed investigations for a skill with real learning/knowledge
+progress, low-scoring (<60) completed investigations (retry), and learning
+path continuation (including recommending an unmet prerequisite ahead of the
+next topic itself, when one exists). Each candidate carries an internal
+`priority` used only for sorting — never shown to the learner.
+
+**Cross-linking** (all reverse-derived from data already on the quiz/skill
+side — never a second hand-maintained list):
+- Learn topic pages: a "Knowledge Check" section via `getQuizzesForTopic()`.
+- `/learn` Learning Path cards: the path's checkpoint quiz (with best score
+  once attempted) via `getQuizzesForPath()`, and related Advanced
+  Investigations via `getScenariosForPath()` (topic-overlap derived, not a
+  hand-maintained path→scenario list).
+- Advanced Investigation results: a "Skill Progress Impact" note naming which
+  skills the completed scenario counts toward, linking to `/progress` — never
+  a fabricated "+10 skill points" number; the engine stays professional, not
+  game-like.
+- Dashboard: a compact `DashboardProgressSummary` block (overall indicator,
+  topic/assessment/investigation counts, one top-priority recommendation)
+  linking to `/progress` — intentionally not a duplicate of the full page.
+
+### Explicitly NOT built in Phase 4 (do not add without being asked)
+
+- Any AI grading, AI-generated quiz questions, or an AI tutor
+- A second, independently-stored readiness/skill score — always recompute from
+  `learning-topic-progress` / `quiz-attempts` / `investigation-completions`
+- Coins, XP, badges, streak pressure, confetti, lives/hearts, or any other
+  gamified/arcade UI — this stays professional SaaS training software
+- Manager dashboards, cohort analytics, leaderboards, or any cross-user view
+  (there is no concept of multiple users yet)
+
+---
+
 ## Tech stack & conventions
 
 - Next.js (App Router) + React + TypeScript + Tailwind CSS.
@@ -376,4 +492,9 @@ DHL-Internship/
     src/lib/data/investigations/    — Advanced Investigations content (8 scenarios)
     src/lib/investigationProgress.ts — Advanced Investigations progress/storage hook
     src/lib/investigationScoring.ts  — generic, scenario-agnostic scoring engine
+    src/lib/data/quizzes/           — Quiz content (12 quizzes, 99 questions)
+    src/lib/quizAttempts.ts         — quiz attempt storage hook
+    src/lib/data/skills.ts          — skill definitions + derived topic/quiz/investigation mapping
+    src/lib/skillProgress.ts        — skill/readiness calculation (30/30/40 weighting)
+    src/lib/recommendations.ts      — deterministic next-action recommendation engine
 ```

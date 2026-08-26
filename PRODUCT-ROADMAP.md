@@ -165,20 +165,70 @@ actually used during the internship, not just built once as a proof of concept.
 
 ---
 
-## Phase 4 — Quiz + Skills System
+## Phase 4 — Quiz + Skills System ✅ (complete)
 
-**Objective:** Structured self-testing and a motivational (not scientific) skill
-progress view.
+**Objective:** Structured self-testing and an explainable, non-scientific skill
+progress view — "I can see what I understand, what I can apply, and what I
+should learn next," never "I am job ready."
 
-**Major features:** Daily quizzes scoped to material already studied, correct/incorrect
-tracking, weak/strong topic detection, a skill tree with explicitly non-scientific
-progress percentages.
+**Delivered:** A **Quiz** layer (`/quizzes`, `/quizzes/[quizId]`) of 12 quizzes
+— 6 Foundation Assessments (one per major skill area: IT Service Management,
+Infrastructure, Networking, Applications, Security Fundamentals, Enterprise
+Troubleshooting) plus 6 Learning Path checkpoints — **99 scenario-based
+questions** total (`dhl-training-hub/src/lib/data/quizzes/`), testing applied
+judgment ("users can reach a service by IP but not hostname — what do you
+investigate first?") rather than definitions. Supports single-choice and
+multi-select questions, one-question-at-a-time navigation with Back/Next and a
+question-jump strip, no correctness leaked before submission, and a detailed
+post-submission answer review (learner's answer, correct answer, an
+explanation, and — for common wrong answers — a targeted misconception
+explanation) linked back to the relevant Learn topics. Attempts persist per
+quiz (`quiz-attempts`, capped at the last 10 attempts each) with best/latest
+score tracking and unlimited retakes.
 
-**Major risks:** Quiz questions outrunning actual studied material; skill percentages
-being misread as objective competency measures.
+A **Skill Progress model** (`dhl-training-hub/src/lib/data/skills.ts` +
+`skillProgress.ts`) tracks 6 skills (IT Service Management, Infrastructure,
+Networking, Applications, Security, Troubleshooting), each **entirely derived**
+at render time from three existing activity sources — completed Learn topics
+(30%), best quiz results (30%), and completed Advanced Investigation scores
+(40%, weighted highest so lesson-checkbox-clicking alone caps a skill at 30%) —
+never a second, independently-stored readiness score. 5 of the 6 skills map
+directly onto a Learn category (so there is only ever one place — the
+category — that could drift out of sync); Troubleshooting is cross-cutting, so
+its learning evidence comes from a small curated set of process-focused topics
+and its practical evidence is every Advanced Investigation (all 8 exercise the
+same scope/evidence/diagnose/escalate/verify framework). Grounded level labels
+only (Not Started / Getting Started / Building Foundation / Practicing / Strong
+Foundation at 0 / 1-24 / 25-49 / 50-74 / 75-100) — never "Expert"/"Certified"/
+"Job Ready." A new **`/progress`** page shows Overall Training Progress, a
+per-skill breakdown (learning/knowledge/practical evidence and level), a
+visible-but-not-obnoxious non-scientific-indicator disclaimer, and a
+deterministic **Recommendation engine** (`lib/recommendations.ts`, no AI) that
+inspects weak quiz topics (from which specific questions were actually missed),
+never-attempted quizzes, never-completed or low-scoring investigations, and
+path progress (including unmet prerequisites) to surface 3-5 prioritized,
+directly-linked next actions.
 
-**Must be validated before proceeding:** Enough Phase 1/2 content exists to quiz on
-without inventing facts to fill gaps.
+Cross-linked throughout: Learn topic pages gained a "Knowledge Check" section
+(reverse-derived from each quiz's own `relatedTopicIds`); Learning Path cards
+on `/learn` show their checkpoint assessment (with best score once attempted)
+and related Advanced Investigations (derived from topic overlap, no
+hand-maintained path→scenario list); Advanced Investigation results show a
+"Skill Progress Impact" note (which skills the completed scenario counts toward)
+linking to `/progress`, without claiming a numeric skill gain; the Dashboard
+gained a compact progress summary block (overall indicator, counts, one
+top-priority recommendation) linking out to the full `/progress` page, rather
+than duplicating it.
+
+**Major risks (as anticipated):** Skill percentages being misread as objective
+competency measures — mitigated with an explicit, visible disclaimer on
+`/progress` and by keeping every score's calculation inspectable ("How this is
+calculated"). Quiz questions outrunning studied material — avoided by writing
+every question from curriculum already in the app, never inventing new facts.
+
+**Must be validated before proceeding:** The recommendation engine and skill
+breakdown are actually useful during the internship, not just structurally
+correct.
 
 ---
 

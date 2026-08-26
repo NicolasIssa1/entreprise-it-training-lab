@@ -360,11 +360,119 @@ export interface InvestigationScore {
   betterReasoningPath: string;
 }
 
-/** Lightweight completion record — Phase 4 analytics will build on this, not on
- * anything added here yet. */
+/** Lightweight completion record — Phase 4 analytics builds on this (see
+ * SkillProgress below), not on anything added here. */
 export interface InvestigationCompletionRecord {
   scenarioId: string;
   completedAt: string; // ISO date string
   score: number;
   resultCategory: PerformanceCategory;
+}
+
+// ---------------------------------------------------------------------------
+// Quizzes (Phase 4). Content lives in src/lib/data/quizzes/ — a knowledge-check
+// layer on top of the Learn library and Advanced Investigations. All content is
+// fictional generic enterprise IT training material — see root CLAUDE.md.
+// ---------------------------------------------------------------------------
+
+export type QuizQuestionType = "single-choice" | "multi-select";
+
+export interface QuizOption {
+  id: string;
+  text: string;
+}
+
+export interface QuizQuestion {
+  id: string;
+  prompt: string;
+  type: QuizQuestionType;
+  options: QuizOption[];
+  /** Exactly one id for single-choice; one or more for multi-select. */
+  correctOptionIds: string[];
+  explanation: string;
+  /** Keyed by a specific wrong option id — a more targeted "why that's wrong"
+   * than the general explanation. Only added where a genuinely common
+   * misconception exists, not on every option. */
+  misconceptionExplanations?: Record<string, string>;
+  relatedTopicIds: string[];
+  difficulty: LearningLevel;
+}
+
+export type QuizCategory = LearningCategory | "Enterprise Troubleshooting";
+
+export interface Quiz {
+  id: string;
+  title: string;
+  description: string;
+  category: QuizCategory;
+  difficulty: LearningLevel;
+  estimatedMinutes: number;
+  relatedTopicIds: string[];
+  relatedPathIds: string[];
+  questions: QuizQuestion[];
+  /** What a strong score on this specific quiz suggests — shown alongside the
+   * generic score-band guidance, not a numeric pass/fail threshold. */
+  passingGuidance: string;
+}
+
+export interface QuizAnswer {
+  questionId: string;
+  selectedOptionIds: string[];
+  correct: boolean;
+}
+
+export interface QuizAttempt {
+  attemptId: string;
+  quizId: string;
+  completedAt: string; // ISO date string
+  correctCount: number;
+  totalQuestions: number;
+  percentage: number; // 0-100
+  answers: QuizAnswer[];
+}
+
+/** Learning descriptors only — never "Certified"/"Expert"/"Job Ready". */
+export type QuizResultGuidance = "Strong understanding" | "Good foundation" | "Developing" | "Review recommended";
+
+// ---------------------------------------------------------------------------
+// Skill / readiness model (Phase 4). Always derived from existing activity —
+// completed Learn topics, quiz attempts, Advanced Investigation completions —
+// never stored as a second, independent readiness score. See root CLAUDE.md:
+// this is a training indicator, not a validated professional assessment.
+// ---------------------------------------------------------------------------
+
+export const SKILL_IDS = ["itsm", "infrastructure", "networking", "applications", "security", "troubleshooting"] as const;
+export type SkillId = (typeof SKILL_IDS)[number];
+
+export interface SkillDefinition {
+  id: SkillId;
+  name: string;
+  description: string;
+}
+
+/** Grounded, non-inflated labels — deliberately never "Expert"/"Professional"/"Certified". */
+export const SKILL_LEVELS = ["Not Started", "Getting Started", "Building Foundation", "Practicing", "Strong Foundation"] as const;
+export type SkillLevel = (typeof SKILL_LEVELS)[number];
+
+export interface SkillEvidence {
+  learning: { completed: number; total: number; percentage: number };
+  knowledge: { attempted: number; total: number; percentage: number };
+  practical: { completed: number; total: number; percentage: number };
+}
+
+export interface SkillProgress {
+  skill: SkillDefinition;
+  overall: number; // 0-100, weighted 30/30/40 across the evidence above
+  level: SkillLevel;
+  evidence: SkillEvidence;
+}
+
+export interface Recommendation {
+  id: string;
+  /** Internal sort key only — higher is more important; never shown in the UI. */
+  priority: number;
+  title: string;
+  description: string;
+  href: string;
+  skillId?: SkillId;
 }

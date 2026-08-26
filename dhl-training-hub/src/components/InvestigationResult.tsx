@@ -5,6 +5,7 @@ import { Badge } from "@/components/Badge";
 import { TeamBadge } from "@/components/TeamBadge";
 import { RelatedTopics } from "@/components/RelatedTopics";
 import { getTeamLabel } from "@/lib/data/teams";
+import { skillDefinitions, getInvestigationsForSkill } from "@/lib/data/skills";
 import {
   ActionQuality,
   DOCUMENTATION_FIELDS,
@@ -51,6 +52,10 @@ export function InvestigationResult({
 }) {
   const initialHypothesis = progress.hypothesisHistory[0];
   const finalHypothesis = progress.hypothesisHistory[progress.hypothesisHistory.length - 1];
+
+  const contributingSkills = skillDefinitions.filter((s) =>
+    getInvestigationsForSkill(s.id).some((investigationScenario) => investigationScenario.id === scenario.id),
+  );
 
   return (
     <div className="space-y-6">
@@ -163,6 +168,19 @@ export function InvestigationResult({
           ))}
         </dl>
       </Card>
+
+      {contributingSkills.length > 0 && (
+        <Card>
+          <SectionHeading title="Skill Progress Impact" />
+          <p className="text-sm text-slate-700 dark:text-slate-300">
+            This investigation contributes practical evidence toward{" "}
+            {contributingSkills.map((s) => s.name).join(" and ")} training progress.
+          </p>
+          <Link href="/progress" className="mt-2 inline-block text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
+            View Progress →
+          </Link>
+        </Card>
+      )}
 
       <section>
         <SectionHeading title="Recommended Review" subtitle="Learn topics connected to this investigation" />

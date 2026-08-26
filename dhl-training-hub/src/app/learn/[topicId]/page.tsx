@@ -10,11 +10,13 @@ import { CompletionButton } from "@/components/CompletionButton";
 import { RelatedTopics } from "@/components/RelatedTopics";
 import { RelatedTickets } from "@/components/RelatedTickets";
 import { RelatedInvestigations } from "@/components/RelatedInvestigations";
+import { RelatedQuizzes } from "@/components/RelatedQuizzes";
 import { TroubleshootingFramework } from "@/components/TroubleshootingFramework";
 import { learningTopics, getTopicById, getTopicsByIds } from "@/lib/data/learning";
 import { getTeamLabel } from "@/lib/data/teams";
 import { getTicketsForTopic } from "@/lib/data/tickets";
 import { getScenariosForTopic } from "@/lib/data/investigations";
+import { getQuizzesForTopic } from "@/lib/data/quizzes";
 
 export function generateStaticParams() {
   return learningTopics.map((topic) => ({ topicId: topic.id }));
@@ -181,6 +183,12 @@ export default async function LearningTopicPage(props: PageProps<"/learn/[topicI
       {getScenariosForTopic(topic.id).length > 0 && (
         <LearningSection title="Advanced Practice" subtitle="Multi-step branching investigations connected to this topic">
           <RelatedInvestigations topicId={topic.id} />
+        </LearningSection>
+      )}
+
+      {getQuizzesForTopic(topic.id).length > 0 && (
+        <LearningSection title="Knowledge Check" subtitle="Test your understanding of this topic">
+          <RelatedQuizzes topicId={topic.id} />
         </LearningSection>
       )}
 

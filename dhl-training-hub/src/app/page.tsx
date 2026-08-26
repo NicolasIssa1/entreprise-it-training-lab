@@ -3,6 +3,7 @@ import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Badge } from "@/components/Badge";
 import { DashboardNotes } from "@/components/DashboardNotes";
+import { DashboardProgressSummary } from "@/components/DashboardProgressSummary";
 import { dashboardData } from "@/lib/data/dashboard";
 import { getTeamById } from "@/lib/data/teams";
 import { internshipState } from "@/lib/data/internshipState";
@@ -59,6 +60,8 @@ export default function DashboardPage() {
           Go to Ticket Simulator →
         </Link>
       </Card>
+
+      <DashboardProgressSummary />
 
       <DashboardNotes />
 

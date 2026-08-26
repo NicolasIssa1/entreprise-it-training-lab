@@ -48,8 +48,18 @@ Tracker**, covering three generic enterprise IT team types:
    document, with a persisted investigation timeline and training-only
    performance feedback. Both tiers are cross-linked with the Team Explorer and
    the Learn library
-5. **Daily Log** — structured journal + "questions to ask" reference per team
-6. **CV Achievement Tracker** — honest, non-exaggerated CV bullet building with an
+5. **Knowledge Assessments** — 12 scenario-based quizzes (6 Foundation
+   Assessments, one per skill area, plus 6 Learning Path checkpoints; 99
+   questions total) testing applied judgment, not definitions, with detailed
+   answer review, best/latest score tracking, and unlimited retakes
+6. **Training Progress** — a `/progress` page showing an explainable, derived
+   (never separately stored) training indicator across 6 skills, combining
+   completed lessons, assessment results, and Advanced Investigation
+   performance, plus a deterministic (no AI) recommendation engine — an
+   educational progress indicator, explicitly not a validated measure of
+   professional competence
+7. **Daily Log** — structured journal + "questions to ask" reference per team
+8. **CV Achievement Tracker** — honest, non-exaggerated CV bullet building with an
    involvement scale (Observed → Implemented) and wording-vs-level validation
 
 See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
@@ -74,13 +84,13 @@ See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
 
 ## Future roadmap (not built yet)
 
-Phase 2 (the Learning Engine, including Security Fundamentals) and Phase 3 (the
-Advanced Investigations branching simulator) are now complete and frozen.
-Briefly, in rough order for what's next: daily quizzes, skill tracking, a
-persistent backend, an AI tutor, and — much later — real enterprise
-pilot/production readiness. See `PRODUCT-ROADMAP.md` for the full phase-by-phase
-breakdown and `ENTERPRISE-READINESS.md` for what a real corporate deployment
-would eventually require.
+Phase 2 (the Learning Engine), Phase 3 (the Advanced Investigations branching
+simulator), and Phase 4 (Quizzes + Skill/Readiness Tracking) are now complete
+and frozen. Briefly, in rough order for what's next: a persistent backend, an AI
+tutor, and — much later — real enterprise pilot/production readiness. See
+`PRODUCT-ROADMAP.md` for the full phase-by-phase breakdown and
+`ENTERPRISE-READINESS.md` for what a real corporate deployment would eventually
+require.
 
 ## Repository layout
 
