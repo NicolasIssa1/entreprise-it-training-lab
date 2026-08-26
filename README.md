@@ -15,6 +15,11 @@ of Leeds) during an internship in DHL Dubai's IT/BPU department.
 > Supabase — but works with **zero setup** in Local Demo Mode (pure browser
 > storage, no account, no network calls) if you don't connect one. See
 > `dhl-training-hub/docs/SUPABASE-SETUP.md` to enable accounts.
+>
+> As of Phase 6, the app optionally includes an AI Tutor grounded in this
+> app's own curriculum — also **zero setup required**: without an Anthropic
+> API key, `/tutor` just shows "not configured" and every other page is
+> unaffected. See `dhl-training-hub/docs/AI-TUTOR.md`.
 
 ## What this product is
 
@@ -66,6 +71,15 @@ Tracker**, covering three generic enterprise IT team types:
 7. **Daily Log** — structured journal + "questions to ask" reference per team
 8. **CV Achievement Tracker** — honest, non-exaggerated CV bullet building with an
    involvement scale (Observed → Implemented) and wording-vs-level validation
+9. **AI Tutor** (`/tutor`, optional) — a grounded enterprise IT tutor, not a
+   general-purpose chatbot: deterministically retrieves relevant Learn topics
+   for each question, distinguishes curriculum-supported facts from general
+   knowledge, never invents DHL-specific facts, coaches (rather than reveals
+   answers) during active quizzes/investigations, and can explain quiz
+   mistakes, investigation feedback, and this app's own progress
+   recommendations. Works with **zero setup** — without an Anthropic API key,
+   the page just says so and every other feature is unaffected. See
+   `dhl-training-hub/docs/AI-TUTOR.md`.
 
 See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
 `internship-plan.md` for the current learning state, and `PRODUCT-ROADMAP.md` /
@@ -94,9 +108,10 @@ See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
 ## Future roadmap (not built yet)
 
 Phase 2 (the Learning Engine), Phase 3 (the Advanced Investigations branching
-simulator), Phase 4 (Quizzes + Skill/Readiness Tracking), and Phase 5
-(Supabase backend + auth + data migration) are now complete. Briefly, in rough
-order for what's next: an AI tutor, and — much later — real enterprise
+simulator), Phase 4 (Quizzes + Skill/Readiness Tracking), Phase 5 (Supabase
+backend + auth + data migration), and Phase 6 (AI Tutor) are now complete.
+Briefly, in rough order for what's next: business/logistics learning content,
+a manager/mentor-facing progress view, and — much later — real enterprise
 pilot/production readiness. See `PRODUCT-ROADMAP.md` for the full
 phase-by-phase breakdown and `ENTERPRISE-READINESS.md` for what a real
 corporate deployment would eventually require.
@@ -114,8 +129,10 @@ learning/ practice-tickets/ quizzes/ questions/ cv-achievements/
                          reserved for future phases
 dhl-training-hub/        the Next.js application
   docs/SUPABASE-SETUP.md          step-by-step cloud setup guide
+  docs/AI-TUTOR.md                AI Tutor architecture, grounding, privacy, setup
   supabase/migrations/0001_init.sql  database schema + Row Level Security
-  .env.example                    env vars needed for cloud mode
+  supabase/migrations/0002_tutor.sql tutor conversation schema + RLS (Phase 6)
+  .env.example                    env vars needed for cloud mode / AI Tutor
 ```
 
 ## Running the app
@@ -136,3 +153,11 @@ To enable real accounts and cross-device sync instead of Local Demo Mode, see
 for the full step-by-step guide (create a Supabase project, run the SQL
 migration, configure `.env.local`). Existing local progress is migrated to
 your account automatically the first time you sign in.
+
+## AI Tutor setup (optional)
+
+To enable the AI Tutor instead of the "not configured" message, see
+[`dhl-training-hub/docs/AI-TUTOR.md`](dhl-training-hub/docs/AI-TUTOR.md) —
+set `ANTHROPIC_API_KEY` in `.env.local` (a separate credential from a Claude
+Code / Claude.ai subscription). Everything else in the app works identically
+with or without it.

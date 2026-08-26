@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/tickets", label: "Ticket Simulator" },
   { href: "/quizzes", label: "Assessments" },
   { href: "/progress", label: "Progress" },
+  { href: "/tutor", label: "Tutor" },
   { href: "/daily-log", label: "Daily Log" },
   { href: "/cv-tracker", label: "CV Tracker" },
 ];

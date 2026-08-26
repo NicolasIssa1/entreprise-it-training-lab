@@ -8,6 +8,7 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { RelatedTopics } from "@/components/RelatedTopics";
 import { SyncErrorNotice } from "@/components/SyncErrorNotice";
+import { AskTutorLink } from "@/components/AskTutorLink";
 import { useQuizAttempts } from "@/lib/quizAttempts";
 import { Quiz, QuizAnswer, QuizAttempt, QuizQuestion, QuizResultGuidance } from "@/lib/types";
 
@@ -95,7 +96,10 @@ export function QuizRunner({ quiz }: { quiz: Quiz }) {
 
       <Card>
         <fieldset>
-          <legend className="text-base font-medium text-slate-900 dark:text-slate-100">{question.prompt}</legend>
+          <div className="flex items-start justify-between gap-3">
+            <legend className="text-base font-medium text-slate-900 dark:text-slate-100">{question.prompt}</legend>
+            <AskTutorLink params={{ mode: "quiz-coach", quiz: quiz.id }}>Ask Tutor for a hint</AskTutorLink>
+          </div>
           {question.type === "multi-select" && <p className="mt-1 text-xs text-slate-400">Select all that apply.</p>}
           <div className="mt-4 space-y-2">
             {question.options.map((option) => {
@@ -221,6 +225,7 @@ function QuizReview({ quiz, attempt, onRetake }: { quiz: Quiz; attempt: QuizAtte
             index={i}
             question={q}
             answer={attempt.answers.find((a) => a.questionId === q.id)}
+            quizId={quiz.id}
           />
         ))}
       </section>
@@ -246,7 +251,17 @@ function QuizReview({ quiz, attempt, onRetake }: { quiz: Quiz; attempt: QuizAtte
   );
 }
 
-function QuestionReviewCard({ index, question, answer }: { index: number; question: QuizQuestion; answer?: QuizAnswer }) {
+function QuestionReviewCard({
+  index,
+  question,
+  answer,
+  quizId,
+}: {
+  index: number;
+  question: QuizQuestion;
+  answer?: QuizAnswer;
+  quizId: string;
+}) {
   const correct = answer?.correct ?? false;
   const selectedIds = answer?.selectedOptionIds ?? [];
   const missedMisconceptions = selectedIds
@@ -261,6 +276,9 @@ function QuestionReviewCard({ index, question, answer }: { index: number; questi
           Q{index + 1}. {question.prompt}
         </p>
         <Badge variant={correct ? "success" : "danger"}>{correct ? "Correct" : "Incorrect"}</Badge>
+      </div>
+      <div className="mt-2">
+        <AskTutorLink params={{ mode: "quiz-review", quiz: quizId, question: question.id }}>Explain with AI →</AskTutorLink>
       </div>
       <ul className="mt-3 space-y-1.5">
         {question.options.map((option) => {

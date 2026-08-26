@@ -12,6 +12,7 @@ import { HypothesisSelector } from "@/components/HypothesisSelector";
 import { InvestigationTimeline } from "@/components/InvestigationTimeline";
 import { DocumentationForm } from "@/components/DocumentationForm";
 import { InvestigationResult } from "@/components/InvestigationResult";
+import { AskTutorLink } from "@/components/AskTutorLink";
 import { useInvestigationProgress } from "@/lib/investigationProgress";
 import { scoreInvestigation } from "@/lib/investigationScoring";
 import {
@@ -232,7 +233,12 @@ export function InvestigationWorkbench({ scenario }: { scenario: InvestigationSc
 
             {!isTerminal && (
               <Card>
-                <SectionHeading title="What do you do next?" subtitle="More than one option here may be reasonable" />
+                <div className="mb-1 flex flex-wrap items-start justify-between gap-3">
+                  <SectionHeading title="What do you do next?" subtitle="More than one option here may be reasonable" />
+                  <AskTutorLink params={{ mode: "investigation-coach", scenario: scenario.id }} variant="button">
+                    Ask Tutor (Coach)
+                  </AskTutorLink>
+                </div>
                 <div className="space-y-2">
                   {node.actions.map((action) => (
                     <button

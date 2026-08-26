@@ -596,6 +596,87 @@ commit, whenever the schema changes.
 
 ---
 
+## Phase 6 scope — AI Tutor (structurally built)
+
+Phase 6 adds an optional AI Tutor grounded in this app's own curriculum —
+**not** a general-purpose chatbot. It answers questions, simplifies topics,
+coaches (rather than reveals answers) during active quizzes/investigations,
+and explains quiz mistakes, investigation feedback, and this app's own
+deterministic progress recommendations. Full architecture, grounding
+strategy, privacy trust boundary, rate limits, and setup steps live in
+`dhl-training-hub/docs/AI-TUTOR.md` — read that before touching anything
+under `src/lib/ai/`, `src/app/api/tutor/`, `src/app/tutor/`, or
+`src/lib/tutorConversation.ts`.
+
+**Provider**: Anthropic only (`@anthropic-ai/sdk`), called exclusively from
+`src/app/api/tutor/route.ts` (server-only) via `lib/ai/provider.ts` →
+`lib/ai/anthropic.ts`. `ANTHROPIC_API_KEY` is server-side only — never
+`NEXT_PUBLIC_`-prefixed, never referenced from a `"use client"` file. Default
+model `claude-sonnet-5` (overridable via `ANTHROPIC_MODEL`), chosen
+deliberately for modest cost/fast conversational tutoring, not the most
+expensive model available — never hardcode a different model string
+elsewhere.
+
+**Grounding**: deterministic, application-side curriculum retrieval only
+(`lib/ai/tutorContext.ts`) — keyword/id matching against
+`lib/data/learning/`, never the full 56-topic library sent on every request,
+and no embeddings/vector DB/external RAG (see "Explicitly NOT built" below).
+A response's `relatedTopicIds` are always the server's own grounded topic
+ids, never a model-generated id/URL.
+
+**Modes** (`TutorMode` in `lib/types.ts`): `tutor`, `topic-tutor`,
+`quiz-coach`, `quiz-review`, `investigation-coach`, `investigation-review`,
+`progress-coach` — always set by trusted application links
+(`lib/ai/tutorLinks.ts`'s `tutorHref()`), never inferred from free user text.
+Coach modes (`quiz-coach`, `investigation-coach`) must never reveal the
+correct answer / hidden root cause / best action / outcome — enforced by the
+system prompt (`lib/ai/tutorPrompt.ts`) and, for investigations, by the
+outcome text simply never being sent to the model until
+`investigation-review`.
+
+**Privacy boundary** (see confidentiality rules at the top of this file,
+which apply to every AI request exactly as they apply everywhere else): the
+Tutor automatically receives grounded curriculum text and a minimal progress
+summary (completed topic/quiz/investigation ids, skill levels — never free
+text). It **never** automatically receives Daily Log entries, CV Achievement
+text, the learner's name/email, or any real company information. Quiz-review
+context is resolved server-side from static quiz data (the client can only
+supply which option ids it claims were selected, not arbitrary explanation
+text) — see `docs/AI-TUTOR.md`'s "trust boundary" note for the one place
+(investigation coach/review context) where client-supplied fields are capped
+and validated but not independently re-verified against a server-side
+record, a documented and low-stakes trade-off for a personal prototype.
+
+**Conversation persistence**: one lightweight running conversation per
+learner (`lib/tutorConversation.ts`, same dual-mode `useLocalStorageState`
+pattern as every Phase 5 hook), backed by two new Supabase tables
+(`supabase/migrations/0002_tutor.sql`: `tutor_conversations`,
+`tutor_messages`, RLS enabled, mirroring every other table's
+`auth.uid() = user_id` policy shape). Only ever stores visible
+user/assistant messages — never system prompts, API keys, or hidden model
+reasoning.
+
+### Explicitly NOT built in Phase 6 (do not add without being asked)
+
+- Embeddings, a vector database, or any external RAG pipeline — grounding
+  stays deterministic keyword/id retrieval
+- Document uploads, company documents, or any DHL-internal document ingestion
+- AI-generated quiz questions or AI-generated curriculum — the Tutor explains
+  existing content, it doesn't author new lessons/questions
+- A second, independently-stored skill/readiness score — `progress-coach`
+  mode only explains the existing Phase 4 recommendation engine's output
+- Streaming responses — a "Thinking…" state followed by the full reply is
+  the deliberate Phase 6 trade-off (see `docs/AI-TUTOR.md`)
+- A multi-conversation history browser — one running thread per learner
+- Server-side Supabase client / JWT verification in `/api/tutor` — Phase 6
+  deliberately preserves Phase 5's client-only Supabase architecture rather
+  than adding it (see the "trust boundary" note above)
+- Voice, image analysis, or any offensive/exploit/credential-theft content —
+  security topics the Tutor can discuss stay strictly defensive, matching
+  the Security Fundamentals category's own scope
+
+---
+
 ## Tech stack & conventions
 
 - Next.js (App Router) + React + TypeScript + Tailwind CSS.
@@ -641,6 +722,12 @@ DHL-Internship/
     src/lib/recommendations.ts      — deterministic next-action recommendation engine
     src/lib/supabase/client.ts      — browser Supabase client + isSupabaseConfigured switch
     src/lib/supabase/database.types.ts — hand-written DB types (see file header to regenerate)
+    src/lib/ai/                     — AI provider abstraction, grounding, system prompt (Phase 6)
+    src/lib/tutorConversation.ts    — Tutor conversation storage hook (cloud-aware, Phase 6)
+    src/app/api/tutor/route.ts      — server-only Anthropic-calling route handler (Phase 6)
+    src/app/tutor/                  — /tutor page
+    supabase/migrations/0002_tutor.sql — tutor conversation schema + RLS (Phase 6)
+    docs/AI-TUTOR.md                — AI Tutor architecture, grounding, privacy, setup guide
     src/lib/auth/AuthProvider.tsx   — auth context/provider, wraps the whole app
     src/lib/repositories/           — the only code that talks to Supabase directly
     src/lib/migration.ts            — one-time legacy localStorage -> cloud migration

@@ -306,21 +306,80 @@ RLS isolation between two accounts.
 
 ---
 
-## Phase 6 — AI Tutor
+## Phase 6 — AI Tutor ✅ (structurally complete)
 
-**Objective:** An AI-assisted layer for Q&A, summarization, and personalized
-explanations grounded in the app's own generic content.
+**Objective:** An AI-assisted layer for Q&A, personalized explanations, and
+coaching, grounded in the app's own curriculum — never a generic unrestricted
+chatbot, never a source of invented DHL-specific facts.
 
-**Major features:** Claude API integration, grounded answers (no invented DHL facts),
-daily-log summarization assistance.
+**Delivered:** A server-mediated **AI Tutor** (`/tutor`) backed by the
+Anthropic API (`claude-sonnet-5` by default, configurable via
+`ANTHROPIC_MODEL`), called only from a Next.js Route Handler
+(`src/app/api/tutor/route.ts`) — `ANTHROPIC_API_KEY` never reaches the
+browser (verified against the production build output). A thin provider
+abstraction (`lib/ai/provider.ts` / `anthropic.ts`) means a future second
+provider wouldn't require rewriting the Tutor UI. **Grounding is
+deterministic** (`lib/ai/tutorContext.ts`): keyword/id matching against the
+existing 56-topic Learn library, capped at 6 topics per request — no
+embeddings, no vector database, no external RAG. A centrally managed system
+prompt (`lib/ai/tutorPrompt.ts`) enforces curriculum-vs-general-knowledge
+labeling, forbids inventing DHL-specific facts or absolute team-ownership
+claims, and implements **7 trusted modes** (`tutor`, `topic-tutor`,
+`quiz-coach`, `quiz-review`, `investigation-coach`, `investigation-review`,
+`progress-coach`) always set by the application link that opened the Tutor,
+never inferred from free text. Coach modes never reveal a quiz's correct
+answer or an investigation's hidden root cause/outcome — enforced by
+instruction and, for investigations, by the outcome text simply not being
+sent to the model until review mode. Quiz-review context is resolved
+server-side from static quiz data, so a client can only supply which options
+it selected, never arbitrary "explanation" text.
 
-**Major risks:** Hallucinated "facts" presented as if confirmed; API cost; conflating
-AI-generated content with the user's own honest observations (especially in the CV
-tracker — the honesty principle in `CLAUDE.md` must survive this phase unchanged).
+**Privacy**: the Tutor automatically receives only grounded curriculum text
+and a minimal progress summary (completed ids, skill levels — never free
+text); it never automatically receives Daily Log entries, CV Achievement
+text, or the learner's name/email — see `docs/AI-TUTOR.md`'s privacy/trust
+boundary section for the full data-flow writeup, including the one
+documented exception (investigation coach/review status fields are capped
+and validated but not re-verified against a server-side record).
 
-**Must be validated before proceeding:** A real backend (Phase 5) exists to safely
-store API keys and mediate requests; clear guardrails are designed before any AI
-content reaches the CV tracker.
+**Integrated throughout**, all via a single reusable `AskTutorLink`
+component so no page duplicates a chat interface: Learn topic pages ("Ask
+Tutor about X"), an active quiz question ("Ask Tutor for a hint"), the
+post-submission answer review ("Explain with AI" per question), an active
+Advanced Investigation ("Ask Tutor (Coach)"), a completed investigation's
+results ("Ask Tutor to explain this"), `/progress`'s recommendations
+("Ask Tutor to explain my recommendations"), and a Dashboard card. **Local
+Demo Mode is preserved**: without `ANTHROPIC_API_KEY`, `/tutor` shows "not
+configured" and every other page works exactly as before.
+
+**Conversation persistence**: one lightweight running conversation per
+learner (`lib/tutorConversation.ts`), the same dual-mode
+local-first/cloud-authoritative-when-signed-in pattern as every Phase 5
+hook, backed by two new RLS-protected Supabase tables
+(`supabase/migrations/0002_tutor.sql`). Only visible messages are ever
+stored — never system prompts, API keys, or hidden model reasoning.
+
+**Major risks (as anticipated, and how they were addressed):**
+Hallucinated "facts" presented as confirmed — mitigated by the grounding
+strategy and system prompt's explicit curriculum-vs-general-knowledge
+labeling rule, though this remains a prompting-level control, not a
+guarantee (documented plainly in `docs/AI-TUTOR.md`, not oversold). API cost
+— mitigated by a modest-cost default model, capped output tokens, capped
+conversation history, prompt caching on the stable system-prompt block, and
+a best-effort in-memory rate limit (documented as not production
+infrastructure). CV tracker honesty — unaffected, since Phase 6
+deliberately does not touch the CV Achievement flow at all.
+
+**Not live-tested against a real Anthropic API key** in this development
+environment (none was available) — the request/response plumbing,
+validation, error paths, and "not configured" UI were verified without a
+live key. See `docs/AI-TUTOR.md`'s manual browser test list for what Nicolas
+should verify once a real key is configured.
+
+**Must be validated before proceeding:** A real Anthropic API key is
+configured and the manual browser test list in `docs/AI-TUTOR.md` passes —
+grounded answers, coach-mode non-disclosure, quiz/investigation review
+explanations, and cloud conversation persistence.
 
 ---
 

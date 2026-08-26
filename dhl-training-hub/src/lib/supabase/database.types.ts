@@ -240,6 +240,48 @@ export interface Database {
         };
         Relationships: [];
       };
+      tutor_conversations: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          user_id: string;
+          title?: string | null;
+        };
+        Update: {
+          title?: string | null;
+        };
+        Relationships: [];
+      };
+      tutor_messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          user_id: string;
+          role: string;
+          content: string;
+          mode: string;
+          related_topic_ids: unknown;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          conversation_id: string;
+          user_id: string;
+          role: string;
+          content: string;
+          mode: string;
+          related_topic_ids: unknown;
+          created_at?: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

@@ -476,3 +476,49 @@ export interface Recommendation {
   href: string;
   skillId?: SkillId;
 }
+
+// ---------------------------------------------------------------------------
+// AI Tutor (Phase 6). Conversation state is a persisted domain model like every
+// other Phase 1-5 hook (see lib/tutorConversation.ts), so it lives here. The
+// request/response wire contract with /api/tutor, system-prompt construction,
+// and curriculum retrieval are NOT persisted — they live in lib/ai/ instead.
+// See root CLAUDE.md: the tutor is grounded in this app's own curriculum and
+// must never invent DHL-specific facts or receive confidential data.
+// ---------------------------------------------------------------------------
+
+/** Trusted application context, not user-chosen — always set by the page/link
+ * that opened the tutor, never inferred from free-text alone. */
+export const TUTOR_MODES = [
+  "tutor",
+  "topic-tutor",
+  "quiz-coach",
+  "quiz-review",
+  "investigation-coach",
+  "investigation-review",
+  "progress-coach",
+] as const;
+export type TutorMode = (typeof TUTOR_MODES)[number];
+
+export type TutorRole = "user" | "assistant";
+
+export interface TutorMessage {
+  id: string;
+  role: TutorRole;
+  content: string;
+  mode: TutorMode;
+  /** Only ever populated on assistant messages, from server-computed grounding
+   * — never a model-generated URL/id (see root CLAUDE.md and lib/ai/tutorContext.ts). */
+  relatedTopicIds: string[];
+  createdAt: string; // ISO date string
+}
+
+/** One lightweight running conversation per learner for Phase 6 — not a full
+ * multi-conversation history browser (deliberately out of scope, see
+ * docs/AI-TUTOR.md "known limitations"). "Start new conversation" begins a
+ * fresh id; older messages are not deleted server-side, just no longer shown. */
+export interface TutorConversation {
+  id: string;
+  title: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

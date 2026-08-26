@@ -7,6 +7,7 @@ import { TeamBadge } from "@/components/TeamBadge";
 import { UniversityConnection } from "@/components/UniversityConnection";
 import { PracticeScenario } from "@/components/PracticeScenario";
 import { CompletionButton } from "@/components/CompletionButton";
+import { AskTutorLink } from "@/components/AskTutorLink";
 import { RelatedTopics } from "@/components/RelatedTopics";
 import { RelatedTickets } from "@/components/RelatedTickets";
 import { RelatedInvestigations } from "@/components/RelatedInvestigations";
@@ -50,7 +51,12 @@ export default async function LearningTopicPage(props: PageProps<"/learn/[topicI
               <TeamBadge key={t} teamId={t} />
             ))}
           </div>
-          <CompletionButton topicId={topic.id} />
+          <div className="flex items-center gap-3">
+            <AskTutorLink params={{ mode: "topic-tutor", topic: topic.id }} variant="button">
+              Ask Tutor about {topic.title}
+            </AskTutorLink>
+            <CompletionButton topicId={topic.id} />
+          </div>
         </div>
       </Card>
 

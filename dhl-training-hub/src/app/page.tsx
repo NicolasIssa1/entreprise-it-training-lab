@@ -4,6 +4,7 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { Badge } from "@/components/Badge";
 import { DashboardNotes } from "@/components/DashboardNotes";
 import { DashboardProgressSummary } from "@/components/DashboardProgressSummary";
+import { AskTutorLink } from "@/components/AskTutorLink";
 import { dashboardData } from "@/lib/data/dashboard";
 import { getTeamById } from "@/lib/data/teams";
 import { internshipState } from "@/lib/data/internshipState";
@@ -62,6 +63,13 @@ export default function DashboardPage() {
       </Card>
 
       <DashboardProgressSummary />
+
+      <Card>
+        <SectionHeading title="Ask the AI Tutor" subtitle="Get a grounded explanation of any enterprise IT concept from this app's curriculum" />
+        <AskTutorLink params={{}} variant="button">
+          Open AI Tutor →
+        </AskTutorLink>
+      </Card>
 
       <DashboardNotes />
 

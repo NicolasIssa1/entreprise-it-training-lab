@@ -4,6 +4,7 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { Badge } from "@/components/Badge";
 import { TeamBadge } from "@/components/TeamBadge";
 import { RelatedTopics } from "@/components/RelatedTopics";
+import { AskTutorLink } from "@/components/AskTutorLink";
 import { getTeamLabel } from "@/lib/data/teams";
 import { skillDefinitions, getInvestigationsForSkill } from "@/lib/data/skills";
 import {
@@ -139,7 +140,12 @@ export function InvestigationResult({
       </div>
 
       <Card>
-        <SectionHeading title="Better reasoning path" />
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <SectionHeading title="Better reasoning path" />
+          <AskTutorLink params={{ mode: "investigation-review", scenario: scenario.id }} variant="button">
+            Ask Tutor to explain this
+          </AskTutorLink>
+        </div>
         <p className="text-sm text-slate-700 dark:text-slate-300">{score.betterReasoningPath}</p>
       </Card>
 

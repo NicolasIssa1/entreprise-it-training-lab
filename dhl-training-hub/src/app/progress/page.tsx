@@ -5,6 +5,7 @@ import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Disclaimer } from "@/components/Disclaimer";
 import { SkillCard } from "@/components/SkillCard";
+import { AskTutorLink } from "@/components/AskTutorLink";
 import { learningTopics } from "@/lib/data/learning";
 import { quizzes } from "@/lib/data/quizzes";
 import { investigationScenarios } from "@/lib/data/investigations";
@@ -89,7 +90,12 @@ export default function ProgressPage() {
       </section>
 
       <section className="space-y-3">
-        <SectionHeading title="Recommended Next Actions" subtitle="Deterministic suggestions based on your activity — no AI" />
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <SectionHeading title="Recommended Next Actions" subtitle="Deterministic suggestions based on your activity — no AI" />
+          <AskTutorLink params={{ mode: "progress-coach" }} variant="button">
+            Ask Tutor to explain my recommendations
+          </AskTutorLink>
+        </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {recommendations.map((r) => (
             <Link key={r.id} href={r.href} className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
