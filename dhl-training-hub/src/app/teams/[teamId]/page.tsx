@@ -5,10 +5,12 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { PageGroupHeading } from "@/components/PageGroupHeading";
 import { Checklist } from "@/components/Checklist";
 import { TeamObservations } from "@/components/TeamObservations";
+import { InvestigationCard } from "@/components/InvestigationCard";
 import { teams, getTeamById } from "@/lib/data/teams";
 import { getTicketsForTeam } from "@/lib/data/tickets";
 import { getQuestionsForTeam } from "@/lib/data/questions";
 import { getTopicsForTeam } from "@/lib/data/learning";
+import { getScenariosForTeam } from "@/lib/data/investigations";
 
 export function generateStaticParams() {
   return teams.map((team) => ({ teamId: team.id }));
@@ -25,6 +27,7 @@ export default async function TeamDetailPage(props: PageProps<"/teams/[teamId]">
   const { likely: likelyTickets, crossTeam: crossTeamTickets } = getTicketsForTeam(team.id);
   const questions = getQuestionsForTeam(team.id)?.questions ?? [];
   const recommendedLearning = getTopicsForTeam(team.id);
+  const advancedScenarios = getScenariosForTeam(team.id);
 
   return (
     <div className="space-y-8">
@@ -153,6 +156,19 @@ export default async function TeamDetailPage(props: PageProps<"/teams/[teamId]">
                     Practice this scenario →
                   </Link>
                 </Card>
+              ))}
+            </div>
+          </>
+        )}
+        {advancedScenarios.length > 0 && (
+          <>
+            <SectionHeading
+              title="Advanced Practice"
+              subtitle="Multi-step branching investigations this team is commonly involved in"
+            />
+            <div className="grid gap-3 sm:grid-cols-2">
+              {advancedScenarios.map((scenario) => (
+                <InvestigationCard key={scenario.id} scenario={scenario} />
               ))}
             </div>
           </>

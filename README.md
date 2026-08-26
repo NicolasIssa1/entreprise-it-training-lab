@@ -40,8 +40,14 @@ Tracker**, covering three generic enterprise IT team types:
    split into general enterprise IT knowledge vs. personally observed facts, plus
    recommended learning, common training tickets (split into likely-owner vs.
    cross-team scenarios), questions to ask, and open learning prompts
-4. **Ticket Simulator** — 34 fake IT tickets to triage, prioritize, and
-   troubleshoot, cross-linked with the Team Explorer and the Learn library
+4. **Ticket Simulator** — two tiers. **Quick Practice**: 34 fake IT tickets to
+   triage, prioritize, and troubleshoot. **Advanced Investigations**: 8
+   branching, multi-step scenarios where evidence evolves as you investigate —
+   assess business impact, ask diagnostic questions, hold and revise a
+   hypothesis, gather evolving evidence, resolve or escalate, verify, and
+   document, with a persisted investigation timeline and training-only
+   performance feedback. Both tiers are cross-linked with the Team Explorer and
+   the Learn library
 5. **Daily Log** — structured journal + "questions to ask" reference per team
 6. **CV Achievement Tracker** — honest, non-exaggerated CV bullet building with an
    involvement scale (Observed → Implemented) and wording-vs-level validation
@@ -68,12 +74,13 @@ See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
 
 ## Future roadmap (not built yet)
 
-Phase 2 (the Learning Engine, including Security Fundamentals) is now complete and
-frozen. Briefly, in rough order for what's next: a branching multi-step ticket
-simulator, daily quizzes, skill tracking, a persistent backend, an AI tutor, and —
-much later — real enterprise pilot/production readiness. See `PRODUCT-ROADMAP.md`
-for the full phase-by-phase breakdown and `ENTERPRISE-READINESS.md` for what a real
-corporate deployment would eventually require.
+Phase 2 (the Learning Engine, including Security Fundamentals) and Phase 3 (the
+Advanced Investigations branching simulator) are now complete and frozen.
+Briefly, in rough order for what's next: daily quizzes, skill tracking, a
+persistent backend, an AI tutor, and — much later — real enterprise
+pilot/production readiness. See `PRODUCT-ROADMAP.md` for the full phase-by-phase
+breakdown and `ENTERPRISE-READINESS.md` for what a real corporate deployment
+would eventually require.
 
 ## Repository layout
 

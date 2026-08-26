@@ -7,26 +7,81 @@ import { Card } from "@/components/Card";
 import { Badge } from "@/components/Badge";
 import { SectionHeading } from "@/components/SectionHeading";
 import { PrivacyNotice } from "@/components/PrivacyNotice";
+import { InvestigationCard } from "@/components/InvestigationCard";
 import { tickets, getTicketById } from "@/lib/data/tickets";
 import { teams, getTeamLabel } from "@/lib/data/teams";
 import { getTopicsByIds } from "@/lib/data/learning";
+import { investigationScenarios } from "@/lib/data/investigations";
+import { useInvestigationCompletions } from "@/lib/investigationProgress";
 import { textareaClass, toggleButtonClass } from "@/lib/ui";
 import { Ticket, TeamId, UrgencyLevel } from "@/lib/types";
 
 const URGENCY_OPTIONS: UrgencyLevel[] = ["Critical", "High", "Medium", "Low"];
 
+type Tier = "quick" | "advanced";
+
 export default function TicketSimulatorPage() {
+  const [tier, setTier] = useState<Tier>("quick");
+
   return (
     <div className="space-y-6">
       <SectionHeading
         title="Ticket Simulator"
-        subtitle="Fake, generic training tickets — not real DHL data or terminology"
+        subtitle="Fake, generic training tickets and investigations — not real DHL data or terminology"
       />
-      <PrivacyNotice context="All tickets below are fictional training scenarios, not real DHL incidents." />
+      <PrivacyNotice context="All tickets and scenarios below are fictional training content, not real DHL incidents." />
 
-      <Suspense fallback={null}>
-        <TicketSimulatorContent />
-      </Suspense>
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Ticket Simulator tier">
+        <button
+          role="tab"
+          aria-selected={tier === "quick"}
+          onClick={() => setTier("quick")}
+          className={toggleButtonClass(tier === "quick")}
+        >
+          Quick Practice
+        </button>
+        <button
+          role="tab"
+          aria-selected={tier === "advanced"}
+          onClick={() => setTier("advanced")}
+          className={toggleButtonClass(tier === "advanced")}
+        >
+          Advanced Investigations
+        </button>
+      </div>
+
+      {tier === "quick" ? (
+        <div className="space-y-4">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Fast, single-step reasoning exercises: read a fictional ticket, pick a team and urgency, and compare your
+            reasoning to the guidance.
+          </p>
+          <Suspense fallback={null}>
+            <TicketSimulatorContent />
+          </Suspense>
+        </div>
+      ) : (
+        <AdvancedInvestigationsTier />
+      )}
+    </div>
+  );
+}
+
+function AdvancedInvestigationsTier() {
+  const completions = useInvestigationCompletions();
+  const completedIds = new Set(completions.map((c) => c.scenarioId));
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-slate-500 dark:text-slate-400">
+        Multi-step, branching investigations where evidence evolves based on your decisions — gather evidence, form
+        and update a hypothesis, and resolve or escalate before documenting the outcome.
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {investigationScenarios.map((scenario) => (
+          <InvestigationCard key={scenario.id} scenario={scenario} completed={completedIds.has(scenario.id)} />
+        ))}
+      </div>
     </div>
   );
 }

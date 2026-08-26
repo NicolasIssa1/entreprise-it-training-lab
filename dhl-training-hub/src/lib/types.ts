@@ -179,3 +179,192 @@ export interface CvAchievement {
   suggestedCvWording: string;
   evidenceNotes: string;
 }
+
+// ---------------------------------------------------------------------------
+// Advanced Investigations (Phase 3). Content lives in
+// src/lib/data/investigations/ — a branching, evolving-evidence layer on top of
+// the fixed-scenario Quick Practice tickets (lib/data/tickets.ts), which remain
+// unchanged. All scenarios are fictional generic enterprise IT training content
+// — see root CLAUDE.md. The engine here is deliberately company-agnostic: no
+// scenario, team id, or escalation path assumes anything DHL-specific.
+// ---------------------------------------------------------------------------
+
+export const BUSINESS_IMPACT_SCOPES = [
+  "One user",
+  "A small team",
+  "A department",
+  "Multiple departments",
+  "Organization-wide",
+] as const;
+export type BusinessImpactScope = (typeof BUSINESS_IMPACT_SCOPES)[number];
+
+/** Generic training hypotheses a learner can hold/change during an investigation
+ * — deliberately not tied to any one team, since real evidence often points
+ * somewhere unexpected. */
+export const INVESTIGATION_HYPOTHESES = [
+  { id: "dns", label: "DNS issue" },
+  { id: "network", label: "Network issue" },
+  { id: "application", label: "Application issue" },
+  { id: "database", label: "Database issue" },
+  { id: "authentication", label: "Authentication issue" },
+  { id: "authorization", label: "Authorization issue" },
+  { id: "infrastructure", label: "Infrastructure issue" },
+  { id: "unknown", label: "Unknown / need more evidence" },
+] as const;
+export type InvestigationHypothesis = (typeof INVESTIGATION_HYPOTHESES)[number]["id"];
+
+/** Fixed set of resolution-documentation fields, shared by every scenario so the
+ * UI/scoring never needs per-scenario field config — only the model example
+ * answers (InvestigationScenario.modelDocumentation) vary. */
+export const DOCUMENTATION_FIELDS = [
+  { id: "issueSummary", label: "Issue summary", placeholder: "What was reported, in your own words..." },
+  { id: "scopeImpact", label: "Scope / impact", placeholder: "Who or what was affected, and how widely..." },
+  { id: "evidenceGathered", label: "Evidence gathered", placeholder: "What you checked and what you found..." },
+  { id: "likelyCause", label: "Likely / root cause", placeholder: "What the evidence points to..." },
+  { id: "actionTaken", label: "Action taken", placeholder: "What you did, or recommended doing..." },
+  { id: "escalation", label: "Escalation", placeholder: "Who this was escalated to, if anyone, and why..." },
+  { id: "verification", label: "Verification", placeholder: "How you confirmed the issue was actually resolved..." },
+] as const;
+export type DocumentationFieldId = (typeof DOCUMENTATION_FIELDS)[number]["id"];
+
+/** How good a choice was — real troubleshooting often has more than one
+ * reasonable option, so "reasonable" is a genuine, non-penalized second choice,
+ * not a watered-down "wrong." */
+export type ActionQuality = "strong" | "reasonable" | "weak" | "unnecessary";
+
+/** Which stage of the Scope → Symptoms → Isolate → Test → Gather Evidence → Fix
+ * or Escalate → Verify → Document framework an action belongs to (Symptoms/Test
+ * fold into "evidence" and "diagnose" respectively — this is the scoring-facing
+ * subset, not a literal 1:1 restatement of all 8 framework labels). */
+export type InvestigationStage = "scope" | "evidence" | "diagnose" | "resolve" | "escalate" | "verify";
+
+export interface DiagnosticQuestion {
+  id: string;
+  question: string;
+  /** Revealed inline when asked — counts as evidence gathering, but never forces
+   * navigation, so asking questions is always safe to do liberally. */
+  answer: string;
+}
+
+export interface InvestigationAction {
+  id: string;
+  label: string;
+  description: string;
+  /** Node this action leads to — may be the current node itself (a deliberate
+   * self-loop, used for weak/unnecessary actions so a poor choice teaches a
+   * lesson via feedback without dead-ending the investigation). */
+  nextNodeId: string;
+  quality: ActionQuality;
+  stage: InvestigationStage;
+  /** Shown immediately after the action is chosen — explains *why* it was a
+   * good/weak/unnecessary choice, never just labels it. */
+  feedback: string;
+}
+
+export interface InvestigationNode {
+  id: string;
+  prompt: string;
+  /** Fictional training evidence revealed on arrival — always rendered labeled
+   * as such in the UI. Never real DHL logs, hostnames, IPs, or systems. */
+  evidence?: string[];
+  diagnosticQuestions?: DiagnosticQuestion[];
+  /** Empty/absent only on a terminal node (one that carries `outcome`). */
+  actions: InvestigationAction[];
+  outcome?: InvestigationOutcome;
+}
+
+export type InvestigationResultType = "resolved" | "escalated";
+
+export interface InvestigationOutcome {
+  result: InvestigationResultType;
+  /** Overall quality of this specific ending — an escalation with strong
+   * evidence and a resolution reached directly can both be "strong"; there is
+   * no single correct ending. */
+  quality: ActionQuality;
+  summary: string;
+  /** Only meaningful when result is "escalated". Framed as "commonly involves,"
+   * never asserted as the one true owner — see root CLAUDE.md. */
+  escalatedTeam?: TeamId;
+  /** The model reasoning path shown in "Better reasoning path" feedback. */
+  modelResolution: string;
+}
+
+export interface InvestigationScenario {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: LearningLevel;
+  estimatedMinutes: number;
+  initialReport: string;
+  suggestedBusinessImpact: BusinessImpactScope;
+  businessImpactNote: string;
+  relatedTopicIds: string[];
+  likelyTeams: TeamId[];
+  learningObjectives: string[];
+  startNodeId: string;
+  nodes: Record<string, InvestigationNode>;
+  modelFinalHypothesis: InvestigationHypothesis;
+  modelDocumentation: Record<DocumentationFieldId, string>;
+  /** Learn topics recommended in the post-scenario "Recommended Review" —
+   * usually related topics, occasionally a superset (e.g. also pointing back to
+   * an Escalation lesson even if not directly tagged). */
+  topicsToReview: string[];
+}
+
+// ---- Learner progress through a scenario (persisted, see investigationProgress.ts) ----
+
+export interface TimelineEntry {
+  id: string;
+  /** Local timestamp for ordering only — not a real incident log. */
+  timestamp: number;
+  kind: "start" | "action" | "question" | "hypothesis" | "impact" | "verify" | "document";
+  label: string;
+  detail?: string;
+}
+
+export interface ActionTakenRecord {
+  actionId: string;
+  nodeId: string;
+  quality: ActionQuality;
+  stage: InvestigationStage;
+}
+
+export interface InvestigationProgress {
+  scenarioId: string;
+  currentNodeId: string;
+  history: TimelineEntry[];
+  actionsTaken: ActionTakenRecord[];
+  askedQuestionIds: string[];
+  /** Ordered — first entry is the initial hypothesis, last is the final one. */
+  hypothesisHistory: InvestigationHypothesis[];
+  businessImpact?: BusinessImpactScope;
+  documentation: Partial<Record<DocumentationFieldId, string>>;
+  completed: boolean;
+  score?: InvestigationScore;
+}
+
+export type PerformanceCategory = "Excellent" | "Strong" | "Developing" | "Needs Review";
+
+export interface CategoryScore {
+  label: string;
+  score: number; // 0-100
+  weight: number; // 0-1, sums to 1 across all categories
+}
+
+export interface InvestigationScore {
+  categories: CategoryScore[];
+  overall: number; // 0-100, weighted
+  overallCategory: PerformanceCategory;
+  whatWentWell: string[];
+  whatCouldImprove: string[];
+  betterReasoningPath: string;
+}
+
+/** Lightweight completion record — Phase 4 analytics will build on this, not on
+ * anything added here yet. */
+export interface InvestigationCompletionRecord {
+  scenarioId: string;
+  completedAt: string; // ISO date string
+  score: number;
+  resultCategory: PerformanceCategory;
+}

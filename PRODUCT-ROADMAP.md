@@ -115,19 +115,53 @@ increment, not part of the current baseline.
 
 ---
 
-## Phase 3 — Advanced Ticket / IT Simulations
+## Phase 3 — Advanced Ticket / IT Simulations ✅ (complete)
 
 **Objective:** Move beyond fixed-answer tickets toward branching, multi-step
 troubleshooting that mirrors how real investigations unfold.
 
-**Major features:** Branching decision trees, tickets that change based on earlier
-choices, richer ambiguity, "escalate vs. keep investigating" decision points.
+**Delivered:** The Ticket Simulator (`/tickets`) now offers two tiers. **Quick
+Practice** is the original 34 fixed-scenario tickets, unchanged. **Advanced
+Investigations** adds 8 branching scenarios (`/tickets/investigate/[scenarioId]`)
+covering DNS/name resolution, application performance (deliberately
+multi-layered, no single obvious cause), VPN connectivity, authentication vs.
+authorization, system integration failure, a shared storage outage, a deployment
+regression, and a defensive-only endpoint security incident. Each scenario is a
+typed `InvestigationScenario` (`dhl-training-hub/src/lib/data/investigations/`) —
+a graph of `InvestigationNode`s connected by `InvestigationAction`s, each tagged
+with a training-stage (scope/evidence/diagnose/resolve/escalate/verify) and a
+quality (strong/reasonable/weak/unnecessary — several genuinely reasonable
+choices exist per decision point, not one correct answer). Evidence evolves as
+the learner acts; weak/unnecessary choices self-loop back with explanatory
+feedback rather than dead-ending the scenario. The learner assesses generic
+business impact up front, can ask optional diagnostic questions, holds and
+revises a hypothesis at any time, and every action is logged to a persisted
+Investigation Timeline. Every scenario ends in "resolved" or "escalated" — both
+are legitimate successful outcomes — followed by a mandatory verification step
+and a short resolution-documentation form (compared afterward against a model
+example). A generic, scenario-agnostic scoring engine
+(`lib/investigationScoring.ts`) turns the tagged actions into six weighted
+categories (Information Gathering, Isolation/Diagnosis, Action Quality,
+Escalation, Verification, Documentation) and an overall Excellent/Strong/
+Developing/Needs Review rating, explicitly labeled a training indicator rather
+than a validated assessment. Progress persists per scenario
+(`investigation-progress` in `localStorage`, via `useInvestigationProgress`) with
+a "Restart Scenario" option (confirmed before clearing), plus a lightweight
+completion history (`investigation-completions`) Phase 4 can build on.
+Cross-linked both ways with Learn ("Advanced Practice" on relevant topic pages)
+and Team Explorer ("Advanced Practice" on relevant team pages), reusing the same
+tag-on-the-scenario / derive-the-reverse-link pattern as tickets. A build-time
+validator (mirroring the Learn library's) checks for duplicate scenario ids, a
+valid start node, valid action destinations, valid topic references, and
+unreachable nodes.
 
-**Major risks:** Overengineering a simulation the intern doesn't have time to use;
-authoring cost per scenario growing much faster than the value it adds.
+**Major risks (as anticipated):** Authoring cost per scenario — managed by
+keeping each scenario to a single well-scoped graph (roughly 8-13 nodes) with a
+shared narrative shape (evidence-gathering → decision hub → post-decision →
+verify → outcome) rather than open-ended branching complexity.
 
-**Must be validated before proceeding:** The Phase 2 fixed-scenario simulator (now
-34 tickets) is genuinely being outgrown, not just theoretically limited.
+**Must be validated before proceeding:** The Advanced Investigations tier is
+actually used during the internship, not just built once as a proof of concept.
 
 ---
 

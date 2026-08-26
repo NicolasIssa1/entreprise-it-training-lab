@@ -257,6 +257,87 @@ deployment-readiness requirements. Don't build ahead of what's been asked for.
 
 ---
 
+## Phase 3 scope — Advanced Investigations (built and frozen)
+
+Phase 3 adds a second tier to the Ticket Simulator, without touching the first.
+**Quick Practice** is the original 34 fixed-scenario tickets from Phase 1/2,
+unchanged, still living at `/tickets`. **Advanced Investigations** is 8 new
+branching, multi-step scenarios at `/tickets/investigate/[scenarioId]` (one
+reusable dynamic page via `generateStaticParams`, never a hardcoded page per
+scenario — same rule as `/learn/[topicId]`): DNS/name resolution, application
+performance (deliberately multi-layered — application, database, infrastructure,
+and a recent deployment are all plausible threads, with no single obvious
+cause), VPN connectivity, authentication vs. authorization, a system integration
+failure, a shared storage outage, a deployment regression, and a defensive-only
+endpoint security incident (no exploit, bypass, or offensive-technique content —
+same rule as Security Fundamentals topics).
+
+**Core idea: don't guess, gather evidence.** Evidence evolves as the learner
+investigates rather than being handed over up front. Each scenario is a typed
+`InvestigationScenario` (`dhl-training-hub/src/lib/data/investigations/`) — a
+graph of `InvestigationNode`s connected by `InvestigationAction`s. Every action
+carries a training-stage (`scope` / `evidence` / `diagnose` / `resolve` /
+`escalate` / `verify`) and a quality (`strong` / `reasonable` / `weak` /
+`unnecessary`). Several genuinely reasonable actions usually exist at once — this
+is deliberate; real troubleshooting is rarely one-answer. Weak/unnecessary
+choices self-loop back to the same node with explanatory feedback rather than
+dead-ending the scenario, so a poor choice teaches something without being
+punitive. The learner also assesses a generic business impact up front (never a
+DHL priority matrix — see `BUSINESS_IMPACT_SCOPES` in `lib/types.ts`), can ask
+optional diagnostic questions that reveal evidence without forcing navigation,
+and holds/revises a hypothesis at any point via `INVESTIGATION_HYPOTHESES` — none
+of this is scored harshly, and changing your mind with new evidence is treated as
+normal, not a failure. Every action is logged to a persisted Investigation
+Timeline. Every scenario resolves through: reach a decision hub → resolve or
+escalate (both are legitimate successful outcomes, framed as "commonly involves
+X, varies by organization" per the confidentiality rules above, never "X owns
+this") → a mandatory verify step → a short resolution-documentation form
+(`DOCUMENTATION_FIELDS`, a fixed 7-field structure shared by every scenario) →
+training performance feedback.
+
+**Scoring** (`dhl-training-hub/src/lib/investigationScoring.ts`) is generic and
+scenario-agnostic — it reads the `stage`/`quality` tags already on the actions
+the learner took, so no scenario needs its own scoring config. Six weighted
+categories (Information Gathering 25%, Isolation/Diagnosis 25%, Action Quality
+20%, Escalation 10%, Verification 10%, Documentation 10%) roll up into an
+overall Excellent/Strong/Developing/Needs Review rating, always shown as a
+"training indicator," never a validated assessment. Feedback always includes
+"what went well," "what could improve," and a "better reasoning path" (the
+outcome node's own `modelResolution` text) — never just a percentage.
+
+- **Storage**: `dhl-training-hub/src/lib/investigationProgress.ts`
+  (`useInvestigationProgress`), built on the same `useLocalStorageState` core as
+  every other storage hook. Key `investigation-progress` holds
+  `Record<scenarioId, InvestigationProgress>` (current node, full timeline,
+  actions taken, questions asked, hypothesis history, business impact,
+  documentation draft, completion, score). A separate `investigation-completions`
+  key holds a lightweight completion history list for Phase 4 to build on later —
+  don't add a second, inconsistent progress-tracking pattern.
+- **Learn ↔ Advanced Investigations**: scenarios carry `relatedTopicIds` (the
+  single source of truth); Learn topic pages derive an "Advanced Practice"
+  section via `getScenariosForTopic()` — same reverse-derivation pattern as
+  `getTicketsForTopic()`. Don't duplicate the relationship on `LearningTopic`.
+- **Team ↔ Advanced Investigations**: scenarios carry `likelyTeams`; Team pages
+  derive an "Advanced Practice" section via `getScenariosForTeam()`.
+- Content validation lives in `lib/data/investigations/index.ts`
+  (`validateInvestigations()`, mirroring the Learn library's validator): checks
+  duplicate scenario ids, a valid `startNodeId`, every action's `nextNodeId`
+  resolving to a real node, terminal nodes having no actions (and non-terminal
+  nodes having at least one), every `relatedTopicIds`/`topicsToReview` reference
+  resolving to a real Learn topic, and — via a BFS from the start node — that
+  every node is actually reachable. Keep this passing.
+
+### Explicitly NOT built in Phase 3 (do not add without being asked)
+
+- Analytics/manager views built on `investigation-completions` (that's Phase 4)
+- Any scoring change that scores by click count alone, or that treats "reasonable"
+  as a disguised "wrong"
+- Company-specific customization of scenarios, teams, or escalation paths — the
+  engine itself must stay organization-agnostic (see Phase 9/10 in
+  `PRODUCT-ROADMAP.md`)
+
+---
+
 ## Tech stack & conventions
 
 - Next.js (App Router) + React + TypeScript + Tailwind CSS.
@@ -292,4 +373,7 @@ DHL-Internship/
     src/lib/product.ts              — product/brand config (private vs public name)
     src/lib/data/learning/          — Learn topic content (56 topics) + paths.ts
     src/lib/learningProgress.ts     — Learn completion tracking hook
+    src/lib/data/investigations/    — Advanced Investigations content (8 scenarios)
+    src/lib/investigationProgress.ts — Advanced Investigations progress/storage hook
+    src/lib/investigationScoring.ts  — generic, scenario-agnostic scoring engine
 ```
