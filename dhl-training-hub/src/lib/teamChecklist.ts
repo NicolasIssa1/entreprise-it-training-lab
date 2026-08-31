@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useLocalStorageState } from "@/lib/storage";
 import { useAuth } from "@/lib/auth/AuthProvider";
-import { fetchTeamChecklist, upsertChecklistItem } from "@/lib/repositories/teamChecklistRepository";
+import { fetchTeamChecklist, upsertChecklistItem, bulkUpsertTeamChecklists } from "@/lib/repositories/teamChecklistRepository";
+import { mergeRecordPreferCloud } from "@/lib/mergeCloudState";
 import { TeamId } from "@/lib/types";
 
 const isChecklistRecord = (value: unknown): value is Record<string, boolean> =>
@@ -31,7 +32,14 @@ export function useTeamChecklist(teamId: TeamId) {
     let cancelled = false;
     fetchTeamChecklist(user.id, teamId)
       .then((cloud) => {
-        if (!cancelled) setChecked(cloud);
+        if (cancelled) return;
+        setChecked((prevLocal) => {
+          const { merged, localOnly } = mergeRecordPreferCloud(prevLocal, cloud);
+          if (Object.keys(localOnly).length > 0) {
+            bulkUpsertTeamChecklists(user.id, { [teamId]: localOnly }).catch(() => setSyncError(true));
+          }
+          return merged;
+        });
       })
       .catch(() => {
         if (!cancelled) setSyncError(true);

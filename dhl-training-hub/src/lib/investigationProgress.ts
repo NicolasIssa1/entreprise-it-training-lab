@@ -9,7 +9,10 @@ import {
   upsertInvestigationCompletion,
   upsertInvestigationProgress,
   deleteInvestigationProgress,
+  bulkUpsertInvestigationProgress,
+  bulkUpsertInvestigationCompletions,
 } from "@/lib/repositories/investigationRepository";
+import { mergeRecordPreferCloud, mergeArrayByIdPreferCloud } from "@/lib/mergeCloudState";
 import { InvestigationCompletionRecord, InvestigationProgress } from "@/lib/types";
 
 const PROGRESS_KEY = "investigation-progress";
@@ -43,12 +46,14 @@ function createInitialProgress(scenarioId: string, startNodeId: string): Investi
  * data is handled safely by useLocalStorageState's isValid guard, falling back
  * to a fresh initial state.
  *
- * Phase 5: signed-in + configured fetches both from Supabase on mount (cloud
- * becomes authoritative — this is what lets a learner start an investigation,
- * leave, and resume from another device, per root CLAUDE.md's Phase 5
- * section) and writes through on every update. "Restart Scenario" deletes the
- * cloud row outright rather than upserting a reset one. Local Demo Mode is
- * unchanged from Phase 3.
+ * Phase 5: signed-in + configured fetches both from Supabase on mount and
+ * merges them with local (see lib/mergeCloudState.ts) — cloud wins per
+ * scenario id it has an opinion on (this is what lets a learner start an
+ * investigation, leave, and resume from another device, per root CLAUDE.md's
+ * Phase 5 section), but progress on a scenario cloud doesn't know about yet
+ * is preserved and re-pushed rather than dropped — and writes through on
+ * every update. "Restart Scenario" deletes the cloud row outright rather than
+ * upserting a reset one. Local Demo Mode is unchanged from Phase 3.
  */
 export function useInvestigationProgress(scenarioId: string, startNodeId: string) {
   const { user, isConfigured } = useAuth();
@@ -72,8 +77,16 @@ export function useInvestigationProgress(scenarioId: string, startNodeId: string
     Promise.all([fetchInvestigationProgress(user.id), fetchInvestigationCompletions(user.id)])
       .then(([progressMap, completionList]) => {
         if (cancelled) return;
-        setAllProgress(progressMap);
-        setCompletions(completionList);
+        setAllProgress((prevLocal) => {
+          const { merged, localOnly } = mergeRecordPreferCloud(prevLocal, progressMap);
+          if (Object.keys(localOnly).length > 0) bulkUpsertInvestigationProgress(user.id, localOnly).catch(() => setSyncError(true));
+          return merged;
+        });
+        setCompletions((prevLocal) => {
+          const { merged, localOnly } = mergeArrayByIdPreferCloud(prevLocal, completionList, (c) => c.scenarioId);
+          if (localOnly.length > 0) bulkUpsertInvestigationCompletions(user.id, localOnly).catch(() => setSyncError(true));
+          return merged;
+        });
       })
       .catch(() => {
         if (!cancelled) setSyncError(true);
@@ -131,7 +144,12 @@ export function useInvestigationCompletions() {
     let cancelled = false;
     fetchInvestigationCompletions(user.id)
       .then((cloud) => {
-        if (!cancelled) setCompletions(cloud);
+        if (cancelled) return;
+        setCompletions((prevLocal) => {
+          const { merged, localOnly } = mergeArrayByIdPreferCloud(prevLocal, cloud, (c) => c.scenarioId);
+          if (localOnly.length > 0) bulkUpsertInvestigationCompletions(user.id, localOnly).catch(() => undefined);
+          return merged;
+        });
       })
       .catch(() => undefined);
     return () => {

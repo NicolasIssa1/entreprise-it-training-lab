@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useLocalStorageState } from "@/lib/storage";
 import { useAuth } from "@/lib/auth/AuthProvider";
-import { fetchQuizAttempts, insertQuizAttempt } from "@/lib/repositories/quizAttemptsRepository";
+import { fetchQuizAttempts, insertQuizAttempt, bulkUpsertQuizAttempts } from "@/lib/repositories/quizAttemptsRepository";
+import { mergeMapOfArraysByIdPreferCloud } from "@/lib/mergeCloudState";
 import { QuizAttempt } from "@/lib/types";
 
 const STORAGE_KEY = "quiz-attempts";
@@ -37,10 +38,14 @@ export function latestAttempt(attempts: QuizAttempt[]): QuizAttempt | undefined 
  * history exceeds the cap.
  *
  * Phase 5: signed-in + configured fetches the full attempt history from
- * Supabase on mount and uses it as the source of truth going forward (local
- * storage becomes an optimistic cache); each new attempt is written through to
- * Supabase in the background, with the same 10-per-quiz cap enforced
- * server-side by the repository. Local Demo Mode is unchanged from Phase 4.
+ * Supabase on mount and merges it with local (see lib/mergeCloudState.ts) —
+ * cloud wins per attempt id, but a just-recorded attempt cloud doesn't know
+ * about yet is preserved and re-pushed rather than dropped (a blind overwrite
+ * here used to be able to silently erase a fresh attempt on a fast refresh);
+ * each new attempt is also written through to Supabase in the background,
+ * with the same 10-per-quiz cap enforced server-side by the repository and
+ * re-applied client-side after every merge. Local Demo Mode is unchanged from
+ * Phase 4.
  */
 export function useQuizAttempts(quizId?: string) {
   const { user, isConfigured } = useAuth();
@@ -58,7 +63,15 @@ export function useQuizAttempts(quizId?: string) {
     let cancelled = false;
     fetchQuizAttempts(user.id)
       .then((cloud) => {
-        if (!cancelled) setAllAttempts(cloud);
+        if (cancelled) return;
+        setAllAttempts((prevLocal) => {
+          const { merged, localOnly } = mergeMapOfArraysByIdPreferCloud(prevLocal, cloud, (a) => a.attemptId);
+          if (Object.keys(localOnly).length > 0) bulkUpsertQuizAttempts(user.id, localOnly).catch(() => setSyncError(true));
+          // Re-apply the per-quiz cap after merging — mirrors recordAttempt's own trim.
+          const capped: QuizAttemptsMap = {};
+          for (const [quizId, list] of Object.entries(merged)) capped[quizId] = list.slice(-MAX_ATTEMPTS_PER_QUIZ);
+          return capped;
+        });
       })
       .catch(() => {
         if (!cancelled) setSyncError(true);

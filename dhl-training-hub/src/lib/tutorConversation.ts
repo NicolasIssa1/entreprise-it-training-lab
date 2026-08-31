@@ -51,8 +51,33 @@ export function useTutorConversation() {
     let cancelled = false;
     fetchLatestTutorConversation(user.id)
       .then((cloud) => {
-        if (cancelled) return;
-        if (cloud) setState({ conversation: cloud.conversation, messages: cloud.messages.slice(-MAX_STORED_MESSAGES) });
+        if (cancelled || !cloud) return;
+        setState((prevLocal) => {
+          if (!prevLocal.conversation || prevLocal.conversation.id === cloud.conversation.id) {
+            // Same thread (or no local thread yet): merge messages by id — cloud
+            // wins on overlap, but a message just sent locally that cloud
+            // doesn't have yet (its background insert hadn't landed) is kept
+            // and re-sent rather than silently dropped from the thread.
+            const cloudIds = new Set(cloud.messages.map((m) => m.id));
+            const localOnly = prevLocal.messages.filter((m) => !cloudIds.has(m.id));
+            if (localOnly.length > 0) {
+              for (const message of localOnly) {
+                appendTutorMessage(user.id, cloud.conversation.id, message).catch(() => setSyncError(true));
+              }
+            }
+            return { conversation: cloud.conversation, messages: [...cloud.messages, ...localOnly].slice(-MAX_STORED_MESSAGES) };
+          }
+          // Local has a different, more recent conversation thread cloud doesn't
+          // know about yet (its creation/messages hadn't synced) — keep it
+          // rather than silently switching the learner to an older thread, and
+          // self-heal it up to cloud.
+          const localConversation = prevLocal.conversation;
+          createTutorConversation(user.id, localConversation).catch(() => setSyncError(true));
+          for (const message of prevLocal.messages) {
+            appendTutorMessage(user.id, localConversation.id, message).catch(() => setSyncError(true));
+          }
+          return prevLocal;
+        });
       })
       .catch(() => {
         if (!cancelled) setSyncError(true);
