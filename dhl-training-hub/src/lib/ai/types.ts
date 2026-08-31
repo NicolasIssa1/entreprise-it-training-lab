@@ -51,6 +51,13 @@ export interface TutorProgressSummary {
   completedInvestigationIds: string[];
   skillLevels: Record<string, string>;
   topRecommendationTitles: string[];
+  /** Phase 9 Part S — optional context so the Tutor can answer things like
+   * "what should I focus on for my Infrastructure internship?" Validated
+   * server-side against real assignment titles / focus area labels (see
+   * /api/tutor/route.ts's sanitizeProgressSummary) — never free text, and
+   * never anything that could name a real employer's systems. */
+  currentAssignmentTitle?: string;
+  onboardingFocusArea?: string;
 }
 
 /** What the client sends for quiz-review — deliberately just ids + the

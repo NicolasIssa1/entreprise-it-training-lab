@@ -21,7 +21,7 @@ const companyContext: CompanyContext = {
   id: "current-internship-organization",
   name: internshipState.organization,
   disclaimer:
-    "This is Nicolas's personal, private internship context — not official material from, or endorsed by, the organization named here. It is shown only in this app's private/local view and is never part of the public Enterprise IT Training Lab build.",
+    "Personal internship context — not official company training material. It is not official material from, or endorsed by, the organization named here, and is shown only in this app's private/local view — never part of the public Enterprise IT Training Lab build.",
   publicFacts: [
     "A large, multinational logistics and delivery company, operating across multiple business divisions worldwide.",
     "Like most companies at this scale, day-to-day operations depend on many internal IT systems working together — the same general categories of technology (networking, applications, infrastructure) covered generically throughout this app's Learn library.",

@@ -672,3 +672,86 @@ export interface TrainingSummary {
   recentActivity: TrainingActivityEvent[];
   generatedAt: string;
 }
+
+// ---------------------------------------------------------------------------
+// Training Assignments (Phase 9 Part D/E/F). A lightweight, static/config-driven
+// concept — NOT a new competency score and NOT organization-wide manager
+// functionality. An assignment is just a named bundle of required learning path,
+// quiz, and investigation ids (see lib/data/assignments.ts, the single source of
+// truth); assignment "completion" is only completion against that required list,
+// always derived at render time from the same three evidence sources every other
+// derived-progress feature already reads — never a second stored score. See root
+// CLAUDE.md's Phase 9 scope.
+export interface TrainingAssignment {
+  id: string;
+  title: string;
+  /** Who this template is written for, e.g. "IT interns and graduate hires focusing on core enterprise IT vocabulary." */
+  audience: string;
+  purpose: string;
+  estimatedScope: string;
+  requiredPathIds: string[];
+  requiredQuizIds: string[];
+  requiredScenarioIds: string[];
+  /** Recommended, never required — same "recommend, don't hard-lock" rule as prerequisiteTopicIds. */
+  recommendedTopicIds?: string[];
+}
+
+export interface AssignmentRequirementProgress {
+  completed: number;
+  total: number;
+  percentage: number;
+}
+
+export interface AssignmentProgress {
+  assignment: TrainingAssignment;
+  paths: AssignmentRequirementProgress;
+  quizzes: AssignmentRequirementProgress;
+  investigations: AssignmentRequirementProgress;
+  /** Mean of the three category percentages above — completion against the
+   * required list only, never a weighted competency score like SkillProgress.overall. */
+  overallCompletion: number;
+  /** First not-yet-done required item (a path's next topic, an unattempted
+   * required quiz, or an uncompleted required investigation), or null once
+   * every requirement is met. Recommend, never hard-lock — same rule as everywhere else. */
+  nextRequiredAction: Recommendation | null;
+}
+
+// ---------------------------------------------------------------------------
+// Onboarding (Phase 9 Part P/Q). Minimal preferences used only to suggest a
+// starting TrainingAssignment via a deterministic mapping (lib/onboarding.ts) —
+// no AI, no complex personalization. Stored locally (see useOnboardingPreferences)
+// — deliberately not a new Supabase table, per Phase 9's "prefer the simplest
+// safe option" guidance. Never collects employer, salary, age, or other private
+// profile data — see root CLAUDE.md.
+export const ONBOARDING_GOALS = [
+  "Starting an internship/job",
+  "Preparing for enterprise IT",
+  "Improving IT support skills",
+  "Learning business/logistics technology",
+  "Exploring enterprise IT",
+] as const;
+export type OnboardingGoal = (typeof ONBOARDING_GOALS)[number];
+
+export const ONBOARDING_FOCUS_AREAS = [
+  "IT Support",
+  "Infrastructure",
+  "Networking",
+  "Applications",
+  "Security",
+  "Business & Logistics",
+  "Not sure",
+] as const;
+export type OnboardingFocusArea = (typeof ONBOARDING_FOCUS_AREAS)[number];
+
+export const ONBOARDING_EXPERIENCE_LEVELS = ["Beginner", "CS/IT student", "Graduate", "Junior professional"] as const;
+export type OnboardingExperience = (typeof ONBOARDING_EXPERIENCE_LEVELS)[number];
+
+export interface OnboardingPreferences {
+  completed: boolean;
+  goal: OnboardingGoal | null;
+  focusArea: OnboardingFocusArea | null;
+  experience: OnboardingExperience | null;
+  /** The assignment id the deterministic mapping suggested — recorded for
+   * reference, never auto-activated without the learner choosing to. */
+  recommendedAssignmentId: string | null;
+}

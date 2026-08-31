@@ -72,6 +72,8 @@ function modeInstructions(mode: TutorMode): string {
 
 function renderProgressSummary(p: TutorProgressSummary): string {
   const lines = [
+    p.currentAssignmentTitle ? `Active training assignment: ${p.currentAssignmentTitle}` : "",
+    p.onboardingFocusArea ? `Learner's stated focus area: ${p.onboardingFocusArea}` : "",
     `Completed Learn topics: ${p.completedTopicIds.length ? p.completedTopicIds.join(", ") : "none yet"}`,
     `Quiz best scores: ${
       Object.keys(p.quizBestPercentages).length
@@ -86,7 +88,7 @@ function renderProgressSummary(p: TutorProgressSummary): string {
     }`,
     `App's own top recommendations right now: ${p.topRecommendationTitles.length ? p.topRecommendationTitles.join("; ") : "none"}`,
   ];
-  return lines.join("\n");
+  return lines.filter(Boolean).join("\n");
 }
 
 function renderQuizReview(q: QuizReviewContext): string {

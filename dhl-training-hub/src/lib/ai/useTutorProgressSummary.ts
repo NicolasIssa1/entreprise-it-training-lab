@@ -5,6 +5,9 @@ import { useQuizAttempts, bestAttempt } from "@/lib/quizAttempts";
 import { useInvestigationCompletions } from "@/lib/investigationProgress";
 import { calculateAllSkillProgress } from "@/lib/skillProgress";
 import { getRecommendations } from "@/lib/recommendations";
+import { useSelectedAssignment } from "@/lib/assignmentSelection";
+import { useOnboardingPreferences } from "@/lib/onboarding";
+import { computeAssignmentProgress } from "@/lib/assignmentProgress";
 import { TutorProgressSummary } from "@/lib/ai/types";
 
 /**
@@ -19,10 +22,15 @@ export function useTutorProgressSummary(): TutorProgressSummary {
   const { completed } = useLearningProgress();
   const { allAttempts } = useQuizAttempts();
   const investigationCompletions = useInvestigationCompletions();
+  const { selectedAssignment } = useSelectedAssignment();
+  const { preferences } = useOnboardingPreferences();
 
   const skillProgresses = calculateAllSkillProgress(completed, allAttempts, investigationCompletions);
+  const assignmentProgress = selectedAssignment
+    ? computeAssignmentProgress(selectedAssignment, completed, allAttempts, investigationCompletions)
+    : null;
   const recommendations = getRecommendations(
-    { completedTopics: completed, quizAttemptsMap: allAttempts, investigationCompletions, skillProgresses },
+    { completedTopics: completed, quizAttemptsMap: allAttempts, investigationCompletions, skillProgresses, assignmentProgress },
     3,
   );
 
@@ -43,5 +51,13 @@ export function useTutorProgressSummary(): TutorProgressSummary {
 
   const topRecommendationTitles = recommendations.map((r) => r.title);
 
-  return { completedTopicIds, quizBestPercentages, completedInvestigationIds, skillLevels, topRecommendationTitles };
+  return {
+    completedTopicIds,
+    quizBestPercentages,
+    completedInvestigationIds,
+    skillLevels,
+    topRecommendationTitles,
+    currentAssignmentTitle: selectedAssignment?.title,
+    onboardingFocusArea: preferences.focusArea ?? undefined,
+  };
 }

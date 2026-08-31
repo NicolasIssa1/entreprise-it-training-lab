@@ -523,22 +523,56 @@ same way Phase 5/6's live-testing checklists were deferred to Nicolas.
 
 ---
 
-## Phase 9 — Enterprise Pilot Readiness
+## Phase 9 — Enterprise Pilot Readiness ✅ (structurally complete)
 
 **Objective:** Prepare the product to be proposed as a real pilot to DHL or another
 company — as a tool, not yet as certified production software.
 
-**Major features:** Multi-user support design (still not full multi-tenancy),
-organization/role/team configuration made real (building on the Phase 1
-`internshipState`/`product` separation), a pitch-ready demo environment with zero
-real data.
+**Delivered:** A **pilot-facing layer** (`/pilot`, `/pilot/demo`,
+`/pilot/readiness`, `/pilot/report`) explaining the product's value
+proposition, intended users, and potential company use — never claiming DHL
+endorsement, official DHL training, real DHL system access, or certification.
+A lightweight **Training Assignment** model (`src/lib/data/assignments.ts`,
+4 static templates: Enterprise IT Intern Foundation, Infrastructure &
+Network Foundation, Applications Support Foundation, Business & Logistics
+Technology Foundation) bundles required learning paths, assessments, and
+investigations; a learner activates one for themselves (`/assignments`,
+stored locally via `useSelectedAssignment` — deliberately not a new Supabase
+table) and sees derived completion against the required list only
+(`src/lib/assignmentProgress.ts`) — never a new competency score, distinct
+from `SkillProgress`. A minimal **onboarding flow** (`/onboarding`: goal,
+focus area, experience level — no employer/salary/age collected) suggests a
+starting assignment via a deterministic, no-AI mapping
+(`src/lib/onboarding.ts`). The existing deterministic recommendation engine
+(`lib/recommendations.ts`) gained one additive, optional signal — an active
+assignment's next required activity is surfaced first — without any rewrite;
+the AI Tutor's progress summary optionally includes the active assignment
+title and onboarding focus area (validated server-side against real static
+data, same trust-boundary pattern as every other Tutor context field).
+`/manager-preview` and the new `/pilot/report` both gained a "Current
+Training Assignment" section reusing the same `computeAssignmentProgress()`
+derivation. A **Privacy & Data Safety page** (`/privacy`) plainly explains
+what's stored, what's deliberately never collected, and the AI Tutor's data
+boundary — a product-level explanation, not a fabricated legal policy. A
+reusable **Pilot Proposal** document (`dhl-training-hub/docs/PILOT-PROPOSAL.md`)
+describes a suggested small pilot (5-15 users, 2-4 weeks) and success signals
+to observe — explicitly no quantified ROI claims and no pricing.
 
-**Major risks:** Presenting a prototype as more production-ready than it is;
-proposing before `ENTERPRISE-READINESS.md` requirements have a credible plan.
+**Major risks (as anticipated, and how they were addressed):** Presenting a
+prototype as more production-ready than it is — mitigated by keeping
+`/pilot/readiness` honest and self-assessed (it checks Supabase/AI Tutor
+configuration live rather than asserting readiness, and explicitly lists
+enterprise gaps: no SSO, no multi-tenancy, no admin console, no trainer
+assignment-management tooling). Scope creep into full multi-tenancy or a
+company-management feature — avoided; there is exactly one "current
+assignment" preference per learner, no organization accounts, and
+`CompanyContext` remains the single, hand-edited Phase 7 scaffold.
 
 **Must be validated before proceeding:** Genuine interest from a sponsor/stakeholder;
 legal/IP clarity on using "DHL" in any pitch context; `ENTERPRISE-READINESS.md`
-items have at least a plan, even if not implemented.
+items have at least a plan, even if not implemented; the pilot pages and
+Training Assignment flow are actually walked through with a real
+manager/trainer, not just built once as a proof of concept.
 
 ---
 

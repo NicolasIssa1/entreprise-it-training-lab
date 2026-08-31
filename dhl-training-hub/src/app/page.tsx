@@ -4,6 +4,7 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { Badge } from "@/components/Badge";
 import { DashboardNotes } from "@/components/DashboardNotes";
 import { DashboardProgressSummary } from "@/components/DashboardProgressSummary";
+import { CurrentAssignmentCard } from "@/components/CurrentAssignmentCard";
 import { AnalyticsDashboardCard } from "@/components/AnalyticsDashboardCard";
 import { CompanyContextCard } from "@/components/CompanyContextCard";
 import { AskTutorLink } from "@/components/AskTutorLink";
@@ -65,6 +66,8 @@ export default function DashboardPage() {
       </Card>
 
       <DashboardProgressSummary />
+
+      <CurrentAssignmentCard />
 
       <AnalyticsDashboardCard />
 

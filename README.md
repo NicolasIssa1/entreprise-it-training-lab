@@ -95,9 +95,61 @@ Tracker**, covering three generic enterprise IT team types:
     exclude Daily Log, CV Achievement, and Tutor conversation content. See
     `dhl-training-hub/docs/ANALYTICS.md`.
 
+11. **Training Assignments** (`/assignments`) — 4 static, config-driven
+    templates (Enterprise IT Intern Foundation, Infrastructure & Network
+    Foundation, Applications Support Foundation, Business & Logistics
+    Technology Foundation), each bundling required learning paths, assessments,
+    and investigations. A learner can activate one for themselves and see
+    completion against its required list — never a new competency score, and
+    not organization-wide manager functionality. An `/onboarding` flow (goal,
+    focus area, experience level — no employer/salary/age collected) suggests
+    a starting template via a deterministic, no-AI mapping.
+12. **Pilot pages** (`/pilot`) — a product-oriented landing page explaining the
+    problem/solution/intended users/potential company use, a guided product
+    tour (`/pilot/demo`), a Pilot Report (`/pilot/report`, an
+    assignment-centric structured summary), and an honest Pilot Readiness
+    checklist (`/pilot/readiness`). Never claims DHL endorsement, official DHL
+    training, or certification — see `CLAUDE.md`'s Phase 9 section.
+13. **Privacy & Data Safety** (`/privacy`) — a plain-English explanation of
+    what's stored, what's deliberately never collected, and exactly what
+    automatically reaches the AI Tutor.
+
 See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
 `internship-plan.md` for the current learning state, and `PRODUCT-ROADMAP.md` /
 `ENTERPRISE-READINESS.md` for what comes next.
+
+## Pilot concept
+
+This product is being developed with an eventual **pilot proposal** in mind —
+see `/pilot` in the running app and
+[`dhl-training-hub/docs/PILOT-PROPOSAL.md`](dhl-training-hub/docs/PILOT-PROPOSAL.md)
+for a reusable pilot description (suggested cohort size, duration, and success
+signals — deliberately no ROI claims or pricing). `/pilot/readiness` is an
+honest, self-assessed checklist of what's ready and what isn't before any real
+pilot could start.
+
+## Screenshots
+
+_Not yet added._ A short walkthrough (Dashboard → Learn → Ticket Simulator →
+Progress → Pilot Report) would go here once available.
+
+## Known limitations
+
+- **Local-first prototype.** Cloud sync (Supabase) and the AI Tutor
+  (Anthropic) are both optional and unverified against real, live credentials
+  in this development environment — see `docs/SUPABASE-SETUP.md` and
+  `docs/AI-TUTOR.md` for the manual verification steps once real credentials
+  are added.
+- **No multi-user manager functionality yet.** Manager Preview and the Pilot
+  Report both show only the signed-in learner's own data — there is no
+  cross-user aggregation, cohort view, or admin console. See
+  `ENTERPRISE-READINESS.md`.
+- **Training Assignments and onboarding preferences are stored locally only**
+  (not a new Supabase table) — a deliberate Phase 9 scope decision to avoid a
+  backend redesign for a lightweight personal preference.
+- **Not production-ready.** No SSO, no RBAC, no formal security review, no
+  production hosting/monitoring/support model — see `ENTERPRISE-READINESS.md`
+  and `/pilot/readiness` for the full, honest list.
 
 ## What it is NOT
 
@@ -124,11 +176,14 @@ See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
 Phase 2 (the Learning Engine), Phase 3 (the Advanced Investigations branching
 simulator), Phase 4 (Quizzes + Skill/Readiness Tracking), Phase 5 (Supabase
 backend + auth + data migration), Phase 6 (AI Tutor), Phase 7 (Business &
-Logistics learning), and Phase 8 (Training Analytics / Manager Preview) are
-now complete. What's next, much later: real enterprise pilot/production
-readiness. See `PRODUCT-ROADMAP.md` for the full phase-by-phase breakdown and
-`ENTERPRISE-READINESS.md` for what a real corporate deployment would
-eventually require.
+Logistics learning), Phase 8 (Training Analytics / Manager Preview), and
+Phase 9 (Enterprise Pilot Readiness — pilot pages, Training Assignments,
+onboarding, and a Privacy/Data Safety page) are now complete. What's next,
+much later: real production readiness (Phase 10 — SSO, RBAC, encrypted
+storage, audit logging, formal security review), only pursued if a real pilot
+validates demand. See `PRODUCT-ROADMAP.md` for the full phase-by-phase
+breakdown and `ENTERPRISE-READINESS.md` for what a real corporate deployment
+would eventually require.
 
 ## Repository layout
 

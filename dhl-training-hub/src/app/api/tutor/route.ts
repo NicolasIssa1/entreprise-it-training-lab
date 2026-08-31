@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SKILL_IDS, SKILL_LEVELS, TUTOR_MODES, TutorMode } from "@/lib/types";
+import { ONBOARDING_FOCUS_AREAS, SKILL_IDS, SKILL_LEVELS, TUTOR_MODES, TutorMode } from "@/lib/types";
 import {
   AiChatMessage,
   InvestigationCoachStatus,
@@ -17,6 +17,7 @@ import { checkRateLimit } from "@/lib/ai/rateLimit";
 import { getTopicById } from "@/lib/data/learning";
 import { getQuizById } from "@/lib/data/quizzes";
 import { getScenarioById } from "@/lib/data/investigations";
+import { trainingAssignments } from "@/lib/data/assignments";
 
 // Phase 6 Part P/T: hard input/cost limits enforced server-side, independent
 // of whatever the client already caps — never trust the client alone.
@@ -78,7 +79,27 @@ function sanitizeProgressSummary(raw: unknown): TutorProgressSummary | undefined
     ? r.topRecommendationTitles.filter((t): t is string => typeof t === "string").slice(0, 5).map((t) => t.slice(0, 120))
     : [];
 
-  return { completedTopicIds, quizBestPercentages, completedInvestigationIds, skillLevels, topRecommendationTitles };
+  // Phase 9 Part S: only accept values that match a real assignment title or a
+  // real onboarding focus-area label — never arbitrary client-supplied text,
+  // same "validate against known static data" rule as every other field here.
+  const currentAssignmentTitle =
+    typeof r.currentAssignmentTitle === "string" && trainingAssignments.some((a) => a.title === r.currentAssignmentTitle)
+      ? r.currentAssignmentTitle
+      : undefined;
+  const onboardingFocusArea =
+    typeof r.onboardingFocusArea === "string" && (ONBOARDING_FOCUS_AREAS as readonly string[]).includes(r.onboardingFocusArea)
+      ? r.onboardingFocusArea
+      : undefined;
+
+  return {
+    completedTopicIds,
+    quizBestPercentages,
+    completedInvestigationIds,
+    skillLevels,
+    topRecommendationTitles,
+    currentAssignmentTitle,
+    onboardingFocusArea,
+  };
 }
 
 /** Resolves quiz review context entirely from static curriculum data — the

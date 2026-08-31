@@ -854,6 +854,109 @@ analytics content.
 
 ---
 
+## Phase 9 scope — Enterprise Pilot Readiness (structurally built)
+
+Phase 9 makes the app presentable as a credible pilot pitch — never a claim
+that it *is* production-ready. It does not add multi-tenancy, real manager
+accounts, SSO, or an admin console; see "Explicitly NOT built" below.
+
+**Pilot pages**: `/pilot` (value proposition, problem/solution, intended
+users, potential company use, pilot use-case templates, and a "company
+customization preview" section clearly labeled "Enterprise features
+roadmap — not currently implemented"), `/pilot/demo` (a guided product tour
+of real links into the actual app — never fake accounts or a separate demo
+environment), `/pilot/readiness` (an honest, self-assessed checklist —
+Supabase/AI Tutor configuration checked live via `useAuth()` and `GET
+/api/tutor` rather than hardcoded), and `/pilot/report` (an
+assignment-centric structured summary, distinct from `/analytics/summary` —
+disclaimer: "Pilot training summary — not a certification or employee
+performance evaluation"). None of these claim DHL endorsement, official DHL
+training, real DHL system access, validation, or certification — same rule
+as every other page.
+
+**Training Assignments** (`src/lib/data/assignments.ts`): 4 static,
+config-driven `TrainingAssignment` templates (Enterprise IT Intern
+Foundation, Infrastructure & Network Foundation, Applications Support
+Foundation, Business & Logistics Technology Foundation), each just a named
+bundle of `requiredPathIds` / `requiredQuizIds` / `requiredScenarioIds` (plus
+optional `recommendedTopicIds`) — generic templates, never company-specific
+programs. Content-validated at module load, same pattern as Learn/
+Investigations/Quizzes/Skills. `src/lib/assignmentProgress.ts`
+(`computeAssignmentProgress()`) derives completion **against the required
+list only** — a path counts done once every topic is completed, a quiz once
+it has any recorded attempt, an investigation once it has a completion
+record — and is explicitly **not** a new competency score (`AssignmentProgress`
+is a distinct type from `SkillProgress`, never blended with the 30/30/40
+weighting). A learner activates at most one assignment for themselves via
+`useSelectedAssignment()` (`src/lib/assignmentSelection.ts`) — a single
+`selected-assignment-id` `localStorage` key, deliberately **not** a new
+Supabase table (Phase 9's own "prefer the simplest safe option, don't
+redesign the whole backend" guidance). `/assignments` lists all templates
+with live progress; a compact `CurrentAssignmentCard` sits on the Dashboard;
+`/manager-preview` and `/pilot/report` both gained a "Current Training
+Assignment" section reusing the same derivation.
+
+**Onboarding** (`/onboarding`, `src/lib/onboarding.ts`): a 3-question wizard
+(goal, focus area, experience level — `ONBOARDING_GOALS` /
+`ONBOARDING_FOCUS_AREAS` / `ONBOARDING_EXPERIENCE_LEVELS` in `lib/types.ts`)
+stored via `useOnboardingPreferences()` (localStorage only, same pattern as
+assignment selection). `recommendAssignmentId()` is a **deterministic**
+focus-area → assignment-id lookup table — no AI, no complex
+personalization. Never collects employer, salary, age, or other private
+profile data.
+
+**Recommendation engine integration** (Part R): `lib/recommendations.ts`
+gained one **additive, optional** field on `RecommendationInput`
+(`assignmentProgress?: AssignmentProgress | null`) and one new generator,
+`assignmentRequirementRecommendations()`, that surfaces an active
+assignment's own precomputed `nextRequiredAction` at priority 95 (just above
+the weak-quiz-area signal) — every existing caller that doesn't pass this
+field behaves exactly as before. This is the only change to the engine; nothing
+was rewritten.
+
+**AI Tutor integration** (Part S): `TutorProgressSummary` gained two optional
+fields, `currentAssignmentTitle` and `onboardingFocusArea`
+(`lib/ai/types.ts`), populated client-side by
+`useTutorProgressSummary.ts` and rendered into the system prompt's PROGRESS
+SUMMARY block (`lib/ai/tutorPrompt.ts`). `/api/tutor/route.ts`'s
+`sanitizeProgressSummary` validates both against real static data (an actual
+`TrainingAssignment.title`, an actual `ONBOARDING_FOCUS_AREAS` label) — same
+"never trust arbitrary client text" rule as every other Tutor context field.
+The Tutor still never infers real employer systems and stays governed by the
+same base system prompt rules.
+
+**Privacy & Data Safety** (`/privacy`): a plain-English, product-level page
+(data stored, data deliberately not collected, the AI Tutor boundary,
+Analytics/Manager Preview exclusions) — not a fabricated legal policy, and
+linked from the footer of every page.
+
+**Company context boundary** (Part K): `lib/data/companyContext.ts`'s
+`disclaimer` text now leads with "Personal internship context — not official
+company training material" — the existing gated, single-instance
+`CompanyContext` architecture from Phase 7 is otherwise unchanged.
+
+**Pilot Proposal** (`dhl-training-hub/docs/PILOT-PROPOSAL.md`): a reusable,
+product-level description of a suggested small pilot (5-15 users, 2-4 weeks,
+one Training Assignment per participant) and success signals to observe —
+explicitly no quantified ROI claim and no pricing/commercial terms.
+
+### Explicitly NOT built in Phase 9 (do not add without being asked)
+
+- Real organization accounts, multi-user manager accounts, cohorts, an admin
+  portal, or trainer invitations
+- SSO (Microsoft Entra, SAML, SCIM), public sharing, or email invitations
+- Payments, subscriptions, or any pricing/commercial terms in-product
+- Production deployment, custom company domains, or real DHL integrations
+- Company document uploads or vector RAG
+- A new Supabase table for Training Assignments or onboarding preferences —
+  both stay `localStorage`-only by deliberate design (see above)
+- A second, independently-computed competency/readiness score for
+  assignments — `AssignmentProgress` is completion-against-required-list
+  only, always derived from the same three evidence sources every other
+  derived-progress feature reads
+
+---
+
 ## Tech stack & conventions
 
 - Next.js (App Router) + React + TypeScript + Tailwind CSS.
@@ -918,4 +1021,13 @@ DHL-Internship/
     src/app/analytics/              — /analytics and /analytics/summary pages
     src/app/manager-preview/        — /manager-preview read-only preview page
     docs/ANALYTICS.md               — analytics architecture, source data, privacy writeup
+    src/lib/data/assignments.ts     — Training Assignment templates (Phase 9, 4 static templates)
+    src/lib/assignmentProgress.ts   — assignment completion derivation (required-list only, not a score)
+    src/lib/assignmentSelection.ts  — useSelectedAssignment() localStorage hook (Phase 9)
+    src/lib/onboarding.ts           — useOnboardingPreferences() + deterministic assignment mapping
+    src/app/assignments/            — /assignments — browse/activate Training Assignments
+    src/app/onboarding/             — /onboarding — 3-question wizard
+    src/app/pilot/                  — /pilot, /pilot/demo, /pilot/readiness, /pilot/report
+    src/app/privacy/                — /privacy — Data Safety page
+    docs/PILOT-PROPOSAL.md          — reusable pilot description (Phase 9, no ROI/pricing claims)
 ```

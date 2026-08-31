@@ -13,9 +13,11 @@ const LINKS = [
   { href: "/quizzes", label: "Assessments" },
   { href: "/progress", label: "Progress" },
   { href: "/analytics", label: "Analytics" },
+  { href: "/assignments", label: "Assignments" },
   { href: "/tutor", label: "Tutor" },
   { href: "/daily-log", label: "Daily Log" },
   { href: "/cv-tracker", label: "CV Tracker" },
+  { href: "/pilot", label: "Pilot" },
 ];
 
 export function Nav() {

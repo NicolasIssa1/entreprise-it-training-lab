@@ -1,4 +1,4 @@
-import { InvestigationCompletionRecord, Recommendation, SkillProgress } from "@/lib/types";
+import { AssignmentProgress, InvestigationCompletionRecord, Recommendation, SkillProgress } from "@/lib/types";
 import { getTopicById, learningPaths, getNextIncompleteTopicId, getPathProgress } from "@/lib/data/learning";
 import { quizzes } from "@/lib/data/quizzes";
 import { getInvestigationsForSkill, getQuizzesForSkill } from "@/lib/data/skills";
@@ -10,18 +10,24 @@ export interface RecommendationInput {
   quizAttemptsMap: QuizAttemptsMap;
   investigationCompletions: InvestigationCompletionRecord[];
   skillProgresses: SkillProgress[];
+  /** Optional (Phase 9 Part R) — when the learner has an active Training
+   * Assignment, its own next-required-action is surfaced ahead of unrelated
+   * content rather than the engine being rewritten. Never required — every
+   * existing caller that doesn't pass this behaves exactly as before. */
+  assignmentProgress?: AssignmentProgress | null;
 }
 
 /**
  * Deterministic, no-AI recommendation engine. Each generator below inspects one
  * signal (weak quiz areas, unattempted quizzes, uncompleted/low-scoring
- * investigations, path progress with unmet prerequisites) and produces
- * candidates with an internal priority; the top few, deduplicated by link, are
- * returned. See root CLAUDE.md — recommendations are educational nudges, not a
- * scored ranking shown to the learner.
+ * investigations, path progress with unmet prerequisites, an active assignment's
+ * next requirement) and produces candidates with an internal priority; the top
+ * few, deduplicated by link, are returned. See root CLAUDE.md — recommendations
+ * are educational nudges, not a scored ranking shown to the learner.
  */
 export function getRecommendations(input: RecommendationInput, limit = 5): Recommendation[] {
   const candidates: Recommendation[] = [
+    ...assignmentRequirementRecommendations(input),
     ...weakQuizTopicRecommendations(input),
     ...lowScoringInvestigationRecommendations(input),
     ...neverCompletedInvestigationRecommendations(input),
@@ -50,6 +56,17 @@ export function getRecommendations(input: RecommendationInput, limit = 5): Recom
   }
 
   return deduped.slice(0, limit);
+}
+
+/** When the learner has an active Training Assignment, its own precomputed
+ * next-required-action (see lib/assignmentProgress.ts) is surfaced first —
+ * priority 95, just above the weak-quiz-area signal below — so required
+ * assignment work is recommended before unrelated content, per root CLAUDE.md
+ * Phase 9 Part R ("influence ordering only where clear," never a rewrite of
+ * the underlying engine). */
+function assignmentRequirementRecommendations({ assignmentProgress }: RecommendationInput): Recommendation[] {
+  if (!assignmentProgress?.nextRequiredAction) return [];
+  return [{ ...assignmentProgress.nextRequiredAction, priority: 95 }];
 }
 
 /** A recent quiz attempt under 70% points at specific weak topics, derived from
