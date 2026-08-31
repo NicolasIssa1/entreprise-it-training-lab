@@ -4,6 +4,7 @@ import { infrastructureTopics } from "./infrastructure";
 import { networkingTopics } from "./networking";
 import { applicationsTopics } from "./applications";
 import { securityTopics } from "./security";
+import { businessLogisticsTopics } from "./businessLogistics";
 import { learningPaths } from "./paths";
 import { tickets } from "@/lib/data/tickets";
 
@@ -17,6 +18,7 @@ export const learningTopics: LearningTopic[] = [
   ...networkingTopics,
   ...applicationsTopics,
   ...securityTopics,
+  ...businessLogisticsTopics,
 ];
 
 export { learningPaths };
@@ -27,6 +29,7 @@ export const LEARNING_CATEGORIES: LearningCategory[] = [
   "Networking",
   "Applications",
   "Security Fundamentals",
+  "Business & Logistics",
 ];
 
 export function getTopicById(id: string): LearningTopic | undefined {
@@ -42,11 +45,13 @@ export function getTopicsByCategory(category: LearningCategory): LearningTopic[]
 }
 
 /** Each team's "home" learning category, for the Team page's "Recommended
- * Learning" section. IT Service Management and Security Fundamentals topics apply
- * broadly (any team can own a ticket/incident/escalation, and security genuinely
- * crosses all three teams — see root CLAUDE.md, no dedicated "security team" is
- * assumed), so both are shown across all three teams rather than assigned to one.
- * This is deliberately category-based, not derived from each topic's
+ * Learning" section. IT Service Management, Security Fundamentals, and Business &
+ * Logistics topics apply broadly (any team can own a ticket/incident/escalation,
+ * security genuinely crosses all three teams, and business/logistics context is
+ * equally relevant regardless of which team a system sits in — see root
+ * CLAUDE.md, no dedicated "security team" or "business team" is assumed), so all
+ * three are shown across all three teams rather than assigned to one. This is
+ * deliberately category-based, not derived from each topic's
  * primaryTeam/relatedTeams (which describe the topic's own most-involved teams,
  * not "which team page should recommend it") — using team fields here would make
  * these cross-cutting categories flood every team's list rather than staying a
@@ -57,7 +62,7 @@ const TEAM_HOME_CATEGORY: Record<TeamId, LearningCategory> = {
   "support-network": "Networking",
 };
 
-const CROSS_TEAM_CATEGORIES: LearningCategory[] = ["IT Service Management", "Security Fundamentals"];
+const CROSS_TEAM_CATEGORIES: LearningCategory[] = ["IT Service Management", "Security Fundamentals", "Business & Logistics"];
 
 export function getTopicsForTeam(teamId: TeamId): LearningTopic[] {
   const homeCategory = TEAM_HOME_CATEGORY[teamId];

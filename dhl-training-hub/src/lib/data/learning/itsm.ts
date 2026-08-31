@@ -201,7 +201,7 @@ export const itsmTopics: LearningTopic[] = [
         "The order-processing errors, because the impact (all users, a business-critical process) is far higher than a cosmetic issue affecting one person — regardless of how each was worded or who reported it. Priority should track actual impact and urgency, not the reporter's tone or role.",
     },
     questionToAskAtWork: "When impact and urgency point in different directions, how does your team decide priority?",
-    relatedTopicIds: ["sla", "incident", "escalation"],
+    relatedTopicIds: ["sla", "incident", "escalation", "technical-business-translation"],
     keywords: ["impact", "urgency", "triage"],
   },
   {
@@ -249,7 +249,7 @@ export const itsmTopics: LearningTopic[] = [
         "This is functional escalation — moving to a team with networking expertise. What should be handed over: the scope (who's affected), symptoms observed, what's already been tried/ruled out, and any evidence (error messages, timestamps) — so the next team doesn't have to start from zero.",
     },
     questionToAskAtWork: "What happens when your team can't resolve a ticket — who does it go to, and how is that decided?",
-    relatedTopicIds: ["ticket", "incident", "priority"],
+    relatedTopicIds: ["ticket", "incident", "priority", "exception-management"],
     keywords: ["handoff", "escalate", "raise visibility"],
   },
   {

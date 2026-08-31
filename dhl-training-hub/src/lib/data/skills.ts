@@ -38,6 +38,12 @@ export const skillDefinitions: SkillDefinition[] = [
     name: "Troubleshooting",
     description: "The cross-cutting investigative mindset: scope, evidence, diagnosis, escalation, and verification.",
   },
+  {
+    id: "business-logistics",
+    name: "Business & Logistics Understanding",
+    description:
+      "Business context, not a technical skill — connecting IT systems to business processes, freight-forwarding/logistics concepts, and operational impact.",
+  },
 ];
 
 export function getSkillById(id: SkillId): SkillDefinition {
@@ -53,6 +59,7 @@ const SKILL_LEARNING_CATEGORY: Partial<Record<SkillId, LearningCategory>> = {
   networking: "Networking",
   applications: "Applications",
   security: "Security Fundamentals",
+  "business-logistics": "Business & Logistics",
 };
 
 /** Troubleshooting is cross-cutting — no Learn category is dedicated to it, so
@@ -67,6 +74,7 @@ export const SKILL_QUIZ_CATEGORY: Record<SkillId, QuizCategory> = {
   applications: "Applications",
   security: "Security Fundamentals",
   troubleshooting: "Enterprise Troubleshooting",
+  "business-logistics": "Business & Logistics",
 };
 
 export function getTopicsForSkill(skillId: SkillId): LearningTopic[] {

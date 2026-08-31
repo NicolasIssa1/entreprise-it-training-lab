@@ -383,19 +383,88 @@ explanations, and cloud conversation persistence.
 
 ---
 
-## Phase 7 — Business / Logistics Learning
+## Phase 7 — Business / Logistics Learning ✅ (complete)
 
-**Objective:** Add the "How DHL Works" business-context view (external/customer flow
-and internal/employee flow) that Phase 1 only stubbed out as a placeholder.
+**Objective:** Add generic business/logistics context on top of the IT-focused
+curriculum — connecting the technical concepts already taught to the business
+processes and operational impact they actually support — using only public or
+generic industry information, never DHL-internal specifics.
 
-**Major features:** Generic freight-forwarding/logistics learning content, using only
-public or generic industry information — never DHL-internal specifics.
+**Delivered:** A 6th Learn category, **Business & Logistics** (24 topics,
+bringing the library to **80 topics** across 6 categories), covering three
+areas: enterprise business foundations (business process, operational
+workflow, customer journey, internal-vs-customer-facing systems,
+business-critical applications, operational dependency, business continuity,
+digital transformation, automation, operational KPIs), generic
+freight-forwarding/logistics foundations (logistics, supply chain, freight
+forwarding, the shipment lifecycle, transport modes, shipping parties,
+customs clearance, warehouse operations, shipment visibility/tracking,
+last-mile delivery, shipping documentation, exception management), and
+explicit IT-to-business translation (technology-in-logistics, mapping core IT
+concepts — network, database, API, auth, monitoring, high availability,
+backup/DR — onto the concrete business function each one supports; and
+technical-business-translation, practicing the technical-symptom → affected
+system → affected process → operational-impact chain). A 7th Learning Path,
+**Business & Logistics Foundations**, plus a Foundation Assessment quiz (13
+scenario-based questions) and a path checkpoint quiz (8 questions) were added
+following the exact same architecture as every earlier Learn/Quiz category —
+no new patterns introduced. A handful of reciprocal `relatedTopicIds` links
+were added from existing IT topics (Priority & Business Impact, Escalation, System
+Integration, Monitoring, High Availability) back to the new category, mirroring
+the reciprocal-linking precedent set in Phase 2C.
 
-**Major risks:** Drifting into DHL-specific claims not actually confirmed; scope
-creep beyond IT into general logistics business content.
+Two new **business-impact-framed Advanced Investigations** were added
+(`lib/data/investigations/`): a customer-facing shipment-tracking outage where
+the technical fault (an expired integration API key) is simple but the
+learner must reason about business impact (an organization-wide customer
+visibility problem despite a small internal cause), and a customs
+documentation delay where a single "stuck shipment" turns out to be a
+systemic booking-form bug affecting several shipments — practicing revising
+an initial impact assessment as evidence evolves, and resolving an immediate
+case without skipping the escalation needed to protect everyone else
+affected. Both follow the same evidence-graph/scoring architecture as the
+original 8 Phase 3 scenarios (bringing the total to **10**), and are counted
+identically by the skill/readiness engine.
 
-**Must be validated before proceeding:** IT-focused phases are solid first, since
-business context is a smaller, secondary need compared to IT skill-building.
+Business & Logistics was added as a **7th skill** (`business-logistics` in
+`SKILL_IDS`) using the exact same 30/30/40 derived-evidence model as every
+other skill — no new scoring logic. It was also added to the "cross-team"
+recommended-learning categories (alongside IT Service Management and Security
+Fundamentals) on every Team page, since business/logistics context is equally
+relevant regardless of which team a system sits in.
+
+A small, clearly-labeled, gated `CompanyContext` scaffold
+(`lib/data/companyContext.ts`, one instance, one `getCompanyContext()`
+accessor) separates the current internship's organization name and a couple
+of generic public facts from the company-agnostic curriculum — rendered only
+in Local/Private mode (`PRODUCT_DISPLAY_MODE === "private"`, see
+`lib/product.ts`) via a small Dashboard card, and never present in a future
+public build. Actual personal observations are never duplicated into it —
+they continue to render live from Daily Log entries, unchanged from Phase 1.
+
+No new architecture was introduced: the AI Tutor's deterministic grounding
+(`lib/ai/tutorContext.ts`), `/learn`'s search and category filter, and the
+`/quizzes` foundation/checkpoint split all picked up the new content
+automatically, since none of them hardcode a category or quiz list — this was
+verified with a live Anthropic API call during this phase (a first for the
+project; Phases 5/6 had only been verified structurally), which correctly
+grounded a freight-forwarder-vs-carrier question against the new
+`freight-forwarding`/`shipping-parties`/`transport-modes` topics.
+
+**Major risks (as anticipated, and how they were addressed):** Drifting into
+DHL-specific claims not actually confirmed — every topic, quiz question, and
+investigation scenario is generic/fictional by construction, consistent with
+the rest of the curriculum, and the new `CompanyContext` scaffold keeps the
+one piece of real personal context (an organization name already recorded in
+`internshipState.ts`) clearly separated and privately gated rather than
+blended into the generic content. Scope creep beyond IT into general business
+content — held to a business/logistics *lens on the same IT concepts already
+taught*, not a general business curriculum; every topic connects back to a
+concrete IT concept, system, or troubleshooting habit.
+
+**Must be validated before proceeding:** The Business & Logistics path and
+new investigations are actually used during the internship, not just built
+once as a proof of concept.
 
 ---
 

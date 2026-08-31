@@ -8,6 +8,8 @@ import { systemIntegrationFailureScenario } from "./systemIntegrationFailure";
 import { sharedStorageOutageScenario } from "./sharedStorageOutage";
 import { deploymentRegressionScenario } from "./deploymentRegression";
 import { endpointSecurityIncidentScenario } from "./endpointSecurityIncident";
+import { shipmentVisibilityOutageScenario } from "./shipmentVisibilityOutage";
+import { customsDocumentationDelayScenario } from "./customsDocumentationDelay";
 
 // Advanced Investigations (Phase 3) — branching, evolving-evidence scenarios that
 // sit alongside the fixed-scenario Quick Practice tickets (lib/data/tickets.ts).
@@ -23,6 +25,8 @@ export const investigationScenarios: InvestigationScenario[] = [
   sharedStorageOutageScenario,
   deploymentRegressionScenario,
   endpointSecurityIncidentScenario,
+  shipmentVisibilityOutageScenario,
+  customsDocumentationDelayScenario,
 ];
 
 export function getScenarioById(id: string): InvestigationScenario | undefined {

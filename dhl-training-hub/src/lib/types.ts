@@ -102,7 +102,8 @@ export type LearningCategory =
   | "Infrastructure"
   | "Networking"
   | "Applications"
-  | "Security Fundamentals";
+  | "Security Fundamentals"
+  | "Business & Logistics";
 
 export type LearningLevel = "Foundation" | "Intermediate";
 
@@ -441,7 +442,7 @@ export type QuizResultGuidance = "Strong understanding" | "Good foundation" | "D
 // this is a training indicator, not a validated professional assessment.
 // ---------------------------------------------------------------------------
 
-export const SKILL_IDS = ["itsm", "infrastructure", "networking", "applications", "security", "troubleshooting"] as const;
+export const SKILL_IDS = ["itsm", "infrastructure", "networking", "applications", "security", "troubleshooting", "business-logistics"] as const;
 export type SkillId = (typeof SKILL_IDS)[number];
 
 export interface SkillDefinition {
@@ -521,4 +522,26 @@ export interface TutorConversation {
   title: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Company context (Phase 7 Part P). A lightweight, deliberately unbuilt-out
+// structure so a future organization-specific context (if ever added) has a
+// designated home, kept separate from generic, company-agnostic Business &
+// Logistics curriculum (src/lib/data/learning/businessLogistics.ts). This is
+// NOT a company-management feature — there is exactly one instance of this
+// type in the app (see lib/data/companyContext.ts), gated behind Local/Private
+// mode (see lib/product.ts). Never invent facts here beyond what's explicitly
+// public or explicitly entered by the user — see root CLAUDE.md.
+// ---------------------------------------------------------------------------
+export interface CompanyContext {
+  id: string;
+  name: string;
+  /** Shown wherever this context is displayed — never optional. */
+  disclaimer: string;
+  /** Only explicitly public, generic facts — never invented or confidential. */
+  publicFacts: string[];
+  /** Documentation only — actual observations are always rendered live from
+   * Daily Log entries (see useDailyLogEntries), never duplicated/stored here. */
+  observations: string[];
 }

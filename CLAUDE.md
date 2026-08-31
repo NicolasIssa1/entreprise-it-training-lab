@@ -677,6 +677,105 @@ reasoning.
 
 ---
 
+## Phase 7 scope — Business & Logistics Learning (built and frozen)
+
+Phase 7 adds a business/logistics lens on top of the IT curriculum already
+built in Phases 2-6 — it does not introduce a general business curriculum,
+and every topic connects back to a concrete IT concept, system, or
+troubleshooting habit already taught elsewhere in the app.
+
+**Learn**: a 6th category, **Business & Logistics** (24 topics, `lib/data/
+learning/businessLogistics.ts`, bringing the library to **80 topics**),
+covering three areas: enterprise business foundations (business process,
+operational workflow, customer journey, internal-vs-customer-facing systems,
+business-critical applications, operational dependency, business continuity,
+digital transformation, automation, operational KPIs); generic
+freight-forwarding/logistics foundations (logistics, supply chain, freight
+forwarding, the shipment lifecycle, transport modes, shipping parties,
+customs clearance, warehouse operations, shipment visibility/tracking,
+last-mile delivery, shipping documentation, exception management); and
+explicit IT-to-business translation (`technology-in-logistics`, mapping core
+IT concepts onto the business function each supports; and
+`technical-business-translation`, the technical-symptom → affected system →
+affected process → operational-impact chain). All content follows the same
+10-part structure and confidentiality rules as every other category — generic
+industry knowledge or fictional example workflows only, never a confirmed
+description of any one company's actual process, systems, org structure, or
+SLAs (real workflows vary by organization, shipment type, country, and
+transport mode — every topic says so explicitly). A 7th Learning Path,
+**Business & Logistics Foundations** (`lib/data/learning/paths.ts`), was
+added. **Business & Logistics was added to `CROSS_TEAM_CATEGORIES`**
+(`lib/data/learning/index.ts`), alongside IT Service Management and Security
+Fundamentals, so it appears in every Team page's "Recommended Learning" —
+business/logistics context is equally relevant regardless of which team a
+system sits in, the same reasoning already applied to Security. A small
+number of reciprocal `relatedTopicIds` links were added from existing IT
+topics (Priority & Business Impact, Escalation, System Integration,
+Monitoring, High Availability) back to the new category — the same
+reciprocal-linking precedent Phase 2C set when it added Security Fundamentals.
+
+**Quizzes**: a Business & Logistics Foundation Assessment (13 scenario-based
+questions) and its Learning Path checkpoint (8 questions) in `lib/data/
+quizzes/businessLogistics.ts` and `pathCheckpoints.ts` — same architecture,
+same content-quality rule (applied judgment, never bare definitions) as every
+other quiz. Bringing the library to **14 quizzes / 120 questions total**.
+
+**Advanced Investigations**: two new **business-impact-framed** scenarios in
+`lib/data/investigations/` — `shipmentVisibilityOutage.ts` (a simple technical
+fault — an expired integration API key — but the learner must reason about
+business impact: an organization-wide customer-visibility problem despite a
+small internal cause) and `customsDocumentationDelay.ts` (a single "stuck
+shipment" turns out to be a systemic booking-form bug affecting several
+shipments — practicing revising an initial business-impact assessment as
+evidence evolves, and resolving the immediate case without skipping the
+escalation needed to protect everyone else affected). Both follow the exact
+same `InvestigationScenario` graph/scoring architecture as the original 8
+Phase 3 scenarios — no new fields, no new scoring logic. Bringing the total to
+**10 investigations**.
+
+**Skills**: Business & Logistics Understanding was added as a 7th skill
+(`business-logistics` in `SKILL_IDS`, `lib/data/skills.ts`), mapped onto the
+new Learn category and quiz category exactly like every other non-cross-cutting
+skill — same 30/30/40 derived-evidence model, no new scoring logic.
+
+**Company context**: a deliberately small, gated scaffold —
+`lib/data/companyContext.ts` exports exactly one `CompanyContext` instance
+(the current internship's organization name plus a couple of generic public
+facts, see `CompanyContext` in `lib/types.ts`) via `getCompanyContext()`,
+which returns `null` unless `PRODUCT_DISPLAY_MODE === "private"`
+(`lib/product.ts`) — so a future public/shared build never surfaces personal
+internship context. Rendered only via `components/CompanyContextCard.tsx` on
+the Dashboard. This is explicitly **not** a company-management feature —
+there is exactly one instance of the type in the app. `publicFacts` must stay
+limited to genuinely, generically public knowledge (per the confidentiality
+rules at the top of this file); `observations` is deliberately always empty —
+actual personal observations continue to render live from Daily Log entries
+via `TeamObservations.tsx`, never duplicated here.
+
+**AI Tutor / search**: no code changes were needed — `lib/ai/tutorContext.ts`
+grounds deterministically against `learningTopics` (already inclusive of the
+new category), and `searchTopics()` / the `/learn` category filter both read
+`LEARNING_CATEGORIES` generically. Grounding against the new content was
+verified with a live Anthropic API call during this phase.
+
+### Explicitly NOT built in Phase 7 (do not add without being asked)
+
+- A dedicated "How DHL Works" page/route — the original Phase 7 idea in
+  `PRODUCT-ROADMAP.md`'s pre-Phase-7 text; superseded by folding this context
+  into the existing Learn/Team/Dashboard surfaces instead, per the confidentiality
+  rules (a standalone company page invites exactly the kind of DHL-specific
+  claims this file prohibits)
+- Any DHL-specific fact, system, SLA, org structure, or process not explicitly
+  told to Claude by Nicolas — `CompanyContext.publicFacts` stays limited to
+  genuinely public, generic knowledge
+- A company-management feature, multiple organizations, or any UI to edit
+  `CompanyContext` — it is a single, hand-edited data file, not a feature
+- Any new scoring, storage, or validation pattern — Phase 7 content reuses
+  every Phase 2-4 architecture exactly (topics/paths/quizzes/investigations/
+  skills), so nothing here should ever need a second content-validation shape
+
+---
+
 ## Tech stack & conventions
 
 - Next.js (App Router) + React + TypeScript + Tailwind CSS.
@@ -710,14 +809,16 @@ DHL-Internship/
   dhl-training-hub/        — the actual Next.js application (see its own README)
     src/lib/data/internshipState.ts — single source of truth for current day/team
     src/lib/product.ts              — product/brand config (private vs public name)
-    src/lib/data/learning/          — Learn topic content (56 topics) + paths.ts
+    src/lib/data/learning/          — Learn topic content (80 topics, 6 categories) + paths.ts
+    src/lib/data/learning/businessLogistics.ts — Business & Logistics category (24 topics, Phase 7)
     src/lib/learningProgress.ts     — Learn completion tracking hook
-    src/lib/data/investigations/    — Advanced Investigations content (8 scenarios)
+    src/lib/data/investigations/    — Advanced Investigations content (10 scenarios)
     src/lib/investigationProgress.ts — Advanced Investigations progress/storage hook
     src/lib/investigationScoring.ts  — generic, scenario-agnostic scoring engine
-    src/lib/data/quizzes/           — Quiz content (12 quizzes, 99 questions)
+    src/lib/data/quizzes/           — Quiz content (14 quizzes, 120 questions)
     src/lib/quizAttempts.ts         — quiz attempt storage hook (cloud-aware, Phase 5)
-    src/lib/data/skills.ts          — skill definitions + derived topic/quiz/investigation mapping
+    src/lib/data/skills.ts          — skill definitions + derived topic/quiz/investigation mapping (7 skills)
+    src/lib/data/companyContext.ts  — single gated CompanyContext instance (Phase 7, private-mode only)
     src/lib/skillProgress.ts        — skill/readiness calculation (30/30/40 weighting)
     src/lib/recommendations.ts      — deterministic next-action recommendation engine
     src/lib/supabase/client.ts      — browser Supabase client + isSupabaseConfigured switch

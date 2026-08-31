@@ -35,35 +35,38 @@ Tracker**, covering three generic enterprise IT team types:
 
 1. **Dashboard** — current day/team (from one shared internship state), goals,
    questions, practice exercise, quick notes, reflection
-2. **Learn** — a 56-topic enterprise IT learning library across five categories
-   (IT Service Management, Infrastructure, Networking, Applications, Security
-   Fundamentals — foundational enterprise security awareness for IT staff, not a
-   cybersecurity specialist course), each lesson following a consistent structure
-   (learning outcomes, what is it, ELI10, technical explanation, business purpose,
-   common problems, troubleshooting approach, team connection, university
-   connection, practice scenario, question to ask at work, related topics/tickets
-   — plus optional recommended prerequisites and "don't confuse this with"
-   callouts where genuinely useful). Includes 6 curated Learning Paths, search
-   (title/description/category/keyword), category/team/level filtering, a
-   deterministic "continue learning" suggestion, and persisted completion tracking
+2. **Learn** — an 80-topic enterprise IT (and business context) learning library
+   across six categories (IT Service Management, Infrastructure, Networking,
+   Applications, Security Fundamentals — foundational enterprise security
+   awareness for IT staff, not a cybersecurity specialist course — and Business
+   & Logistics — generic business/freight-forwarding context connecting IT
+   concepts to the business processes they support), each lesson following a
+   consistent structure (learning outcomes, what is it, ELI10, technical
+   explanation, business purpose, common problems, troubleshooting approach,
+   team connection, university connection, practice scenario, question to ask
+   at work, related topics/tickets — plus optional recommended prerequisites
+   and "don't confuse this with" callouts where genuinely useful). Includes 7
+   curated Learning Paths, search (title/description/category/keyword),
+   category/team/level filtering, a deterministic "continue learning"
+   suggestion, and persisted completion tracking
 3. **Team Explorer** — Infrastructure / Applications / Support & Network pages, each
    split into general enterprise IT knowledge vs. personally observed facts, plus
    recommended learning, common training tickets (split into likely-owner vs.
    cross-team scenarios), questions to ask, and open learning prompts
 4. **Ticket Simulator** — two tiers. **Quick Practice**: 34 fake IT tickets to
-   triage, prioritize, and troubleshoot. **Advanced Investigations**: 8
+   triage, prioritize, and troubleshoot. **Advanced Investigations**: 10
    branching, multi-step scenarios where evidence evolves as you investigate —
    assess business impact, ask diagnostic questions, hold and revise a
    hypothesis, gather evolving evidence, resolve or escalate, verify, and
    document, with a persisted investigation timeline and training-only
    performance feedback. Both tiers are cross-linked with the Team Explorer and
    the Learn library
-5. **Knowledge Assessments** — 12 scenario-based quizzes (6 Foundation
-   Assessments, one per skill area, plus 6 Learning Path checkpoints; 99
+5. **Knowledge Assessments** — 14 scenario-based quizzes (7 Foundation
+   Assessments, one per skill area, plus 7 Learning Path checkpoints; 120
    questions total) testing applied judgment, not definitions, with detailed
    answer review, best/latest score tracking, and unlimited retakes
 6. **Training Progress** — a `/progress` page showing an explainable, derived
-   (never separately stored) training indicator across 6 skills, combining
+   (never separately stored) training indicator across 7 skills, combining
    completed lessons, assessment results, and Advanced Investigation
    performance, plus a deterministic (no AI) recommendation engine — an
    educational progress indicator, explicitly not a validated measure of
@@ -109,10 +112,10 @@ See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
 
 Phase 2 (the Learning Engine), Phase 3 (the Advanced Investigations branching
 simulator), Phase 4 (Quizzes + Skill/Readiness Tracking), Phase 5 (Supabase
-backend + auth + data migration), and Phase 6 (AI Tutor) are now complete.
-Briefly, in rough order for what's next: business/logistics learning content,
-a manager/mentor-facing progress view, and — much later — real enterprise
-pilot/production readiness. See `PRODUCT-ROADMAP.md` for the full
+backend + auth + data migration), Phase 6 (AI Tutor), and Phase 7 (Business &
+Logistics learning) are now complete. Briefly, in rough order for what's
+next: a manager/mentor-facing progress view, and — much later — real
+enterprise pilot/production readiness. See `PRODUCT-ROADMAP.md` for the full
 phase-by-phase breakdown and `ENTERPRISE-READINESS.md` for what a real
 corporate deployment would eventually require.
 

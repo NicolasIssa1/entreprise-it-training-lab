@@ -104,4 +104,23 @@ export const learningPaths: LearningPath[] = [
       "change-management",
     ],
   },
+  {
+    id: "business-logistics-foundations",
+    title: "Business & Logistics Foundations",
+    purpose:
+      "Why enterprise IT matters to the business: generic business and freight-forwarding/logistics concepts, connecting technical systems to business processes and operational impact.",
+    topicIds: [
+      "business-process",
+      "logistics",
+      "supply-chain",
+      "freight-forwarding",
+      "shipment-lifecycle",
+      "transport-modes",
+      "customs-clearance",
+      "shipment-visibility",
+      "exception-management",
+      "technology-in-logistics",
+      "technical-business-translation",
+    ],
+  },
 ];

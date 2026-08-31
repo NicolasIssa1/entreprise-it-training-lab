@@ -329,7 +329,7 @@ export const applicationsTopics: LearningTopic[] = [
         "Establish scope and evidence first: how long has the sync been failing, how much data is affected, and what does the integration log show at the point it started failing — fixing the connection without knowing this risks leaving a data gap unresolved.",
     },
     questionToAskAtWork: "Which integrations here are considered most business-critical, and how are they monitored?",
-    relatedTopicIds: ["api", "application-logs", "database"],
+    relatedTopicIds: ["api", "application-logs", "database", "technology-in-logistics"],
     keywords: ["data sync", "middleware", "interoperability"],
   },
   {

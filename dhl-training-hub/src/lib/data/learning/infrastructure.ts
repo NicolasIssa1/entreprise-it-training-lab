@@ -184,7 +184,7 @@ export const infrastructureTopics: LearningTopic[] = [
         "Yes — that's the point of monitoring: catching problems before they cause visible impact. Investigating now (what process is using the CPU, is it expected) can prevent the issue from ever becoming a user-facing incident at all.",
     },
     questionToAskAtWork: "Which systems do you monitor most closely, and what usually triggers an alert here?",
-    relatedTopicIds: ["server", "virtual-machine", "incident", "logging"],
+    relatedTopicIds: ["server", "virtual-machine", "incident", "logging", "technology-in-logistics"],
     keywords: ["alerting", "observability", "metrics"],
     dontConfuseWith: [
       { topicId: "logging", note: "Monitoring watches live metrics/status and alerts in real time; logging records historical events for later investigation." },
@@ -325,7 +325,7 @@ export const infrastructureTopics: LearningTopic[] = [
         "A redundant server or component likely took over automatically (failover), which is exactly what high availability design is meant to achieve — the failure still happened, but it didn't translate into user-visible downtime.",
     },
     questionToAskAtWork: "Which systems here are designed for high availability, and which aren't — and how is that decided?",
-    relatedTopicIds: ["disaster-recovery", "load-balancer", "server"],
+    relatedTopicIds: ["disaster-recovery", "load-balancer", "server", "business-critical-application"],
     keywords: ["redundancy", "failover", "uptime"],
     dontConfuseWith: [
       { topicId: "disaster-recovery", note: "High availability minimizes downtime from likely component failures; disaster recovery restores service after a major disruption." },
