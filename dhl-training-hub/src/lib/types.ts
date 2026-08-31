@@ -545,3 +545,130 @@ export interface CompanyContext {
    * Daily Log entries (see useDailyLogEntries), never duplicated/stored here. */
   observations: string[];
 }
+
+// ---------------------------------------------------------------------------
+// Analytics (Phase 8). Every type below describes DERIVED data only — there is
+// no analytics database table and no second stored truth. Each is computed at
+// render time in src/lib/analytics/ from the same three evidence sources
+// skillProgress.ts already reads (learning-topic-progress, quiz-attempts,
+// investigation-completions) plus static curriculum data. See root CLAUDE.md's
+// Phase 8 section and docs/ANALYTICS.md for the full derivation/privacy
+// writeup. These are educational progress indicators — never job-readiness,
+// certification, or professional-competence claims.
+// ---------------------------------------------------------------------------
+
+export interface TrainingOverview {
+  topicsCompleted: number;
+  topicsTotal: number;
+  quizzesAttempted: number;
+  quizzesTotal: number;
+  investigationsCompleted: number;
+  investigationsTotal: number;
+  pathsInProgress: number;
+  pathsCompleted: number;
+  pathsTotal: number;
+  overallProgress: number; // 0-100, same calculateOverallTrainingProgress mean used by /progress
+}
+
+export interface QuizAttemptTrendPoint {
+  attemptNumber: number;
+  percentage: number;
+  completedAt: string;
+}
+
+export type TrendDirection = "improving" | "declining" | "steady" | "insufficient-data";
+
+export interface QuizAnalyticsEntry {
+  quiz: Quiz;
+  attemptCount: number;
+  latestPercentage: number | null;
+  bestPercentage: number | null;
+  latestCompletedAt: string | null;
+  /** Ordered oldest -> newest, capped at the same 10-attempt history the app
+   * already keeps — never a fabricated longer history. */
+  trend: QuizAttemptTrendPoint[];
+  trendDirection: TrendDirection;
+  resultGuidance: QuizResultGuidance | null;
+  relatedSkillIds: SkillId[];
+}
+
+export interface InvestigationCompletionSummary {
+  scenario: InvestigationScenario;
+  completedAt: string;
+  score: number;
+  resultCategory: PerformanceCategory;
+  /** Learn category the scenario is most associated with, via its own
+   * relatedTopicIds — used to group "strongest/focus areas," never a second
+   * hand-maintained mapping. */
+  primaryCategory: LearningCategory | null;
+}
+
+export interface InvestigationAreaScore {
+  category: LearningCategory;
+  averageScore: number;
+  completedCount: number;
+}
+
+export interface InvestigationAnalytics {
+  completions: InvestigationCompletionSummary[];
+  completedCount: number;
+  totalScenarios: number;
+  averageScore: number | null;
+  strongestAreas: InvestigationAreaScore[];
+  focusAreas: InvestigationAreaScore[];
+}
+
+export interface LearningPathAnalyticsEntry {
+  path: LearningPath;
+  topicsCompleted: number;
+  topicsTotal: number;
+  progressPercentage: number;
+  checkpointQuiz: QuizAnalyticsEntry | null;
+  relatedInvestigationsCompleted: number;
+  relatedInvestigationsTotal: number;
+  /** Next not-yet-completed topic in the path, or null once complete — same
+   * "recommend, never hard-lock" rule as everywhere else this path data is used. */
+  nextTopic: LearningTopic | null;
+}
+
+export type TrainingActivityEventType = "quiz-attempt" | "investigation-completion";
+
+export interface TrainingActivityEvent {
+  id: string;
+  type: TrainingActivityEventType;
+  /** ISO timestamp — always a real timestamp from the underlying record
+   * (QuizAttempt.completedAt / InvestigationCompletionRecord.completedAt).
+   * Learn topic completions are NOT included here because the current data
+   * model doesn't store a per-topic completion timestamp — see
+   * docs/ANALYTICS.md rather than inventing one. */
+  timestamp: string;
+  title: string;
+  description: string;
+  href: string;
+}
+
+export interface WeeklyActivityCount {
+  /** ISO date (Monday) of the week this bucket represents. */
+  weekStart: string;
+  count: number;
+}
+
+export interface SkillAnalyticsEntry {
+  progress: SkillProgress;
+  recommendedAction: Recommendation | null;
+  /** Short, human-readable rollup of what evidence actually exists for this
+   * skill, e.g. "6/9 lessons, 1 assessment attempted, 2 investigations done." */
+  activitySummary: string;
+}
+
+/** Shared bundle both /analytics/summary and /manager-preview build from — one
+ * computation, two presentations (full page vs. read-only preview), never two
+ * separate derivations of the same numbers. */
+export interface TrainingSummary {
+  overview: TrainingOverview;
+  skills: SkillAnalyticsEntry[];
+  strongestSkills: SkillDefinition[];
+  focusSkills: SkillDefinition[];
+  recentActivity: TrainingActivityEvent[];
+  generatedAt: string;
+}

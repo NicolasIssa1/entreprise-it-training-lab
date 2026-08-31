@@ -29,10 +29,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
         <AuthProvider>
-          <Nav />
-          <MigrationBanner />
+          <div className="print:hidden">
+            <Nav />
+            <MigrationBanner />
+          </div>
           <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
-          <footer className="border-t border-slate-200 py-4 text-center text-xs text-slate-400 dark:border-slate-800">
+          <footer className="print:hidden border-t border-slate-200 py-4 text-center text-xs text-slate-400 dark:border-slate-800">
             {product.trainingDisclaimer}
           </footer>
         </AuthProvider>

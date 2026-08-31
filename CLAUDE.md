@@ -776,6 +776,84 @@ verified with a live Anthropic API call during this phase.
 
 ---
 
+## Phase 8 scope — Analytics / Manager View (structurally built)
+
+Phase 8 adds a **reporting layer** over training activity that already
+exists in Phases 2-4 — never a second stored score, and never a
+job-readiness/certification/professional-competence claim (same rule as
+Phase 4's `/progress`). Full architecture, source-data mapping, and privacy
+writeup live in `dhl-training-hub/docs/ANALYTICS.md` — read that before
+touching anything under `src/lib/analytics/`, `src/app/analytics/`, or
+`src/app/manager-preview/`.
+
+**`/progress` vs `/analytics`** are deliberately distinct, not duplicates:
+`/progress` = "what should I learn next?" (skill breakdown + deterministic
+recommendations, unchanged from Phase 4); `/analytics` = "what have I done,
+and how has it developed?" (overview, per-quiz score trends, per-investigation
+history grouped by area, learning path progress, a structured activity
+timeline, weekly activity counts, and a shareable summary). Both pages call
+the *same* `calculateAllSkillProgress()` / `getRecommendations()` functions
+Phase 4 already built — Phase 8 never recomputes a skill score or
+recommendation a second way.
+
+**Derivation layer** (`src/lib/analytics/`) — every function is pure and
+reads only the three existing evidence sources (`learning-topic-progress`,
+`quiz-attempts`, `investigation-completions`) plus static curriculum data.
+`pureCalculations.ts` deliberately has zero `@/`-aliased imports so its trend
+direction, ISO-week bucketing, and averaging logic can be unit-tested
+directly with Node's built-in test runner (mirrors the Phase 1-7 regression
+fix's `mergeCloudState.ts` pattern) — the other analytics files build on top
+of it rather than duplicating that math. Types live in `lib/types.ts`'s
+"Analytics (Phase 8)" section, per the existing one-file-per-project
+type-location convention.
+
+**Activity Timeline is built only from genuinely timestamped records** — quiz
+attempts and investigation completions. Learn topic completions are
+deliberately excluded from the timeline (not from the Training Overview's
+aggregate counts) because the current data model has no per-topic completion
+timestamp exposed to the client — see `docs/ANALYTICS.md` for the full
+reasoning and the low-risk (but not attempted) path to add one later. No
+timestamp is ever invented.
+
+**Three new routes**, all client components following the existing
+"every page hydrates its own state after mount" architecture: `/analytics`
+(the full page), `/analytics/summary` (a concise, printable summary —
+`window.print()` + print CSS, no server-side PDF generation), and
+`/manager-preview` (a **read-only preview of the signed-in learner's own
+data** — explicitly not a real multi-user manager account, never queries
+another user's `user_id`, never weakens RLS). `/analytics/summary` and
+`/manager-preview` both build from one shared `computeTrainingSummary()`
+bundle so their numbers always agree.
+
+**Privacy exclusions are enforced by construction**: no Phase 8 file ever
+imports `useDailyLogEntries`, `useCvAchievements`, or `useTutorConversation`
+— there is no free-text content available to leak, not just a runtime filter
+hiding it. Every Phase 8 page carries a visible disclaimer stating this
+boundary explicitly, per the confidentiality rules at the top of this file.
+
+**Zero Supabase schema changes** — every analytics function reads through
+the existing Phase 5 hooks; no new table, column, or RLS policy.
+
+**Tutor integration**: reuses the existing `progress-coach` mode
+(`AskTutorLink params={{ mode: "progress-coach" }}`, same as `/progress`) —
+no new Tutor mode was added, since Phase 6's `progress-coach` prompt
+("explain the learner's PROGRESS SUMMARY... you are explaining and
+encouraging, not generating new recommendations") already covers explaining
+analytics content.
+
+### Explicitly NOT built in Phase 8 (do not add without being asked)
+
+- Real multi-user manager accounts, organization accounts, cohorts, trainer
+  invitations, or an admin dashboard
+- SSO, manager access to other users' data, or any RLS change
+- Public share links, email reports, or manager access tokens
+- An analytics database table, materialized scores, or any second stored
+  readiness/analytics truth
+- A heavy charting library — `TrendSparkline` stays a small inline-SVG
+  component
+
+---
+
 ## Tech stack & conventions
 
 - Next.js (App Router) + React + TypeScript + Tailwind CSS.
@@ -833,6 +911,11 @@ DHL-Internship/
     src/lib/repositories/           — the only code that talks to Supabase directly
     src/lib/migration.ts            — one-time legacy localStorage -> cloud migration
     src/lib/teamChecklist.ts, dailyLog.ts, cvAchievements.ts — cloud-aware domain hooks
+    src/lib/mergeCloudState.ts      — merge-not-replace cloud-sync helpers (Phase 1-7 regression fix)
     supabase/migrations/0001_init.sql — schema, indexes, RLS policies
     docs/SUPABASE-SETUP.md          — step-by-step cloud setup guide
+    src/lib/analytics/              — analytics derivation layer (Phase 8, pure functions)
+    src/app/analytics/              — /analytics and /analytics/summary pages
+    src/app/manager-preview/        — /manager-preview read-only preview page
+    docs/ANALYTICS.md               — analytics architecture, source data, privacy writeup
 ```

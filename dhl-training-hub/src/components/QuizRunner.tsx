@@ -9,20 +9,13 @@ import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { RelatedTopics } from "@/components/RelatedTopics";
 import { SyncErrorNotice } from "@/components/SyncErrorNotice";
 import { AskTutorLink } from "@/components/AskTutorLink";
-import { useQuizAttempts } from "@/lib/quizAttempts";
-import { Quiz, QuizAnswer, QuizAttempt, QuizQuestion, QuizResultGuidance } from "@/lib/types";
+import { useQuizAttempts, quizResultGuidance } from "@/lib/quizAttempts";
+import { Quiz, QuizAnswer, QuizAttempt, QuizQuestion } from "@/lib/types";
 
 function arraysEqualAsSets(a: string[], b: string[]): boolean {
   if (a.length !== b.length) return false;
   const setB = new Set(b);
   return a.every((x) => setB.has(x));
-}
-
-function resultGuidance(percentage: number): { label: QuizResultGuidance; variant: "success" | "accent" | "warning" | "danger" } {
-  if (percentage >= 85) return { label: "Strong understanding", variant: "success" };
-  if (percentage >= 70) return { label: "Good foundation", variant: "accent" };
-  if (percentage >= 50) return { label: "Developing", variant: "warning" };
-  return { label: "Review recommended", variant: "danger" };
 }
 
 /** Full quiz-taking flow: one question at a time, no correctness leaked before
@@ -179,7 +172,7 @@ export function QuizRunner({ quiz }: { quiz: Quiz }) {
 
 function QuizReview({ quiz, attempt, onRetake }: { quiz: Quiz; attempt: QuizAttempt; onRetake: () => void }) {
   const { best, syncError } = useQuizAttempts(quiz.id);
-  const guidance = resultGuidance(attempt.percentage);
+  const guidance = quizResultGuidance(attempt.percentage);
 
   return (
     <div className="space-y-6">

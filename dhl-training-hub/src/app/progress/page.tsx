@@ -36,7 +36,12 @@ export default function ProgressPage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Training Progress</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
-          An educational progress indicator across your lessons, knowledge checks, and practical investigations.
+          An educational progress indicator across your lessons, knowledge checks, and practical investigations. For a
+          fuller breakdown of what you&rsquo;ve done — quiz trends, investigation history, a shareable summary — see{" "}
+          <Link href="/analytics" className="font-medium text-blue-600 hover:underline dark:text-blue-400">
+            Training Analytics
+          </Link>
+          .
         </p>
       </div>
 

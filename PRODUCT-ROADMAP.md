@@ -468,19 +468,58 @@ once as a proof of concept.
 
 ---
 
-## Phase 8 — Analytics / Manager View
+## Phase 8 — Analytics / Manager View ✅ (structurally complete)
 
 **Objective:** A read-only view suitable for showing a manager or mentor a summary of
 learning progress (not raw personal journal entries).
 
-**Major features:** Aggregate progress views, exportable summaries, clear separation
-between what's shareable and what stays private.
+**Delivered:** A **reporting layer** (`src/lib/analytics/`) over training
+activity already built in Phases 2-4 — every function pure and derived from
+the same three evidence sources `skillProgress.ts`/`recommendations.ts`
+already read, never a second stored score. Three new routes: **`/analytics`**
+(Training Overview counts, per-skill cards reusing the existing `SkillCard`
+plus a recommended next action, per-quiz score trends with a small inline-SVG
+sparkline, investigation results grouped into strongest/focus areas by Learn
+category, learning path progress with checkpoint results, a structured
+activity timeline, and weekly activity counts), **`/analytics/summary`** (a
+concise, printable summary — strongest/focus areas, recent activity,
+`window.print()` + print CSS, no server-side PDF generation), and
+**`/manager-preview`** (a read-only preview of the signed-in learner's own
+data — explicitly labeled as not a real multi-user manager account, never
+queries another user's data, never touches RLS). The summary and manager
+preview both build from one shared `computeTrainingSummary()` bundle so their
+numbers always agree. `/progress` ("what should I learn next?") and
+`/analytics` ("what have I done?") stay deliberately distinct — both call the
+same Phase 4 `calculateAllSkillProgress()`/`getRecommendations()` rather than
+each computing a second version.
 
-**Major risks:** Accidentally exposing raw, unfiltered personal notes; privacy
-boundary mistakes between "my journal" and "what I'd show someone else."
+The Activity Timeline is built only from genuinely timestamped records (quiz
+attempts, investigation completions) — Learn topic completions are
+deliberately excluded from it (not from aggregate counts) because the current
+data model has no per-topic completion timestamp exposed to the client, and
+Phase 8 doesn't invent one (see `docs/ANALYTICS.md`). Privacy exclusions
+(Daily Log, CV Achievement, Tutor conversation content) are enforced by
+construction — no Phase 8 file imports those hooks at all, not just a runtime
+filter — with a visible disclaimer on every page stating the boundary. Zero
+Supabase schema changes. The AI Tutor integration reuses the existing
+`progress-coach` mode rather than adding a new one. A small, dependency-free
+`pureCalculations.ts` module (trend direction, ISO-week bucketing, averaging)
+mirrors the Phase 1-7 regression fix's `mergeCloudState.ts` pattern — zero
+`@/`-aliased imports, so it's genuinely unit-tested with Node's built-in test
+runner.
+
+**Major risks (as anticipated, and how they were addressed):** Accidentally
+exposing raw, unfiltered personal notes — avoided structurally, not by a
+runtime filter (see above). Privacy boundary mistakes between "my journal"
+and "what I'd show someone else" — every analytics/summary/preview page
+carries a visible, explicit disclaimer naming exactly what's excluded, per
+Part L's "make the boundary visible" requirement, not just true in code.
 
 **Must be validated before proceeding:** Real interest from a manager/mentor in
-seeing this, not a speculative feature.
+seeing this, not a speculative feature; and — since this phase's own live
+browser testing wasn't possible in the development environment — the manual
+interactive checks in the Phase 8 completion report should be run once, the
+same way Phase 5/6's live-testing checklists were deferred to Nicolas.
 
 ---
 

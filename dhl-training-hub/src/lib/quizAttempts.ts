@@ -5,7 +5,7 @@ import { useLocalStorageState } from "@/lib/storage";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { fetchQuizAttempts, insertQuizAttempt, bulkUpsertQuizAttempts } from "@/lib/repositories/quizAttemptsRepository";
 import { mergeMapOfArraysByIdPreferCloud } from "@/lib/mergeCloudState";
-import { QuizAttempt } from "@/lib/types";
+import { QuizAttempt, QuizResultGuidance } from "@/lib/types";
 
 const STORAGE_KEY = "quiz-attempts";
 const MAX_ATTEMPTS_PER_QUIZ = 10;
@@ -28,6 +28,16 @@ export function bestAttempt(attempts: QuizAttempt[]): QuizAttempt | undefined {
 
 export function latestAttempt(attempts: QuizAttempt[]): QuizAttempt | undefined {
   return attempts[attempts.length - 1];
+}
+
+/** Learning-descriptor-only result guidance for a percentage score — shared by
+ * QuizRunner's post-submission result and Quiz Analytics (Phase 8) so the
+ * score bands only ever live in one place. Never "Certified"/"Expert". */
+export function quizResultGuidance(percentage: number): { label: QuizResultGuidance; variant: "success" | "accent" | "warning" | "danger" } {
+  if (percentage >= 85) return { label: "Strong understanding", variant: "success" };
+  if (percentage >= 70) return { label: "Good foundation", variant: "accent" };
+  if (percentage >= 50) return { label: "Developing", variant: "warning" };
+  return { label: "Review recommended", variant: "danger" };
 }
 
 /**

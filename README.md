@@ -83,6 +83,17 @@ Tracker**, covering three generic enterprise IT team types:
    recommendations. Works with **zero setup** — without an Anthropic API key,
    the page just says so and every other feature is unaffected. See
    `dhl-training-hub/docs/AI-TUTOR.md`.
+10. **Training Analytics** (`/analytics`) — a reporting layer over activity
+    that already exists elsewhere in the app (never a second stored score):
+    an overview of topics/paths/quizzes/investigations completed, per-skill
+    cards with a recommended next action, per-quiz score trends, investigation
+    results grouped into strongest/focus areas, learning path progress, and a
+    structured activity timeline built only from genuinely timestamped
+    records. `/analytics/summary` is a concise, printable summary;
+    `/manager-preview` is a read-only preview of your own data labeled
+    exactly as that — not a real multi-user manager feature. Both explicitly
+    exclude Daily Log, CV Achievement, and Tutor conversation content. See
+    `dhl-training-hub/docs/ANALYTICS.md`.
 
 See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
 `internship-plan.md` for the current learning state, and `PRODUCT-ROADMAP.md` /
@@ -112,12 +123,12 @@ See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
 
 Phase 2 (the Learning Engine), Phase 3 (the Advanced Investigations branching
 simulator), Phase 4 (Quizzes + Skill/Readiness Tracking), Phase 5 (Supabase
-backend + auth + data migration), Phase 6 (AI Tutor), and Phase 7 (Business &
-Logistics learning) are now complete. Briefly, in rough order for what's
-next: a manager/mentor-facing progress view, and — much later — real
-enterprise pilot/production readiness. See `PRODUCT-ROADMAP.md` for the full
-phase-by-phase breakdown and `ENTERPRISE-READINESS.md` for what a real
-corporate deployment would eventually require.
+backend + auth + data migration), Phase 6 (AI Tutor), Phase 7 (Business &
+Logistics learning), and Phase 8 (Training Analytics / Manager Preview) are
+now complete. What's next, much later: real enterprise pilot/production
+readiness. See `PRODUCT-ROADMAP.md` for the full phase-by-phase breakdown and
+`ENTERPRISE-READINESS.md` for what a real corporate deployment would
+eventually require.
 
 ## Repository layout
 
@@ -133,6 +144,7 @@ learning/ practice-tickets/ quizzes/ questions/ cv-achievements/
 dhl-training-hub/        the Next.js application
   docs/SUPABASE-SETUP.md          step-by-step cloud setup guide
   docs/AI-TUTOR.md                AI Tutor architecture, grounding, privacy, setup
+  docs/ANALYTICS.md               Analytics architecture, source data, privacy (Phase 8)
   supabase/migrations/0001_init.sql  database schema + Row Level Security
   supabase/migrations/0002_tutor.sql tutor conversation schema + RLS (Phase 6)
   .env.example                    env vars needed for cloud mode / AI Tutor
