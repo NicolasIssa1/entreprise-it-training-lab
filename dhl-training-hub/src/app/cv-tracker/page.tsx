@@ -59,7 +59,7 @@ export default function CvTrackerPage() {
 
   return (
     <div className="space-y-8">
-      <SectionHeading title="CV Achievement Tracker" subtitle="Honest, evidence-based CV bullets — never exaggerated" />
+      <SectionHeading level="h1" title="CV Achievement Tracker" subtitle="Honest, evidence-based CV bullets — never exaggerated" />
       <PrivacyNotice context="Achievements should reflect your own honest involvement, without confidential specifics." />
       <Disclaimer>
         Never overstate what actually happened. If you only observed something, it must

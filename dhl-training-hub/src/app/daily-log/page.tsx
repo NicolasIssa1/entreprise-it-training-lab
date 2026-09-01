@@ -74,7 +74,7 @@ function DailyLogContent() {
 
   return (
     <div className="space-y-8">
-      <SectionHeading title="Daily Log" subtitle="Journal your internship — no employee names required" />
+      <SectionHeading level="h1" title="Daily Log" subtitle="Journal your internship — no employee names required" />
       <PrivacyNotice context="Personal observations are welcome, but exclude anything restricted or confidential." />
 
       <Card>

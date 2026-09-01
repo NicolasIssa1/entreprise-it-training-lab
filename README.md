@@ -21,6 +21,17 @@ of Leeds) during an internship in DHL Dubai's IT/BPU department.
 > API key, `/tutor` just shows "not configured" and every other page is
 > unaffected. See `dhl-training-hub/docs/AI-TUTOR.md`.
 
+## The problem
+
+Internships are easy to passively observe and hard to actively learn from —
+concepts get explained once, terminology comes up faster than it can be
+absorbed, and there's rarely a structured way to test whether something
+actually stuck. This project exists to close that gap for one intern (me):
+turn day-to-day exposure to enterprise IT into structured lessons, realistic
+troubleshooting practice, and honest, self-assessed progress tracking —
+without ever needing (or storing) any real confidential company information
+to do it.
+
 ## What this product is
 
 A personal enterprise IT learning and internship training platform: an **Internship
@@ -130,8 +141,94 @@ pilot could start.
 
 ## Screenshots
 
-_Not yet added._ A short walkthrough (Dashboard → Learn → Ticket Simulator →
-Progress → Pilot Report) would go here once available.
+_Not yet added._ See
+[`dhl-training-hub/docs/SCREENSHOTS.md`](dhl-training-hub/docs/SCREENSHOTS.md)
+for the exact shot list (route, what should be visible, what to remove first)
+— a walkthrough covering Dashboard → Learn → Advanced Investigation → Quiz
+results → Progress/Analytics → AI Tutor → Manager Preview → Pilot would go
+here once captured.
+
+## Architecture
+
+Next.js App Router, entirely client-rendered: every page is a client
+component that hydrates its own state after mount, so there's no
+server-rendered personalized content and no session-refreshing middleware to
+maintain. Storage is **local-first, optionally cloud-backed**: every piece of
+user-generated data (learning progress, quiz attempts, investigation state,
+daily log, CV achievements, tutor conversations) lives in the browser's
+`localStorage` first, and — only once a Supabase project is configured and
+the learner signs in — also syncs to Postgres behind real authentication and
+Row Level Security. A thin repository layer
+(`dhl-training-hub/src/lib/repositories/`) is the only code that talks to
+Supabase directly; every page calls a domain hook instead. Cloud sync
+**merges** with local state rather than replacing it outright
+(`dhl-training-hub/src/lib/mergeCloudState.ts`) — an earlier version of this
+app had a race condition where a cloud fetch could silently overwrite a
+just-saved local change, fixed in commit `a8e9566` and covered by unit tests
+ever since. See `CLAUDE.md`'s Phase 5 section for the full write-up, and
+[`dhl-training-hub/docs/PORTFOLIO-STORY.md`](dhl-training-hub/docs/PORTFOLIO-STORY.md)
+for the fuller story of that bug and fix.
+
+Static curriculum (Learn topics, quizzes, tickets, investigation scenarios,
+team/skill/assignment definitions) is application code, not a CMS — every
+content set is validated at build time by a small custom validator that fails
+the build on a duplicate ID, a dangling reference, or an unreachable
+investigation graph node.
+
+## AI Tutor architecture
+
+An optional, curriculum-grounded assistant — not a general-purpose chatbot.
+Retrieval is deterministic keyword/ID matching against the Learn library (no
+embeddings, no vector database), capped at 6 topics per request, called only
+from a server-only Next.js Route Handler so the Anthropic API key never
+reaches the browser. Seven trusted "modes" (general tutor, topic tutor, quiz
+coach, quiz review, investigation coach, investigation review, progress
+coach) are always set by which link the learner clicked, never inferred from
+free text — this matters because coach modes have a hard rule: the correct
+quiz answer or an investigation's hidden outcome is structurally excluded
+from what's sent to the model in coach mode, not just withheld by
+instruction. Full architecture, grounding strategy, privacy trust boundary,
+and rate limiting: [`dhl-training-hub/docs/AI-TUTOR.md`](dhl-training-hub/docs/AI-TUTOR.md).
+
+## Data / privacy architecture
+
+See `CLAUDE.md`'s confidentiality rules for the policy; in short:
+
+- No real DHL data, employee/customer names, ticket numbers, internal
+  URLs/IPs, or credentials are ever entered, stored, or generated anywhere —
+  all tickets, scenarios, and quiz questions are fictional and generic by
+  construction.
+- The Analytics, Manager Preview, and Pilot Report pages never import the
+  Daily Log or CV Achievement hooks at all — the privacy boundary is enforced
+  structurally (there's no free-text content available to leak), not by a
+  runtime filter. See
+  [`dhl-training-hub/docs/ANALYTICS.md`](dhl-training-hub/docs/ANALYTICS.md).
+- The AI Tutor never automatically receives Daily Log entries, CV Achievement
+  text, or the learner's name/email — see `docs/AI-TUTOR.md`'s trust boundary
+  section for exactly what it does receive.
+- Every Supabase table has Row Level Security enabled, scoped to
+  `auth.uid() = user_id` — the database enforces per-user isolation, not just
+  the frontend.
+- A plain-English explanation of all of the above lives at `/privacy` in the
+  running app.
+
+## Testing
+
+`npm test` runs a small, genuinely dependency-free unit test suite (Node's
+built-in test runner) covering the two areas most worth protecting against
+silent regression: `dhl-training-hub/src/lib/mergeCloudState.ts` (the
+merge-not-replace persistence fix — including a regression test that
+reproduces the original overwrite bug) and
+`dhl-training-hub/src/lib/analytics/pureCalculations.ts` (trend direction,
+ISO-week bucketing, averaging). `npm run lint` and `npm run build` are
+expected to stay clean — build-time content validators
+(`validateLearningContent`, `validateInvestigations`, `validateQuizzes`,
+`validateSkills`) also run automatically on every build and throw on any
+broken cross-reference. There is no browser-automation test suite yet — see
+each phase's completion notes and
+[`dhl-training-hub/docs/DEPLOYMENT.md`](dhl-training-hub/docs/DEPLOYMENT.md)'s
+post-deploy smoke test list for the manual regression steps that fill that
+gap today.
 
 ## Known limitations
 
@@ -171,19 +268,23 @@ Progress → Pilot Report) would go here once available.
   With no Supabase project configured, the app runs entirely locally with zero
   setup ("Local Demo Mode")
 
-## Future roadmap (not built yet)
+## Roadmap status
 
-Phase 2 (the Learning Engine), Phase 3 (the Advanced Investigations branching
-simulator), Phase 4 (Quizzes + Skill/Readiness Tracking), Phase 5 (Supabase
-backend + auth + data migration), Phase 6 (AI Tutor), Phase 7 (Business &
-Logistics learning), Phase 8 (Training Analytics / Manager Preview), and
-Phase 9 (Enterprise Pilot Readiness — pilot pages, Training Assignments,
-onboarding, and a Privacy/Data Safety page) are now complete. What's next,
-much later: real production readiness (Phase 10 — SSO, RBAC, encrypted
-storage, audit logging, formal security review), only pursued if a real pilot
-validates demand. See `PRODUCT-ROADMAP.md` for the full phase-by-phase
-breakdown and `ENTERPRISE-READINESS.md` for what a real corporate deployment
-would eventually require.
+All 10 planned phases are complete: Phase 2 (the Learning Engine), Phase 3
+(the Advanced Investigations branching simulator), Phase 4 (Quizzes +
+Skill/Readiness Tracking), Phase 5 (Supabase backend + auth + data
+migration), Phase 6 (AI Tutor), Phase 7 (Business & Logistics learning),
+Phase 8 (Training Analytics / Manager Preview), Phase 9 (Enterprise Pilot
+Readiness — pilot pages, Training Assignments, onboarding, and a Privacy/Data
+Safety page), and Phase 10 (final QA, polish, deployment readiness, and demo/
+portfolio preparation — this document, `docs/DEMO-SCRIPT.md`,
+`docs/PORTFOLIO-STORY.md`, `docs/SCREENSHOTS.md`, and `docs/DEPLOYMENT.md`
+are its main outputs). **Phase 10 is the last planned phase** — see
+`PRODUCT-ROADMAP.md` for the full phase-by-phase breakdown. Real enterprise
+production readiness (SSO, RBAC, encrypted storage, audit logging, a formal
+security review) remains an unimplemented, unplanned future direction
+documented in `ENTERPRISE-READINESS.md`, only worth pursuing if a real pilot
+ever validates demand.
 
 ## Repository layout
 
@@ -200,6 +301,11 @@ dhl-training-hub/        the Next.js application
   docs/SUPABASE-SETUP.md          step-by-step cloud setup guide
   docs/AI-TUTOR.md                AI Tutor architecture, grounding, privacy, setup
   docs/ANALYTICS.md               Analytics architecture, source data, privacy (Phase 8)
+  docs/PILOT-PROPOSAL.md          reusable pilot description (Phase 9)
+  docs/DEMO-SCRIPT.md             5-minute demo script + internship-manager demo (Phase 10)
+  docs/PORTFOLIO-STORY.md         interview answers, CV bullets, GitHub/LinkedIn copy (Phase 10)
+  docs/SCREENSHOTS.md             exact screenshot shot list for the README (Phase 10)
+  docs/DEPLOYMENT.md              env vars, Supabase/Vercel setup, smoke tests (Phase 10)
   supabase/migrations/0001_init.sql  database schema + Row Level Security
   supabase/migrations/0002_tutor.sql tutor conversation schema + RLS (Phase 6)
   .env.example                    env vars needed for cloud mode / AI Tutor

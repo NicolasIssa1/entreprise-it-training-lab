@@ -957,6 +957,111 @@ explicitly no quantified ROI claim and no pricing/commercial terms.
 
 ---
 
+## Phase 10 scope — Final QA, Polish, Deployment & Portfolio Readiness (complete)
+
+Phase 10 is the **final planned build phase**. It is a finalization pass over
+Phases 1-9 — QA, polish, consistency, documentation, demo readiness, and
+deployment readiness — not a new feature phase. It supersedes
+`PRODUCT-ROADMAP.md`'s original "Phase 10 — Production/Commercial Readiness"
+description (full enterprise production readiness — SSO, RBAC, encrypted
+storage, audit logging, a formal security review); that speculative future
+scope still lives in `ENTERPRISE-READINESS.md`, unimplemented, only pursued if
+a real pilot ever validates demand — it is explicitly **not** numbered as a
+phase, so that this project's phase sequence ends cleanly at Phase 10 rather
+than implying an open-ended Phase 11+.
+
+**Verified baseline before any change**: `npm run build`, `npm run lint`, and
+`npm test` (14/14) were all already clean, and `npm audit` reported 0
+vulnerabilities — Phase 10 is polish on a structurally sound base, not a
+rescue.
+
+**QA audit findings and fixes**: a handful of pages (`/tickets`, `/teams`,
+`/daily-log`, `/cv-tracker`) were missing a page-level `<h1>` — `SectionHeading`
+(`src/components/SectionHeading.tsx`) gained an optional `level` prop
+(`"h1" | "h2"`, defaulting to `"h2"`) rather than introducing a second heading
+component, and those four pages now pass `level="h1"` on their top heading.
+The Dashboard's `DashboardProgressSummary` and `AnalyticsDashboardCard` were
+found to render the same three counts (topics/assessments/investigations)
+side by side — `AnalyticsDashboardCard` was removed and its one link folded
+into `DashboardProgressSummary`'s header as a second "View analytics →" link,
+since it had no other caller. No other QA issues (broken links, terminology
+drift, hype language, stray DHL branding, hydration/console issues) were
+found — see the Phase 10 completion report for the full audit trail.
+
+**Navigation** (`src/components/Nav.tsx`): the flat 12-link list was grouped
+into four sections (Learn: Dashboard/Learn/Teams/Ticket Simulator/Assessments;
+Progress: Progress/Analytics/Assignments; Tools: AI Tutor/Daily Log/CV
+Tracker; Pilot) with a divider between groups on wide screens, and a proper
+hamburger-toggled mobile panel (grouped, with section labels) replaces the old
+`flex-wrap`-only mobile behavior, which could push page content down several
+rows on narrow screens. The Nav's "Tutor" label was corrected to "AI Tutor"
+to match every other reference to the feature in the app; "Assessments" was
+confirmed (not changed) as the app's consistent user-facing term for the quiz
+feature — `/quizzes` is only ever a URL slug, never shown as a label.
+Manager Preview, Privacy, and Onboarding remain deliberately reachable only
+via footer/in-page links, not top nav, to keep the nav from growing further.
+
+**Security, privacy, and persistence**: a full read-only audit (secrets in
+git history and tracked files, `.gitignore`, the `ANTHROPIC_API_KEY`
+server/client boundary, Supabase RLS on all 10 tables, the Phase 8/9 privacy
+exclusions, `CompanyContext` scope, and a scan of ticket/investigation/daily
+journal content for anything real) found **no issues** — verdict: safe to
+publish publicly. A separate audit of all 7 persistence domains, the
+`mergeCloudState.ts` merge-not-replace logic from the Phase 1-7 regression
+fix (`a8e9566`), analytics correctness (no NaN/double-counting/fabricated
+timestamps), assignment/onboarding derivation, and the AI Tutor's grounding
+cap/coach-mode structural non-disclosure/rate limiting/error handling also
+found **no issues** — every domain matches its documented Phase 5-9
+architecture exactly. Neither audit required a code change; see the Phase 10
+completion report for the manual browser regression steps still owed (this
+project has no browser-automation suite, so live persistence-under-real-
+network-timing can only be confirmed by Nicolas manually, in both Local Demo
+Mode and, if configured, Cloud Mode).
+
+**New documentation** (`dhl-training-hub/docs/`): `DEMO-SCRIPT.md` (a ~5-minute
+general walkthrough plus a separate, differently-framed internship-manager
+demo script — "I built this independently to structure what I was learning,"
+never "I built DHL's training system"), `PORTFOLIO-STORY.md` (interview
+answers, freshly recomputed factual counts, and CV bullet / GitHub
+description / LinkedIn description options — no user/ROI/production-adoption
+claims), `SCREENSHOTS.md` (an exact shot list with a "remove before
+publishing" column per screenshot), and `DEPLOYMENT.md` (environment
+variables, Supabase redirect-URL configuration, Vercel-oriented deployment
+steps, post-deploy smoke tests, and the explicit production/pilot limitations
+list — no deployment was actually performed). The root `README.md` gained
+explicit Problem, Architecture, AI Tutor Architecture, Data/Privacy
+Architecture, and Testing sections it previously lacked as standalone
+headers, plus links to all four new docs.
+
+**Verified factual counts** (recomputed directly from source during Phase 10,
+not carried over from memory — see `PORTFOLIO-STORY.md`): 80 Learn topics
+across 6 categories, 7 Learning Paths, 34 Quick Practice tickets, 10 Advanced
+Investigations, 14 quizzes / 120 questions, 7 skills, 4 assignment templates,
+10 Supabase tables (8 from Phase 5 + 2 from Phase 6), all RLS-enabled.
+
+### Explicitly NOT built in Phase 10 (do not add without being asked)
+
+- Any new feature, route, or data domain — Phase 10 is polish/QA/docs only,
+  never a vehicle for scope creep
+- Real browser-automation/E2E testing — this environment has none; the
+  manual regression steps in the Phase 10 completion report and
+  `DEPLOYMENT.md`'s smoke-test list fill that gap for now
+- An actual deployment to Vercel or anywhere else — `DEPLOYMENT.md` documents
+  how to, but Phase 10 did not perform one
+- Real screenshots — `SCREENSHOTS.md` is a shot list, not screenshots; none
+  were captured (capturing requires a live browser, and risks including real
+  personal content if done carelessly — left to Nicolas)
+- Any dependency upgrade at all, major or patch (TypeScript 5→7, ESLint 9→10,
+  `@types/node` 20→26, and even the patch-level `next`/`eslint-config-next`
+  16.3.2→16.3.4 were all identified as available via `npm outdated` and
+  deliberately left alone) — stability over chasing latest versions, per
+  this phase's own brief; nothing here is a known bug affecting this app
+- Phase 11, or any further numbered phase — Phase 10 is the last one; further
+  work is either a fix to something Phase 10 found, or lives in
+  `ENTERPRISE-READINESS.md` as an unplanned, unstarted future direction
+
+---
+
 ## Tech stack & conventions
 
 - Next.js (App Router) + React + TypeScript + Tailwind CSS.

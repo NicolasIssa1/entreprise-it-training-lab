@@ -32,11 +32,16 @@ export function DashboardProgressSummary() {
 
   return (
     <Card>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <SectionHeading title="Your Learning Progress" />
-        <Link href="/progress" className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
-          View full progress →
-        </Link>
+        <div className="flex gap-4 text-sm font-medium">
+          <Link href="/progress" className="text-blue-600 hover:underline dark:text-blue-400">
+            View full progress →
+          </Link>
+          <Link href="/analytics" className="text-blue-600 hover:underline dark:text-blue-400">
+            View analytics →
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-4">

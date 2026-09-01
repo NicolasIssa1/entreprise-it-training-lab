@@ -26,6 +26,7 @@ export default function TicketSimulatorPage() {
   return (
     <div className="space-y-6">
       <SectionHeading
+        level="h1"
         title="Ticket Simulator"
         subtitle="Fake, generic training tickets and investigations — not real DHL data or terminology"
       />

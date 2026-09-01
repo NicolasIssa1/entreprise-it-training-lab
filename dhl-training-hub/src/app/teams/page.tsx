@@ -7,6 +7,7 @@ export default function TeamsPage() {
   return (
     <div className="space-y-6">
       <SectionHeading
+        level="h1"
         title="Teams"
         subtitle="Generic enterprise IT concepts, organized by the three IT/BPU teams. No confidential DHL information — see CLAUDE.md."
       />

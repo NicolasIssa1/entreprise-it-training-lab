@@ -576,17 +576,64 @@ manager/trainer, not just built once as a proof of concept.
 
 ---
 
-## Phase 10 — Production / Commercial Readiness
+## Phase 10 — Final QA, Polish, Deployment & Portfolio Readiness ✅ (complete — final phase)
 
-**Objective:** Actual enterprise-grade deployment — the furthest phase, only pursued
-if Phase 9 validates real demand.
+**Objective:** Take Phases 1-9 and make the product stable, polished,
+consistent, presentation-ready, portfolio-ready, GitHub-ready, and deployment-
+ready — a finalization pass, never a new feature phase. **Phase 10 is the
+last planned phase of this project.**
 
-**Major features:** Everything in `ENTERPRISE-READINESS.md` — auth/SSO, RBAC,
-encrypted storage, audit logging, monitoring, support model, legal/licensing review,
-company branding approval, formal security review.
+**Delivered:** A full QA audit across every route (navigation, accessibility,
+design consistency, terminology, dashboard hierarchy) found and fixed a small
+set of concrete issues — four pages missing a page-level `<h1>`
+(`SectionHeading` gained an optional `level` prop rather than a second
+component), and two Dashboard cards rendering the same three counts
+side by side (merged into one). Navigation (`src/components/Nav.tsx`) was
+regrouped from a flat 12-link list into four labeled sections with a proper
+mobile hamburger panel, replacing wrap-only mobile behavior. A full read-only
+security/privacy audit (secrets in git history and tracked files,
+`.gitignore`, the Anthropic key server/client boundary, RLS on all 10
+Supabase tables, the Phase 8/9 privacy exclusions, and a scan of
+ticket/investigation/journal content) and a separate persistence/analytics/
+assignment/Tutor correctness audit (verifying the Phase 1-7 merge-not-replace
+fix, `a8e9566`, is still followed everywhere, and that no analytics value can
+produce NaN, double-count, or fabricate a timestamp) both passed cleanly —
+**no code defects were found in either audit**, only the UI/nav issues above.
+Four new docs were added
+(`dhl-training-hub/docs/DEMO-SCRIPT.md`, `PORTFOLIO-STORY.md`,
+`SCREENSHOTS.md`, `DEPLOYMENT.md`) covering a real demo script (with a
+separately-framed internship-manager version), interview/CV/portfolio
+material built from factual counts recomputed during this phase, an exact
+screenshot shot list, and deployment steps/environment variables/post-deploy
+smoke tests for a future Vercel deployment (no deployment was actually
+performed). `README.md` gained explicit Problem, Architecture, AI Tutor
+Architecture, Data/Privacy Architecture, and Testing sections. `npm run
+build`, `npm run lint`, and `npm test` (14/14) were all already clean before
+Phase 10 started and remained clean after every change; `npm audit` reported
+0 vulnerabilities throughout. Available dependency upgrades (including a safe
+patch-level Next.js bump) were identified via `npm outdated` and deliberately
+left alone, per this phase's stability-over-latest-versions brief.
 
-**Major risks:** Underestimating the gap between "polished prototype" and "production
-enterprise software"; security or compliance gaps discovered late.
+**Major risks (as anticipated, and how they were addressed):** Turning a
+finalization phase into unplanned feature work — avoided; every change in
+this phase is traceable to a specific audit finding, not a new idea. Treating
+"builds and lints cleanly" as sufficient QA — avoided by running actual route
+smoke tests against a production server build, reading the persistence/merge
+code directly rather than trusting it, and being explicit about which checks
+(live multi-device Cloud Mode sync, a real Anthropic API call, actual browser
+rendering) still require Nicolas's manual verification, since no browser-
+automation tooling exists in this environment.
 
-**Must be validated before proceeding:** A committed customer/sponsor, a security
-review, and legal sign-off — this phase should not start speculatively.
+**Must be validated before considering the project "done":** Nicolas runs the
+manual browser regression list from the Phase 10 completion report (in both
+Local Demo Mode and, if a Supabase project is configured, Cloud Mode
+including sign-out/sign-in on a second device) — code-level correctness was
+verified this phase, but live browser behavior under real network timing
+was not.
+
+**What comes after Phase 10:** Nothing numbered. `ENTERPRISE-READINESS.md`
+still holds the full list of what real enterprise-grade production readiness
+would require (SSO, RBAC, encrypted storage, audit logging, a formal security
+review, and everything else in that document) — unimplemented, and only
+worth pursuing if a real pilot ever validates demand. It is deliberately not
+called "Phase 11": this project's phase sequence ends at Phase 10.
