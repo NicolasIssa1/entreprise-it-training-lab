@@ -74,7 +74,7 @@ export function calculateAllSkillProgress(
   return SKILL_IDS.map((id) => calculateSkillProgress(id, completedTopics, quizAttemptsMap, investigationCompletions));
 }
 
-/** Simple mean across the 6 skills — shown as "Overall Training Progress." */
+/** Simple mean across every skill — shown as "Overall Training Progress." */
 export function calculateOverallTrainingProgress(skillProgresses: SkillProgress[]): number {
   if (skillProgresses.length === 0) return 0;
   return Math.round(skillProgresses.reduce((sum, s) => sum + s.overall, 0) / skillProgresses.length);

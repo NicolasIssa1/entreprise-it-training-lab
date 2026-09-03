@@ -32,8 +32,8 @@ database."
 Open a topic (e.g. `/learn/dns`). Show the consistent structure: simple
 explanation → ELI10 → technical explanation → business purpose → team
 connection → university connection → practice scenario → question to ask at
-work. Mention: "80 topics across 6 categories, all following this same
-10-part structure — one reusable page template, not 80 hand-built pages."
+work. Mention: "103 topics across 7 categories, all following this same
+10-part structure — one reusable page template, not 103 hand-built pages."
 
 **3. Advanced Investigation (`/tickets` → Advanced Investigations tab → any
 scenario)** — 60 seconds

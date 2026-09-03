@@ -34,6 +34,7 @@ const NAV_GROUPS: { label: string; links: { href: string; label: string }[] }[] 
       { href: "/tutor", label: "AI Tutor" },
       { href: "/daily-log", label: "Daily Log" },
       { href: "/cv-tracker", label: "CV Tracker" },
+      { href: "/bpo/project-prep", label: "BPO Project Prep" },
     ],
   },
   {

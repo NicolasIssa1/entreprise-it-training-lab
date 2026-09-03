@@ -56,9 +56,9 @@ export default function PilotReadinessPage() {
       <Card>
         <SectionHeading title="Product" />
         <ul className="space-y-3">
-          <ChecklistItem label="Curriculum ready" done note="80 Learn topics across 6 categories, validated at build time." />
-          <ChecklistItem label="Quizzes ready" done note="14 scenario-based assessments, 120 questions, validated at build time." />
-          <ChecklistItem label="Investigation scenarios ready" done note="10 branching Advanced Investigations, validated at build time." />
+          <ChecklistItem label="Curriculum ready" done note="103 Learn topics across 7 categories, validated at build time." />
+          <ChecklistItem label="Quizzes ready" done note="16 scenario-based assessments, 143 questions, validated at build time." />
+          <ChecklistItem label="Investigation scenarios ready" done note="13 branching Advanced Investigations, validated at build time." />
           <ChecklistItem
             label="AI Tutor ready"
             done={aiConfigured === true}

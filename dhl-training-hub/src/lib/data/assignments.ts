@@ -54,6 +54,18 @@ export const trainingAssignments: TrainingAssignment[] = [
     requiredQuizIds: ["quiz-business-logistics-foundation"],
     requiredScenarioIds: ["shipment-visibility-outage", "customs-documentation-delay"],
   },
+  {
+    id: "bpo-process-automation-foundation",
+    title: "BPO & Process Automation Foundation",
+    audience: "Anyone preparing to work on a real business-process-improvement or Power Automate project — understanding a process before automating it, then core Power Automate concepts.",
+    purpose:
+      "Builds the BPO methodology (As-Is/To-Be, root cause, requirements, automation fit) and the Power Automate fundamentals (triggers, conditions, connectors, exception handling, troubleshooting) needed to responsibly contribute to a real automation project.",
+    estimatedScope: "1 learning path, 1 assessment, 3 investigations — roughly 1-2 weeks of part-time study.",
+    requiredPathIds: ["bpo-process-automation-foundations"],
+    requiredQuizIds: ["quiz-bpo-automation-foundation"],
+    requiredScenarioIds: ["excel-reporting-missing-rows", "approval-flow-duplicate-notifications", "previously-working-flow-fails"],
+    recommendedTopicIds: ["bpo-method-lifecycle", "requirements-gathering", "automation-governance-and-ownership"],
+  },
 ];
 
 export function getAssignmentById(id: string): TrainingAssignment | undefined {

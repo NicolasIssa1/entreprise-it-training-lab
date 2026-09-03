@@ -1,38 +1,39 @@
-# Portfolio Story (Phase 10)
+# Portfolio Story (Phase 10, counts updated post-Phase-10)
 
 Interview-ready, CV-ready, LinkedIn-ready material for **Enterprise IT
 Training Lab**. Every factual count below was recomputed directly from the
-codebase during Phase 10 (not carried over from memory) — see the "Verified
-counts" section. Nothing here claims real users, ROI, or production adoption;
-see `CLAUDE.md`'s CV Achievement honesty rule, which this document follows
-too.
+codebase during Phase 10, then again after the post-Phase-10 BPO & Process
+Automation learning expansion (see `docs/BPO-LEARNING.md`) — not carried
+over from memory. Nothing here claims real users, ROI, or production
+adoption; see `CLAUDE.md`'s CV Achievement honesty rule, which this document
+follows too.
 
 ---
 
-## Verified counts (recomputed, Phase 10)
+## Verified counts (recomputed after the BPO & Process Automation expansion)
 
-- **80** Learn topics across **6** categories (IT Service Management,
+- **103** Learn topics across **7** categories (IT Service Management,
   Infrastructure, Networking, Applications, Security Fundamentals, Business &
-  Logistics)
-- **7** curated Learning Paths
-- **34** Quick Practice tickets + **10** Advanced Investigation scenarios (44
+  Logistics, BPO & Process Automation)
+- **8** curated Learning Paths
+- **34** Quick Practice tickets + **13** Advanced Investigation scenarios (47
   troubleshooting exercises total)
-- **14** quizzes / **120** scenario-based questions
-- **7** derived skills, each combining Learning (30%) + Knowledge (30%) +
+- **16** quizzes / **143** scenario-based questions
+- **8** derived skills, each combining Learning (30%) + Knowledge (30%) +
   Practical (40%) evidence
-- **4** Training Assignment templates
+- **5** Training Assignment templates
 - **8 + 2 = 10** Supabase tables (Phase 5's 8 + Phase 6's 2 Tutor tables),
   every one with Row Level Security enabled
-- **14/14** unit tests passing, `npm run build`/`npm run lint` clean, `npm
-  audit`: 0 vulnerabilities (all reconfirmed during Phase 10)
+- **20/20** unit tests passing, `npm run build`/`npm run lint` clean, `npm
+  audit`: 0 vulnerabilities (all reconfirmed after the BPO expansion)
 
 ---
 
 ## What did you build?
 
 A full-stack internship training platform I use during my own DHL Dubai IT
-internship — a Dashboard, an 80-topic enterprise IT learning library, a
-two-tier ticket/troubleshooting simulator (fixed-scenario tickets plus
+internship — a Dashboard, a 103-topic enterprise IT and business-process
+learning library, a two-tier ticket/troubleshooting simulator (fixed-scenario tickets plus
 branching multi-step investigations), scenario-based knowledge assessments, a
 derived skill/analytics layer, a learning journal, a CV achievement tracker,
 and an optional AI tutor grounded in the app's own curriculum. It runs with
@@ -54,8 +55,8 @@ explained it to me once.
   set of client components that each hydrate their own state after mount —
   deliberately no server-rendered personalized content, so there's no need for
   session-refreshing middleware.
-- **Static curriculum as application code, not a CMS.** All 80 topics, 14
-  quizzes, 10 investigation scenarios, and 34 tickets are typed TypeScript
+- **Static curriculum as application code, not a CMS.** All 103 topics, 16
+  quizzes, 13 investigation scenarios, and 34 tickets are typed TypeScript
   data, validated at build time by lightweight custom validators (duplicate
   IDs, dangling references, unreachable graph nodes) that fail the build
   loudly rather than shipping a broken cross-link.
@@ -167,8 +168,8 @@ Pick the version matching the job you're applying for. All three describe the
 same project — verified counts only, no user/ROI claims.
 
 **Software engineering version:**
-> Built a full-stack Next.js/TypeScript training platform (80 lessons, 34
-> fixed-scenario + 10 branching troubleshooting simulations, 14 scenario-based
+> Built a full-stack Next.js/TypeScript training platform (103 lessons, 34
+> fixed-scenario + 13 branching troubleshooting simulations, 16 scenario-based
 > assessments) with a local-first persistence layer that optionally syncs to
 > Supabase Postgres under Row Level Security; diagnosed and fixed a
 > cloud-sync race condition with a unit-tested merge-not-replace strategy.
@@ -183,23 +184,25 @@ same project — verified counts only, no user/ROI claims.
 
 **Enterprise IT / business version:**
 > Independently built an enterprise IT training simulator during a DHL
-> internship — 80 structured lessons and 44 realistic troubleshooting
-> scenarios spanning Infrastructure, Applications, Networking, Security, and
-> Business/Logistics — to translate day-to-day exposure into a structured,
-> self-assessed skill progression across 7 competency areas.
+> internship — 103 structured lessons and 47 realistic troubleshooting
+> scenarios spanning Infrastructure, Applications, Networking, Security,
+> Business/Logistics, and BPO & Process Automation — to translate day-to-day
+> exposure into a structured, self-assessed skill progression across 8
+> competency areas.
 
 ---
 
 ## GitHub description
 
 > A full-stack IT training simulator (Next.js/TypeScript/Supabase/Anthropic)
-> with 80 lessons, branching troubleshooting investigations, scenario quizzes,
-> derived skill analytics, and an optional curriculum-grounded AI tutor.
+> with 103 lessons, branching troubleshooting investigations, scenario
+> quizzes, derived skill analytics, and an optional curriculum-grounded AI
+> tutor.
 
 ## Short README intro (one paragraph)
 
 > Enterprise IT Training Lab is a personal, full-stack training platform for
-> learning how enterprise IT actually works — an 80-topic learning library, a
+> learning how enterprise IT actually works — a 103-topic learning library, a
 > two-tier ticket/troubleshooting simulator (fixed scenarios plus branching
 > multi-step investigations), scenario-based knowledge assessments, derived
 > skill analytics, and an optional AI tutor grounded in the app's own
@@ -210,7 +213,7 @@ same project — verified counts only, no user/ROI claims.
 
 > I built Enterprise IT Training Lab, a full-stack training platform (Next.js,
 > TypeScript, Supabase, Anthropic's API), to structure what I was learning
-> during my IT internship — 80 lessons, branching troubleshooting scenarios,
+> during my IT internship — 103 lessons, branching troubleshooting scenarios,
 > scenario-based assessments, and a grounded AI tutor, all with derived,
 > honestly-labeled skill analytics instead of gamified scoring. It's a
 > personal project, not an official product of any company, and every

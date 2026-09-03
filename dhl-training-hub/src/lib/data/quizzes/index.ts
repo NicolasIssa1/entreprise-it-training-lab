@@ -7,13 +7,15 @@ import { applicationsQuiz } from "./applications";
 import { securityQuiz } from "./security";
 import { troubleshootingQuiz } from "./troubleshooting";
 import { businessLogisticsQuiz } from "./businessLogistics";
+import { bpoAutomationQuiz } from "./bpoAutomation";
 import { pathCheckpointQuizzes } from "./pathCheckpoints";
 
-// Quiz library (Phase 4/7) — one Foundation Assessment per major skill area
-// (including Business & Logistics, added in Phase 7) plus one checkpoint per
-// Learning Path. Kept as flat, typed local data, same architecture as the Learn
-// library and Advanced Investigations. All content is fictional generic
-// enterprise IT/business training material — see root CLAUDE.md.
+// Quiz library (Phase 4/7 + post-Phase-10 BPO expansion) — one Foundation
+// Assessment per major skill area (including Business & Logistics from Phase 7
+// and BPO & Process Automation from the post-Phase-10 learning expansion) plus
+// one checkpoint per Learning Path. Kept as flat, typed local data, same
+// architecture as the Learn library and Advanced Investigations. All content is
+// fictional generic enterprise IT/business training material — see root CLAUDE.md.
 export const quizzes: Quiz[] = [
   itsmQuiz,
   infrastructureQuiz,
@@ -22,6 +24,7 @@ export const quizzes: Quiz[] = [
   securityQuiz,
   troubleshootingQuiz,
   businessLogisticsQuiz,
+  bpoAutomationQuiz,
   ...pathCheckpointQuizzes,
 ];
 

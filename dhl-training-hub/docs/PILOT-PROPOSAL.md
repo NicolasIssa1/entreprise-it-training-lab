@@ -17,7 +17,7 @@ participant, selected to match their team/focus area — e.g. Enterprise IT
 Intern Foundation for general onboarding, or a team-specific template
 (Infrastructure & Network, Applications Support, or Business & Logistics
 Technology). Each assignment bundles a small set of Learning Paths, Foundation
-Assessments, and Advanced Investigations — not the full 80-topic library at
+Assessments, and Advanced Investigations — not the full 103-topic library at
 once.
 
 **What participants would do:**

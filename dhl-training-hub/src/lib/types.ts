@@ -103,7 +103,8 @@ export type LearningCategory =
   | "Networking"
   | "Applications"
   | "Security Fundamentals"
-  | "Business & Logistics";
+  | "Business & Logistics"
+  | "BPO & Process Automation";
 
 export type LearningLevel = "Foundation" | "Intermediate";
 
@@ -442,7 +443,16 @@ export type QuizResultGuidance = "Strong understanding" | "Good foundation" | "D
 // this is a training indicator, not a validated professional assessment.
 // ---------------------------------------------------------------------------
 
-export const SKILL_IDS = ["itsm", "infrastructure", "networking", "applications", "security", "troubleshooting", "business-logistics"] as const;
+export const SKILL_IDS = [
+  "itsm",
+  "infrastructure",
+  "networking",
+  "applications",
+  "security",
+  "troubleshooting",
+  "business-logistics",
+  "process-optimization-automation",
+] as const;
 export type SkillId = (typeof SKILL_IDS)[number];
 
 export interface SkillDefinition {
@@ -755,3 +765,31 @@ export interface OnboardingPreferences {
    * reference, never auto-activated without the learner choosing to. */
   recommendedAssignmentId: string | null;
 }
+
+// ---------------------------------------------------------------------------
+// BPO Project Prep worksheet (post-Phase-10 BPO & Process Automation learning
+// expansion). A PRIVATE, personal, local-only worksheet — see
+// lib/bpoProjectPrep.ts and src/app/bpo/project-prep — never synced to
+// Supabase, never sent to the AI Tutor, and never surfaced in Analytics/
+// Manager Preview/Pilot Report. Fixed field structure, same DOCUMENTATION_FIELDS
+// pattern used by Advanced Investigations, so the UI never needs per-field
+// config. Nicolas fills this in himself; the app never invents or infers any
+// of these values — see root CLAUDE.md's confidentiality rules.
+// ---------------------------------------------------------------------------
+export const BPO_PROJECT_PREP_FIELDS = [
+  { id: "problem", label: "Problem", placeholder: "What problem are we trying to solve?" },
+  { id: "asIsProcess", label: "Current As-Is Process", placeholder: "Step 1...\nStep 2...\nStep 3..." },
+  { id: "peopleTeams", label: "People / Teams Involved", placeholder: "Who performs each step? Who is affected?" },
+  { id: "systemsFiles", label: "Systems / Files Involved", placeholder: "Which systems, files, or tools does this touch?" },
+  { id: "trigger", label: "Trigger", placeholder: "What starts this process?" },
+  { id: "inputs", label: "Inputs", placeholder: "What information or data is needed?" },
+  { id: "businessRules", label: "Business Rules", placeholder: "What rules decide what happens next?" },
+  { id: "outputs", label: "Outputs", placeholder: "What does this process produce?" },
+  { id: "exceptions", label: "Exceptions", placeholder: "What unusual or edge cases occur?" },
+  { id: "currentProblems", label: "Current Problems", placeholder: "What currently goes wrong, and how often?" },
+  { id: "desiredToBe", label: "Desired To-Be Process", placeholder: "What would the improved version look like?" },
+  { id: "successMeasures", label: "Success Measures", placeholder: "How would we know this actually improved?" },
+  { id: "questionsToAsk", label: "Questions Still to Ask", placeholder: "What do you still need to find out before discussing this?" },
+] as const;
+export type BpoProjectPrepFieldId = (typeof BPO_PROJECT_PREP_FIELDS)[number]["id"];
+export type BpoProjectPrepNotes = Partial<Record<BpoProjectPrepFieldId, string>>;

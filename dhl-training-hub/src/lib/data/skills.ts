@@ -3,7 +3,7 @@ import { getTopicsByCategory, getTopicsByIds, getTopicById } from "@/lib/data/le
 import { investigationScenarios } from "@/lib/data/investigations";
 import { quizzes } from "@/lib/data/quizzes";
 
-// Skill model (Phase 4) — 6 skills, each with evidence derived from existing
+// Skill model (Phase 4, extended by the post-Phase-10 BPO expansion) — each skill has evidence derived from existing
 // content (Learn topics, quizzes, Advanced Investigations) rather than a second
 // hand-maintained mapping. See root CLAUDE.md and PRODUCT-ROADMAP.md for the
 // full readiness-calculation writeup.
@@ -44,6 +44,12 @@ export const skillDefinitions: SkillDefinition[] = [
     description:
       "Business context, not a technical skill — connecting IT systems to business processes, freight-forwarding/logistics concepts, and operational impact.",
   },
+  {
+    id: "process-optimization-automation",
+    name: "Process Optimization & Automation",
+    description:
+      "Understanding a business process before changing it, and the Microsoft Power Automate concepts needed to build, test, and troubleshoot a real automation.",
+  },
 ];
 
 export function getSkillById(id: SkillId): SkillDefinition {
@@ -60,6 +66,7 @@ const SKILL_LEARNING_CATEGORY: Partial<Record<SkillId, LearningCategory>> = {
   applications: "Applications",
   security: "Security Fundamentals",
   "business-logistics": "Business & Logistics",
+  "process-optimization-automation": "BPO & Process Automation",
 };
 
 /** Troubleshooting is cross-cutting — no Learn category is dedicated to it, so
@@ -75,6 +82,7 @@ export const SKILL_QUIZ_CATEGORY: Record<SkillId, QuizCategory> = {
   security: "Security Fundamentals",
   troubleshooting: "Enterprise Troubleshooting",
   "business-logistics": "Business & Logistics",
+  "process-optimization-automation": "BPO & Process Automation",
 };
 
 export function getTopicsForSkill(skillId: SkillId): LearningTopic[] {

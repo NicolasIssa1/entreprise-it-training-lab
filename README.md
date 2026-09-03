@@ -20,6 +20,12 @@ of Leeds) during an internship in DHL Dubai's IT/BPU department.
 > app's own curriculum — also **zero setup required**: without an Anthropic
 > API key, `/tutor` just shows "not configured" and every other page is
 > unaffected. See `dhl-training-hub/docs/AI-TUTOR.md`.
+>
+> The original 10-phase roadmap is complete and frozen. A post-Phase-10 **BPO
+> & Process Automation learning expansion** was added afterward — Business
+> Process Optimization methodology and Microsoft Power Automate fundamentals,
+> prompted by a real internship request to learn Power Automate. It is not a
+> new numbered phase. See `dhl-training-hub/docs/BPO-LEARNING.md`.
 
 ## The problem
 
@@ -46,38 +52,42 @@ Tracker**, covering three generic enterprise IT team types:
 
 1. **Dashboard** — current day/team (from one shared internship state), goals,
    questions, practice exercise, quick notes, reflection
-2. **Learn** — an 80-topic enterprise IT (and business context) learning library
-   across six categories (IT Service Management, Infrastructure, Networking,
-   Applications, Security Fundamentals — foundational enterprise security
-   awareness for IT staff, not a cybersecurity specialist course — and Business
-   & Logistics — generic business/freight-forwarding context connecting IT
-   concepts to the business processes they support), each lesson following a
-   consistent structure (learning outcomes, what is it, ELI10, technical
-   explanation, business purpose, common problems, troubleshooting approach,
-   team connection, university connection, practice scenario, question to ask
-   at work, related topics/tickets — plus optional recommended prerequisites
-   and "don't confuse this with" callouts where genuinely useful). Includes 7
-   curated Learning Paths, search (title/description/category/keyword),
-   category/team/level filtering, a deterministic "continue learning"
-   suggestion, and persisted completion tracking
+2. **Learn** — a 103-topic enterprise IT (and business/process context) learning
+   library across seven categories (IT Service Management, Infrastructure,
+   Networking, Applications, Security Fundamentals — foundational enterprise
+   security awareness for IT staff, not a cybersecurity specialist course;
+   Business & Logistics — generic business/freight-forwarding context
+   connecting IT concepts to the business processes they support; and BPO &
+   Process Automation — Business Process Optimization methodology and
+   Microsoft Power Automate fundamentals, added as a post-Phase-10 learning
+   expansion, see `dhl-training-hub/docs/BPO-LEARNING.md`), each lesson
+   following a consistent structure (learning outcomes, what is it, ELI10,
+   technical explanation, business purpose, common problems, troubleshooting
+   approach, team connection, university connection, practice scenario,
+   question to ask at work, related topics/tickets — plus optional recommended
+   prerequisites and "don't confuse this with" callouts where genuinely
+   useful). Includes 8 curated Learning Paths, search
+   (title/description/category/keyword), category/team/level filtering, a
+   deterministic "continue learning" suggestion, and persisted completion
+   tracking
 3. **Team Explorer** — Infrastructure / Applications / Support & Network pages, each
    split into general enterprise IT knowledge vs. personally observed facts, plus
    recommended learning, common training tickets (split into likely-owner vs.
    cross-team scenarios), questions to ask, and open learning prompts
 4. **Ticket Simulator** — two tiers. **Quick Practice**: 34 fake IT tickets to
-   triage, prioritize, and troubleshoot. **Advanced Investigations**: 10
+   triage, prioritize, and troubleshoot. **Advanced Investigations**: 13
    branching, multi-step scenarios where evidence evolves as you investigate —
    assess business impact, ask diagnostic questions, hold and revise a
    hypothesis, gather evolving evidence, resolve or escalate, verify, and
    document, with a persisted investigation timeline and training-only
    performance feedback. Both tiers are cross-linked with the Team Explorer and
    the Learn library
-5. **Knowledge Assessments** — 14 scenario-based quizzes (7 Foundation
-   Assessments, one per skill area, plus 7 Learning Path checkpoints; 120
+5. **Knowledge Assessments** — 16 scenario-based quizzes (8 Foundation
+   Assessments, one per skill area, plus 8 Learning Path checkpoints; 143
    questions total) testing applied judgment, not definitions, with detailed
    answer review, best/latest score tracking, and unlimited retakes
 6. **Training Progress** — a `/progress` page showing an explainable, derived
-   (never separately stored) training indicator across 7 skills, combining
+   (never separately stored) training indicator across 8 skills, combining
    completed lessons, assessment results, and Advanced Investigation
    performance, plus a deterministic (no AI) recommendation engine — an
    educational progress indicator, explicitly not a validated measure of
@@ -106,15 +116,16 @@ Tracker**, covering three generic enterprise IT team types:
     exclude Daily Log, CV Achievement, and Tutor conversation content. See
     `dhl-training-hub/docs/ANALYTICS.md`.
 
-11. **Training Assignments** (`/assignments`) — 4 static, config-driven
+11. **Training Assignments** (`/assignments`) — 5 static, config-driven
     templates (Enterprise IT Intern Foundation, Infrastructure & Network
     Foundation, Applications Support Foundation, Business & Logistics
-    Technology Foundation), each bundling required learning paths, assessments,
-    and investigations. A learner can activate one for themselves and see
-    completion against its required list — never a new competency score, and
-    not organization-wide manager functionality. An `/onboarding` flow (goal,
-    focus area, experience level — no employer/salary/age collected) suggests
-    a starting template via a deterministic, no-AI mapping.
+    Technology Foundation, BPO & Process Automation Foundation), each bundling
+    required learning paths, assessments, and investigations. A learner can
+    activate one for themselves and see completion against its required list —
+    never a new competency score, and not organization-wide manager
+    functionality. An `/onboarding` flow (goal, focus area, experience level —
+    no employer/salary/age collected) suggests a starting template via a
+    deterministic, no-AI mapping.
 12. **Pilot pages** (`/pilot`) — a product-oriented landing page explaining the
     problem/solution/intended users/potential company use, a guided product
     tour (`/pilot/demo`), a Pilot Report (`/pilot/report`, an
@@ -124,6 +135,12 @@ Tracker**, covering three generic enterprise IT team types:
 13. **Privacy & Data Safety** (`/privacy`) — a plain-English explanation of
     what's stored, what's deliberately never collected, and exactly what
     automatically reaches the AI Tutor.
+14. **BPO & Process Automation tools** (`/bpo/project-prep`,
+    `/bpo/power-automate-cheatsheet`) — a private, local-only worksheet for
+    organizing thoughts before a real automation conversation (never synced,
+    never sent to the AI Tutor, never shown in Analytics/Manager
+    Preview/Pilot Report), and a quick-reference Power Automate cheat sheet.
+    See `dhl-training-hub/docs/BPO-LEARNING.md`.
 
 See `CLAUDE.md` for full project rules (confidentiality, methodology, scope),
 `internship-plan.md` for the current learning state, and `PRODUCT-ROADMAP.md` /

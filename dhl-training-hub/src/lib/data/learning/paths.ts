@@ -123,4 +123,27 @@ export const learningPaths: LearningPath[] = [
       "technical-business-translation",
     ],
   },
+  {
+    id: "bpo-process-automation-foundations",
+    title: "BPO & Process Automation Foundations",
+    purpose:
+      "Understand a business process before automating it, then learn the Microsoft Power Automate concepts needed to build and troubleshoot a real flow — a curated subset of the full BPO & Process Automation category, not every topic in it.",
+    topicIds: [
+      "bpo-process-optimization",
+      "process-workflow-procedure",
+      "as-is-process",
+      "process-mapping-and-swimlanes",
+      "pain-points-bottlenecks",
+      "five-whys-root-cause",
+      "to-be-process",
+      "automation-opportunity-assessment",
+      "power-automate-fundamentals",
+      "triggers-and-actions",
+      "conditions-and-branching",
+      "connectors-and-data-sources",
+      "exception-handling-testing-and-monitoring",
+      "troubleshooting-a-broken-flow",
+      "automation-governance-and-ownership",
+    ],
+  },
 ];

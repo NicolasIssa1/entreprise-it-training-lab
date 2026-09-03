@@ -440,7 +440,7 @@ export const businessLogisticsTopics: LearningTopic[] = [
         "Because automation removed the natural human check — a person doing this manually would likely have noticed something was off. Automated tasks need their own monitoring specifically because nobody is watching them do the work anymore.",
     },
     questionToAskAtWork: "What tasks here have been automated, and how would anyone actually notice if the automation quietly stopped working?",
-    relatedTopicIds: ["digital-transformation", "business-process", "monitoring", "application-monitoring"],
+    relatedTopicIds: ["digital-transformation", "business-process", "monitoring", "application-monitoring", "automation-opportunity-assessment"],
     keywords: ["automation", "scheduled task", "manual process"],
   },
   {

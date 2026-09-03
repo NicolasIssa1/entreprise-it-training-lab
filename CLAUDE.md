@@ -1124,6 +1124,122 @@ Investigations, 14 quizzes / 120 questions, 7 skills, 4 assignment templates,
 
 ---
 
+## Post-Phase-10 — BPO & Process Automation Learning Expansion
+
+This is **not** a new numbered phase — the 10-phase roadmap above is complete
+and frozen. This is a focused, additive learning-content expansion, prompted
+by a real internship situation: a BPO (Business Process Optimization —
+**not** Business Process Outsourcing, see below) colleague asked Nicolas to
+learn Microsoft Power Automate to collaborate on a real automation project
+that had had problems. Nicolas wanted the app to teach BPO methodology and
+Power Automate fundamentals properly before starting that real work. Full
+writeup: `dhl-training-hub/docs/BPO-LEARNING.md`.
+
+**New Learn category**: **BPO & Process Automation** (23 topics,
+`dhl-training-hub/src/lib/data/learning/bpoAutomation.ts`, bringing the
+library to **103 topics across 7 categories**). The first topic explicitly
+disambiguates BPO (Business Process Optimization, used throughout this
+category) from Business Process Outsourcing, a different, unrelated concept
+that also commonly uses the same abbreviation. Content covers two halves:
+BPO Foundations (process vs. workflow vs. procedure, process owner/
+stakeholders, As-Is/To-Be, process mapping and swimlane diagrams, pain
+points/bottlenecks, the 5 Whys, standardization and value-adding work,
+automation opportunity assessment, a central BPO & Automation lifecycle
+framework, and requirements gathering) and Process Automation (Power
+Automate fundamentals, triggers/actions, conditions/branching, loops,
+connectors, Excel automation patterns, approvals/notifications, exception
+handling/testing/monitoring, common failure patterns, a dedicated
+troubleshooting-a-broken-flow lesson reinforcing this app's existing "don't
+guess, gather evidence" principle, and automation governance/ownership).
+**BPO & Process Automation was added to `CROSS_TEAM_CATEGORIES`**
+(`lib/data/learning/index.ts`), alongside IT Service Management, Security
+Fundamentals, and Business & Logistics — automation crosses all three teams,
+the same reasoning already applied to Security and Business & Logistics. A
+small number of reciprocal `relatedTopicIds` links were added from existing
+topics (Root Cause Analysis, Escalation, System Integration, Application
+Monitoring, Business Automation) back to the new category — the same
+reciprocal-linking precedent Phase 2C/7 set. New content never duplicates an
+existing topic (e.g. root-cause-analysis, business-automation,
+operational-kpi, digital-transformation already existed and are cross-linked
+rather than repeated) and stays generic — no DHL-specific process, system,
+or account details, per the confidentiality rules above.
+
+**New Learning Path**: **BPO & Process Automation Foundations**
+(`lib/data/learning/paths.ts`), a curated 15-topic subset of the full
+23-topic category, bringing the library to **8 Learning Paths**.
+
+**New skill**: **Process Optimization & Automation**
+(`process-optimization-automation` in `SKILL_IDS`, `lib/data/skills.ts`),
+mapped onto the new Learn category and quiz category exactly like every
+other non-cross-cutting skill — same 30/30/40 derived-evidence model, no new
+scoring logic. Bringing the total to **8 skills**.
+
+**New quizzes**: a BPO & Process Automation Foundation Assessment (15
+questions) and its Learning Path checkpoint (8 questions) in
+`lib/data/quizzes/bpoAutomation.ts` and `pathCheckpoints.ts` — same
+architecture and scenario-based-judgment content-quality rule as every other
+quiz. Bringing the library to **16 quizzes / 143 questions total**.
+
+**New Advanced Investigations**: three new scenarios in
+`lib/data/investigations/` — `excelReportingMissingRows.ts` (a silent
+Excel row-limit/pagination failure), `approvalFlowDuplicateNotifications.ts`
+(a self-triggering approval flow and the idempotency fix for it), and
+`previouslyWorkingFlowFails.ts` (a flow that breaks when its connection,
+tied to a departed employee's personal account, stops working — directly
+illustrating the automation-governance lesson). All three follow the exact
+same `InvestigationScenario` graph/scoring architecture as the original 10
+scenarios — no new fields, no new scoring logic. Bringing the total to
+**13 investigations**.
+
+**New assignment**: **BPO & Process Automation Foundation**
+(`lib/data/assignments.ts`), bundling the new learning path, quiz, and all
+three new investigations — same static, config-driven template architecture
+as every other assignment. Bringing the total to **5 assignment templates**.
+
+**New pages** (`src/app/bpo/`): `/bpo/project-prep` — a **private,
+local-only** worksheet (`lib/bpoProjectPrep.ts`, `BPO_PROJECT_PREP_FIELDS` in
+`lib/types.ts`) for organizing thoughts before a real automation
+conversation, explicitly labeled PRIVATE PERSONAL NOTES, scoped per identity
+via `scopedKey()` (the same account-isolation architecture from commit
+`7326665`) but — unlike every Phase 5 domain hook — **never synced to
+Supabase, never sent to the AI Tutor, and never imported by Analytics,
+Manager Preview, or the Pilot Report**, matching the same "no free-text
+content available to leak" structural-privacy pattern those pages already
+use for Daily Log/CV Tracker. `/bpo/power-automate-cheatsheet` — a static
+quick-reference page (Trigger, Action, Condition, Apply to Each, Compose,
+Variable, Connector, Connection, Expression, Approval, Scope, Configure Run
+After, Run History, Retry Policy), each with a definition, a mini example,
+and a common mistake. Both are reachable from Nav → Tools → "BPO Project
+Prep" (the cheat sheet is linked from within that page and from the Learn
+category, deliberately not added to top nav directly, per Phase 10's
+"don't grow the nav further" guidance).
+
+**AI Tutor / analytics / recommendations**: no code changes were needed —
+the Tutor's grounding (`lib/ai/tutorContext.ts`) matches deterministically
+against `learningTopics`, already inclusive of the new category, exactly as
+Phase 7 found for Business & Logistics; the skill/progress/analytics/
+assignment engines all derive their numbers from the three underlying
+evidence sources plus static curriculum data, so they picked up the new
+skill/quiz/investigation/assignment automatically without a second stored
+score.
+
+### Explicitly NOT built in this expansion (do not add without being asked)
+
+- A Power Automate certification course — this stays conceptual and
+  practical readiness, not exam-style Microsoft Learn content
+- Any DHL-specific process, system, account, or automation detail — every
+  example is fictional/generic, per the confidentiality rules above; the
+  `/bpo/project-prep` worksheet exists precisely so Nicolas has somewhere
+  private to think through the real (non-DHL-generic) details himself,
+  without them ever entering the app's content or reaching the AI Tutor
+- Syncing `/bpo/project-prep` to Supabase, the AI Tutor, Analytics, Manager
+  Preview, or the Pilot Report — this worksheet is local-only by deliberate
+  design, not an oversight to fix later
+- A new numbered phase — this expansion is additive learning content on top
+  of the frozen Phase 1-10 roadmap, not Phase 11
+
+---
+
 ## Tech stack & conventions
 
 - Next.js (App Router) + React + TypeScript + Tailwind CSS.
@@ -1157,15 +1273,15 @@ DHL-Internship/
   dhl-training-hub/        — the actual Next.js application (see its own README)
     src/lib/data/internshipState.ts — single source of truth for current day/team
     src/lib/product.ts              — product/brand config (private vs public name)
-    src/lib/data/learning/          — Learn topic content (80 topics, 6 categories) + paths.ts
+    src/lib/data/learning/          — Learn topic content (103 topics, 7 categories) + paths.ts
     src/lib/data/learning/businessLogistics.ts — Business & Logistics category (24 topics, Phase 7)
     src/lib/learningProgress.ts     — Learn completion tracking hook
-    src/lib/data/investigations/    — Advanced Investigations content (10 scenarios)
+    src/lib/data/investigations/    — Advanced Investigations content (13 scenarios)
     src/lib/investigationProgress.ts — Advanced Investigations progress/storage hook
     src/lib/investigationScoring.ts  — generic, scenario-agnostic scoring engine
-    src/lib/data/quizzes/           — Quiz content (14 quizzes, 120 questions)
+    src/lib/data/quizzes/           — Quiz content (16 quizzes, 143 questions)
     src/lib/quizAttempts.ts         — quiz attempt storage hook (cloud-aware, Phase 5)
-    src/lib/data/skills.ts          — skill definitions + derived topic/quiz/investigation mapping (7 skills)
+    src/lib/data/skills.ts          — skill definitions + derived topic/quiz/investigation mapping (8 skills)
     src/lib/data/companyContext.ts  — single gated CompanyContext instance (Phase 7, private-mode only)
     src/lib/skillProgress.ts        — skill/readiness calculation (30/30/40 weighting)
     src/lib/recommendations.ts      — deterministic next-action recommendation engine
@@ -1188,7 +1304,7 @@ DHL-Internship/
     src/app/analytics/              — /analytics and /analytics/summary pages
     src/app/manager-preview/        — /manager-preview read-only preview page
     docs/ANALYTICS.md               — analytics architecture, source data, privacy writeup
-    src/lib/data/assignments.ts     — Training Assignment templates (Phase 9, 4 static templates)
+    src/lib/data/assignments.ts     — Training Assignment templates (Phase 9, 5 static templates)
     src/lib/assignmentProgress.ts   — assignment completion derivation (required-list only, not a score)
     src/lib/assignmentSelection.ts  — useSelectedAssignment() localStorage hook (Phase 9)
     src/lib/onboarding.ts           — useOnboardingPreferences() + deterministic assignment mapping
@@ -1197,4 +1313,11 @@ DHL-Internship/
     src/app/pilot/                  — /pilot, /pilot/demo, /pilot/readiness, /pilot/report
     src/app/privacy/                — /privacy — Data Safety page
     docs/PILOT-PROPOSAL.md          — reusable pilot description (Phase 9, no ROI/pricing claims)
+    src/lib/data/learning/bpoAutomation.ts — BPO & Process Automation category (post-Phase-10, 23 topics)
+    src/lib/data/quizzes/bpoAutomation.ts  — BPO & Process Automation Foundation Assessment (15 questions)
+    src/lib/data/investigations/excelReportingMissingRows.ts, approvalFlowDuplicateNotifications.ts, previouslyWorkingFlowFails.ts — 3 new investigations
+    src/lib/bpoProjectPrep.ts       — useBpoProjectPrep() — PRIVATE, local-only worksheet hook (never synced anywhere)
+    src/app/bpo/project-prep/       — /bpo/project-prep — private Real Project Prep worksheet
+    src/app/bpo/power-automate-cheatsheet/ — /bpo/power-automate-cheatsheet — static quick reference
+    docs/BPO-LEARNING.md            — post-Phase-10 BPO & Process Automation learning expansion writeup
 ```

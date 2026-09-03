@@ -637,3 +637,30 @@ would require (SSO, RBAC, encrypted storage, audit logging, a formal security
 review, and everything else in that document) — unimplemented, and only
 worth pursuing if a real pilot ever validates demand. It is deliberately not
 called "Phase 11": this project's phase sequence ends at Phase 10.
+
+---
+
+## Post-Phase-10 — BPO & Process Automation Learning Expansion ✅ (complete)
+
+**Not a numbered phase.** A focused, additive learning-content expansion on
+top of the frozen Phase 1-10 roadmap, prompted by a real internship
+situation: a BPO (Business Process Optimization) colleague asked Nicolas to
+learn Microsoft Power Automate for a real automation project. Full writeup:
+`dhl-training-hub/docs/BPO-LEARNING.md`; summarized in `CLAUDE.md`'s own
+"Post-Phase-10" section.
+
+**Delivered:** a new Learn category (BPO & Process Automation, 23 topics,
+bringing the library to 103 topics / 7 categories), a new Learning Path (BPO
+& Process Automation Foundations, bringing the total to 8), a new skill
+(Process Optimization & Automation, the 8th, same derived-evidence model),
+a new quiz + checkpoint (bringing the library to 16 quizzes / 143
+questions), 3 new Advanced Investigations (bringing the total to 13), a new
+Training Assignment (bringing the total to 5), and two new pages
+(`/bpo/project-prep` — a private, local-only worksheet never synced anywhere
+— and `/bpo/power-automate-cheatsheet`). No new architecture was invented:
+every piece reuses the exact content-validation, scoring, and storage-
+scoping patterns Phases 2-9 already established.
+
+**What comes after this:** Nothing planned. Further BPO/automation content
+would be its own future addition, evaluated the same way this one was —
+never assumed, never called "Phase 11."

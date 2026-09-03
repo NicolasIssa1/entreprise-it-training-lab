@@ -329,7 +329,7 @@ export const applicationsTopics: LearningTopic[] = [
         "Establish scope and evidence first: how long has the sync been failing, how much data is affected, and what does the integration log show at the point it started failing — fixing the connection without knowing this risks leaving a data gap unresolved.",
     },
     questionToAskAtWork: "Which integrations here are considered most business-critical, and how are they monitored?",
-    relatedTopicIds: ["api", "application-logs", "database", "technology-in-logistics"],
+    relatedTopicIds: ["api", "application-logs", "database", "technology-in-logistics", "connectors-and-data-sources"],
     keywords: ["data sync", "middleware", "interoperability"],
   },
   {
@@ -464,7 +464,7 @@ export const applicationsTopics: LearningTopic[] = [
         "Application-level monitoring — tracking that specific feature's error rate or response time directly — since a healthy server doesn't guarantee the application logic running on it is behaving correctly for every feature.",
     },
     questionToAskAtWork: "What application-level metrics are tracked here, beyond basic server health?",
-    relatedTopicIds: ["monitoring", "application-performance", "application-logs"],
+    relatedTopicIds: ["monitoring", "application-performance", "application-logs", "exception-handling-testing-and-monitoring"],
     keywords: ["APM", "error rate", "latency"],
   },
   {

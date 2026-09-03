@@ -249,7 +249,7 @@ export const itsmTopics: LearningTopic[] = [
         "This is functional escalation — moving to a team with networking expertise. What should be handed over: the scope (who's affected), symptoms observed, what's already been tried/ruled out, and any evidence (error messages, timestamps) — so the next team doesn't have to start from zero.",
     },
     questionToAskAtWork: "What happens when your team can't resolve a ticket — who does it go to, and how is that decided?",
-    relatedTopicIds: ["ticket", "incident", "priority", "exception-management"],
+    relatedTopicIds: ["ticket", "incident", "priority", "exception-management", "troubleshooting-a-broken-flow"],
     keywords: ["handoff", "escalate", "raise visibility"],
   },
   {
@@ -397,7 +397,7 @@ export const itsmTopics: LearningTopic[] = [
         "No — restarting resolved the symptom (the crash), not necessarily the cause (why memory ran out). RCA would ask why memory usage grew unbounded: a memory leak in an application, an unexpected spike in load, or a misconfigured limit are all possible next questions to investigate.",
     },
     questionToAskAtWork: "Does this team use a specific RCA technique, or does it vary by the kind of issue?",
-    relatedTopicIds: ["problem-management", "incident", "knowledge-base"],
+    relatedTopicIds: ["problem-management", "incident", "knowledge-base", "five-whys-root-cause"],
     keywords: ["5 whys", "root cause", "postmortem"],
   },
   {

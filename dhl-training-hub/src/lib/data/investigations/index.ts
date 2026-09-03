@@ -10,6 +10,9 @@ import { deploymentRegressionScenario } from "./deploymentRegression";
 import { endpointSecurityIncidentScenario } from "./endpointSecurityIncident";
 import { shipmentVisibilityOutageScenario } from "./shipmentVisibilityOutage";
 import { customsDocumentationDelayScenario } from "./customsDocumentationDelay";
+import { excelReportingMissingRowsScenario } from "./excelReportingMissingRows";
+import { approvalFlowDuplicateNotificationsScenario } from "./approvalFlowDuplicateNotifications";
+import { previouslyWorkingFlowFailsScenario } from "./previouslyWorkingFlowFails";
 
 // Advanced Investigations (Phase 3) — branching, evolving-evidence scenarios that
 // sit alongside the fixed-scenario Quick Practice tickets (lib/data/tickets.ts).
@@ -27,6 +30,9 @@ export const investigationScenarios: InvestigationScenario[] = [
   endpointSecurityIncidentScenario,
   shipmentVisibilityOutageScenario,
   customsDocumentationDelayScenario,
+  excelReportingMissingRowsScenario,
+  approvalFlowDuplicateNotificationsScenario,
+  previouslyWorkingFlowFailsScenario,
 ];
 
 export function getScenarioById(id: string): InvestigationScenario | undefined {

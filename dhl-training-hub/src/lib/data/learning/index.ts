@@ -5,6 +5,7 @@ import { networkingTopics } from "./networking";
 import { applicationsTopics } from "./applications";
 import { securityTopics } from "./security";
 import { businessLogisticsTopics } from "./businessLogistics";
+import { bpoAutomationTopics } from "./bpoAutomation";
 import { learningPaths } from "./paths";
 import { tickets } from "@/lib/data/tickets";
 
@@ -19,6 +20,7 @@ export const learningTopics: LearningTopic[] = [
   ...applicationsTopics,
   ...securityTopics,
   ...businessLogisticsTopics,
+  ...bpoAutomationTopics,
 ];
 
 export { learningPaths };
@@ -30,6 +32,7 @@ export const LEARNING_CATEGORIES: LearningCategory[] = [
   "Applications",
   "Security Fundamentals",
   "Business & Logistics",
+  "BPO & Process Automation",
 ];
 
 export function getTopicById(id: string): LearningTopic | undefined {
@@ -62,7 +65,12 @@ const TEAM_HOME_CATEGORY: Record<TeamId, LearningCategory> = {
   "support-network": "Networking",
 };
 
-const CROSS_TEAM_CATEGORIES: LearningCategory[] = ["IT Service Management", "Security Fundamentals", "Business & Logistics"];
+const CROSS_TEAM_CATEGORIES: LearningCategory[] = [
+  "IT Service Management",
+  "Security Fundamentals",
+  "Business & Logistics",
+  "BPO & Process Automation",
+];
 
 export function getTopicsForTeam(teamId: TeamId): LearningTopic[] {
   const homeCategory = TEAM_HOME_CATEGORY[teamId];
@@ -108,7 +116,7 @@ export function getNextIncompleteTopicId(
 // `next build` and in dev) and throws if content is internally inconsistent —
 // catching a bad topic/path/ticket reference at build time instead of a broken
 // link discovered later at runtime. Intentionally a small typed check, not a
-// validation library — the dataset is small (56 topics, 6 paths, ~34 tickets).
+// validation library — the dataset is small (103 topics, 8 paths, ~34 tickets).
 // ---------------------------------------------------------------------------
 function validateLearningContent(): void {
   const errors: string[] = [];
