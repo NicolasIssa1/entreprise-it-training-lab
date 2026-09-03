@@ -580,6 +580,68 @@ regeneration command once a real project exists). Keep this file in sync with
 the SQL migration by hand until then — they're edited together, in the same
 commit, whenever the schema changes.
 
+### Account isolation fix (post-Phase 10 — critical, read before touching persistence)
+
+A real bug, found after Phase 10: creating a second account on the same
+browser inherited the first account's learning progress, quiz attempts,
+investigation state, Daily Log, CV Tracker, and (via its own separate
+merge-on-mount logic) Tutor conversation — a privacy-critical failure of
+per-user isolation, not a repeat of the `a8e9566` merge-not-replace bug (that
+fix is still correct and untouched). **Root cause**: every domain hook's
+`localStorage` key was a single fixed global string (e.g.
+`"learning-topic-progress"`) shared by every identity that ever used that
+browser — signed out, Account A, or Account B all read/wrote the exact same
+key. Combined with `migrateLocalDataToCloud` never clearing what it migrated,
+a second brand-new account (its own unmigrated `local_migration_version`)
+would independently re-read and re-upload the first account's leftover local
+data into its own cloud rows.
+
+**Fix** (`dhl-training-hub/src/lib/storageScope.ts`): every domain key is now
+identity-scoped via `scopedKey(domain, userId)` — `demo:<domain>` when signed
+out (Local Demo Mode; unchanged in spirit from every phase before accounts
+existed), `user:<userId>:<domain>` when signed in. Never keyed by email —
+always the immutable Supabase auth id. All 9 domain hooks (`learningProgress`,
+`teamChecklist`, `quizAttempts`, `investigationProgress` (both exports),
+`dailyLog`, `cvAchievements`, `tutorConversation`, `assignmentSelection`,
+`onboarding`) derive their key this way — the last two are local-only (no
+Supabase table) but still scoped, so a second account never inherits the
+first account's selected Training Assignment or onboarding answers either.
+`lib/storage.ts`'s `useLocalStorageState` now also resets its in-memory state
+to `initial` **synchronously during render** (React's documented
+"adjusting state when a prop changes" pattern, via `useState` — never a
+`useRef` read during render, which React's compiler-safety lint rule
+forbids) the instant its `key` changes, so switching accounts can never paint
+a previous account's cached value for even one frame; a proper "loading"
+gap is preferred over ever showing the wrong account's data.
+
+A one-time, module-load-time (not effect-time, to avoid a hydration race)
+step in `storage.ts` adopts every pre-fix raw global key into the `demo:`
+namespace once, so an existing Local Demo Mode user doesn't lose data, then
+deletes the raw key so nothing can read it again. `lib/migration.ts` now
+reads only from the `demo:<domain>` namespace (never a raw legacy key) and,
+critically, **clears each domain's demo key after that domain migrates
+successfully** — the original design deliberately never cleared
+`localStorage` post-migration ("data loss is worse than duplication"), but
+that policy is exactly what let a second account re-claim the first
+account's leftover data; once copied to Account A's cloud rows, it must stop
+being generic, unclaimed, transferable state. A domain that fails to migrate
+is left in the demo bucket rather than cleared, so a failed upload isn't also
+a lost one. `useDailyLogEntries` also stopped seeding a brand-new
+**authenticated** account with the example `seedDailyLogEntries` (personal
+illustrative content meant only for first-time Local Demo Mode) — a
+newly-created real account now starts with zero Daily Log entries, matching
+every other domain. `AuthProvider.signOut()` also clears `migrationMessage`
+(an account-specific banner) so it can't linger into a different account's
+next session.
+
+**Do not regress this**: any future domain hook backed by `localStorage` must
+derive its key via `scopedKey()`, never a fixed string — see
+`storageScope.ts`'s header comment and `storageScope.test.ts`'s regression
+tests. Never key by email. Never assume `localStorage` is safe to read/write
+without going through an identity-scoped key, even for a "local-only, never
+synced to cloud" preference like Training Assignment selection — that was
+exactly as leaky as the cloud-synced domains until this fix.
+
 ### Explicitly NOT built in Phase 5 (do not add without being asked)
 
 - Password reset (`/forgot-password`) — deliberately deferred; straightforward

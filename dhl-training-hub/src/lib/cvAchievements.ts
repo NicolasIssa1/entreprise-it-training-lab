@@ -5,11 +5,16 @@ import { useLocalStorageList } from "@/lib/storage";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { fetchCvAchievements, insertCvAchievement, deleteCvAchievement, bulkUpsertCvAchievements } from "@/lib/repositories/cvAchievementsRepository";
 import { mergeArrayByIdPreferCloud } from "@/lib/mergeCloudState";
+import { scopedKey } from "@/lib/storageScope";
 import { CvAchievement } from "@/lib/types";
 
+const DOMAIN_KEY = "cv-achievements";
+
 /**
- * CV Achievement entries — "cv-achievements" key. Phase 5: cloud-aware the
- * same way as every other domain hook (see lib/learningProgress.ts).
+ * CV Achievement entries. Phase 5: cloud-aware the same way as every other
+ * domain hook (see lib/learningProgress.ts). Local cache key is scoped per
+ * signed-in user (see storageScope.ts) so no two accounts on the same browser
+ * ever share achievements.
  *
  * Regression fix: the cloud fetch used to overwrite local state outright
  * (`setAchievements(cloud)`), which could silently erase a just-added
@@ -22,7 +27,10 @@ export function useCvAchievements() {
   const { user, isConfigured } = useAuth();
   const cloudMode = isConfigured && !!user;
 
-  const { items: achievements, setItems: setAchievements } = useLocalStorageList<CvAchievement>("cv-achievements", []);
+  const { items: achievements, setItems: setAchievements } = useLocalStorageList<CvAchievement>(
+    scopedKey(DOMAIN_KEY, user?.id),
+    [],
+  );
   const [syncError, setSyncError] = useState(false);
 
   useEffect(() => {

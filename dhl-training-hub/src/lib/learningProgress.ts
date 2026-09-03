@@ -5,8 +5,9 @@ import { useLocalStorageState } from "@/lib/storage";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { fetchLearningProgress, upsertTopicCompletion, bulkUpsertLearningProgress } from "@/lib/repositories/learningProgressRepository";
 import { mergeRecordPreferCloud } from "@/lib/mergeCloudState";
+import { scopedKey } from "@/lib/storageScope";
 
-const STORAGE_KEY = "learning-topic-progress";
+const DOMAIN_KEY = "learning-topic-progress";
 
 const isProgressRecord = (value: unknown): value is Record<string, boolean> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -14,8 +15,10 @@ const isProgressRecord = (value: unknown): value is Record<string, boolean> =>
 /**
  * Learning topic completion, shared across the Learn landing page and topic
  * pages. Built on the same useLocalStorageState core as everything else
- * (Checklist, Daily Log, CV Tracker) — key "learning-topic-progress", schema
- * Record<topicId, boolean>.
+ * (Checklist, Daily Log, CV Tracker) — schema Record<topicId, boolean>, keyed
+ * by `scopedKey(DOMAIN_KEY, user?.id)` so every signed-in account gets its own
+ * private local cache, never a key shared with any other account on the same
+ * browser (see storageScope.ts — this is the account-isolation fix).
  *
  * Phase 5: when signed in with Supabase configured, local storage is used as
  * an optimistic cache — cloud data is merged into it on load (cloud wins per
@@ -25,14 +28,15 @@ const isProgressRecord = (value: unknown): value is Record<string, boolean> =>
  * un-complete a topic if its background write hadn't landed before the next
  * mount's fetch), and every toggle writes through to Supabase in the
  * background. Signed-out / Local Demo Mode behaves exactly as it did in
- * Phase 4: pure localStorage, no network calls.
+ * Phase 4: pure localStorage, no network calls, using the shared "demo"
+ * namespace.
  */
 export function useLearningProgress() {
   const { user, isConfigured } = useAuth();
   const cloudMode = isConfigured && !!user;
 
   const { state: completed, setState: setCompleted } = useLocalStorageState<Record<string, boolean>>(
-    STORAGE_KEY,
+    scopedKey(DOMAIN_KEY, user?.id),
     {},
     isProgressRecord,
   );

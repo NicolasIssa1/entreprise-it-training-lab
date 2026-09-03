@@ -13,10 +13,11 @@ import {
   bulkUpsertInvestigationCompletions,
 } from "@/lib/repositories/investigationRepository";
 import { mergeRecordPreferCloud, mergeArrayByIdPreferCloud } from "@/lib/mergeCloudState";
+import { scopedKey } from "@/lib/storageScope";
 import { InvestigationCompletionRecord, InvestigationProgress } from "@/lib/types";
 
-const PROGRESS_KEY = "investigation-progress";
-const COMPLETIONS_KEY = "investigation-completions";
+const PROGRESS_DOMAIN_KEY = "investigation-progress";
+const COMPLETIONS_DOMAIN_KEY = "investigation-completions";
 
 type ProgressMap = Record<string, InvestigationProgress>;
 
@@ -60,12 +61,12 @@ export function useInvestigationProgress(scenarioId: string, startNodeId: string
   const cloudMode = isConfigured && !!user;
 
   const { state: allProgress, setState: setAllProgress, loaded } = useLocalStorageState<ProgressMap>(
-    PROGRESS_KEY,
+    scopedKey(PROGRESS_DOMAIN_KEY, user?.id),
     {},
     isProgressMap,
   );
   const { state: completions, setState: setCompletions } = useLocalStorageState<InvestigationCompletionRecord[]>(
-    COMPLETIONS_KEY,
+    scopedKey(COMPLETIONS_DOMAIN_KEY, user?.id),
     [],
     isCompletionArray,
   );
@@ -134,7 +135,7 @@ export function useInvestigationCompletions() {
   const cloudMode = isConfigured && !!user;
 
   const { state: completions, setState: setCompletions } = useLocalStorageState<InvestigationCompletionRecord[]>(
-    COMPLETIONS_KEY,
+    scopedKey(COMPLETIONS_DOMAIN_KEY, user?.id),
     [],
     isCompletionArray,
   );

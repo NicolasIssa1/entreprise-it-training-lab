@@ -5,9 +5,10 @@ import { useLocalStorageState } from "@/lib/storage";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { fetchQuizAttempts, insertQuizAttempt, bulkUpsertQuizAttempts } from "@/lib/repositories/quizAttemptsRepository";
 import { mergeMapOfArraysByIdPreferCloud } from "@/lib/mergeCloudState";
+import { scopedKey } from "@/lib/storageScope";
 import { QuizAttempt, QuizResultGuidance } from "@/lib/types";
 
-const STORAGE_KEY = "quiz-attempts";
+const DOMAIN_KEY = "quiz-attempts";
 const MAX_ATTEMPTS_PER_QUIZ = 10;
 
 export type QuizAttemptsMap = Record<string, QuizAttempt[]>;
@@ -62,7 +63,7 @@ export function useQuizAttempts(quizId?: string) {
   const cloudMode = isConfigured && !!user;
 
   const { state: allAttempts, setState: setAllAttempts, loaded } = useLocalStorageState<QuizAttemptsMap>(
-    STORAGE_KEY,
+    scopedKey(DOMAIN_KEY, user?.id),
     {},
     isAttemptsMap,
   );

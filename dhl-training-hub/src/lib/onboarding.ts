@@ -1,9 +1,11 @@
 "use client";
 
 import { useLocalStorageState } from "@/lib/storage";
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { scopedKey } from "@/lib/storageScope";
 import { OnboardingExperience, OnboardingFocusArea, OnboardingGoal, OnboardingPreferences } from "@/lib/types";
 
-const STORAGE_KEY = "onboarding-preferences";
+const DOMAIN_KEY = "onboarding-preferences";
 
 const INITIAL: OnboardingPreferences = {
   completed: false,
@@ -38,11 +40,18 @@ export function recommendAssignmentId(focusArea: OnboardingFocusArea): string {
 /**
  * Minimal onboarding preferences (Phase 9 Part P/Q) — goal, focus area,
  * experience level, and the deterministically recommended assignment id.
- * Stored purely in localStorage, same simple pattern as assignment selection;
- * no employer, salary, age, or other private profile data is ever collected.
+ * Stored purely in localStorage, same simple pattern as assignment selection
+ * (including being scoped per signed-in user via storageScope.ts, for the
+ * same account-isolation reason — see that file's comment).
+ * No employer, salary, age, or other private profile data is ever collected.
  */
 export function useOnboardingPreferences() {
-  const { state, setState, loaded } = useLocalStorageState<OnboardingPreferences>(STORAGE_KEY, INITIAL, isPreferences);
+  const { user } = useAuth();
+  const { state, setState, loaded } = useLocalStorageState<OnboardingPreferences>(
+    scopedKey(DOMAIN_KEY, user?.id),
+    INITIAL,
+    isPreferences,
+  );
 
   function savePreferences(goal: OnboardingGoal, focusArea: OnboardingFocusArea, experience: OnboardingExperience) {
     const recommendedAssignmentId = recommendAssignmentId(focusArea);

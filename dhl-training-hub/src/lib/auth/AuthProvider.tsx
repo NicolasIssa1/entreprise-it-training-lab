@@ -126,7 +126,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = getSupabaseClient();
     if (!supabase) return;
     await supabase.auth.signOut();
+    // Account isolation: a migration banner is account-specific ("your
+    // progress was synced") — leaving it visible into a different account's
+    // next session would be a small but real cross-account leak of state.
     setMigratedForUserId(null);
+    setMigrationMessage(null);
   }, []);
 
   const dismissMigrationMessage = useCallback(() => setMigrationMessage(null), []);

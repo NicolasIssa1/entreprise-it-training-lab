@@ -5,6 +5,7 @@ import { useLocalStorageState } from "@/lib/storage";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { fetchTeamChecklist, upsertChecklistItem, bulkUpsertTeamChecklists } from "@/lib/repositories/teamChecklistRepository";
 import { mergeRecordPreferCloud } from "@/lib/mergeCloudState";
+import { scopedKey } from "@/lib/storageScope";
 import { TeamId } from "@/lib/types";
 
 const isChecklistRecord = (value: unknown): value is Record<string, boolean> =>
@@ -13,15 +14,17 @@ const isChecklistRecord = (value: unknown): value is Record<string, boolean> =>
 /**
  * Team learning checklist, storage scoped per team via a distinct key
  * (`checklist-<teamId>`) so Infrastructure/Applications/Support & Network each
- * own their own record. Phase 5: cloud-aware the same way as every other
- * domain hook — see lib/learningProgress.ts for the pattern this follows.
+ * own their own record, and further scoped per signed-in user (see
+ * storageScope.ts — the account-isolation fix) so no two accounts on the same
+ * browser ever share a checklist. Phase 5: cloud-aware the same way as every
+ * other domain hook — see lib/learningProgress.ts for the pattern this follows.
  */
 export function useTeamChecklist(teamId: TeamId) {
   const { user, isConfigured } = useAuth();
   const cloudMode = isConfigured && !!user;
 
   const { state: checked, setState: setChecked } = useLocalStorageState<Record<string, boolean>>(
-    `checklist-${teamId}`,
+    scopedKey(`checklist-${teamId}`, user?.id),
     {},
     isChecklistRecord,
   );

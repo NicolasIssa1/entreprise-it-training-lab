@@ -6,7 +6,10 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 import { fetchDailyLogs, insertDailyLog, deleteDailyLog, bulkUpsertDailyLogs } from "@/lib/repositories/dailyLogRepository";
 import { seedDailyLogEntries } from "@/lib/data/seedDailyLog";
 import { mergeArrayByIdPreferCloud } from "@/lib/mergeCloudState";
+import { scopedKey } from "@/lib/storageScope";
 import { DailyLogEntry } from "@/lib/types";
+
+const DOMAIN_KEY = "daily-log-entries";
 
 /**
  * Daily Log entries, shared by the Daily Log page (read/write) and
@@ -20,18 +23,22 @@ import { DailyLogEntry } from "@/lib/types";
  * regression where a just-saved entry could vanish on refresh if its
  * background insert hadn't landed in Supabase yet. Any entry that's still
  * local-only after the merge (never yet synced) is re-pushed to cloud in the
- * background. If this is a genuinely brand-new account (nothing local, no
- * rows in cloud), the merge naturally keeps the local seedDailyLogEntries and
- * self-heals them up to cloud, so first-time cloud users still see the
- * example entries. Local Demo Mode is unchanged.
+ * background.
+ *
+ * Account isolation (see storageScope.ts): the local cache key is scoped per
+ * signed-in user, so no two accounts on the same browser ever share entries.
+ * A brand-new authenticated account starts from an empty list, never the
+ * example `seedDailyLogEntries` — those are personal illustrative content
+ * meant only for first-time Local Demo Mode use (the shared "demo" namespace,
+ * signed out), not something a newly created real account should inherit.
  */
 export function useDailyLogEntries() {
   const { user, isConfigured } = useAuth();
   const cloudMode = isConfigured && !!user;
 
   const { items: entries, setItems: setEntries } = useLocalStorageList<DailyLogEntry>(
-    "daily-log-entries",
-    seedDailyLogEntries,
+    scopedKey(DOMAIN_KEY, user?.id),
+    cloudMode ? [] : seedDailyLogEntries,
   );
   const [syncError, setSyncError] = useState(false);
 

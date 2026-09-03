@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { useLocalStorageState } from "@/lib/storage";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { fetchLatestTutorConversation, createTutorConversation, appendTutorMessage } from "@/lib/repositories/tutorRepository";
+import { scopedKey } from "@/lib/storageScope";
 import { TutorConversation, TutorMessage } from "@/lib/types";
 
-const STORAGE_KEY = "tutor-conversation";
+const DOMAIN_KEY = "tutor-conversation";
 /** Rolling cap on what's kept in view/storage — the API request itself only
  * ever sends the last ~12 turns regardless (see /api/tutor/route.ts), this is
  * a separate cap so the stored conversation doesn't grow unbounded across a
@@ -38,12 +39,23 @@ const isStoredConversation = (value: unknown): value is StoredConversation =>
  * Signed in fetches the user's latest conversation on mount (cloud becomes
  * authoritative) and writes through on every new message, same
  * optimistic-local-first / SyncErrorNotice pattern as every other Phase 5 hook.
+ *
+ * Account isolation (see storageScope.ts): the local cache key is scoped per
+ * signed-in user, so a brand-new account never sees — and never re-uploads to
+ * its own cloud rows — another account's conversation history from the same
+ * browser. A newly authenticated user simply starts with no conversation;
+ * there is no cross-account "adoption" of a demo-mode conversation the way
+ * the Phase 5 one-time migration adopts other domains (see lib/migration.ts).
  */
 export function useTutorConversation() {
   const { user, isConfigured } = useAuth();
   const cloudMode = isConfigured && !!user;
 
-  const { state, setState, loaded } = useLocalStorageState<StoredConversation>(STORAGE_KEY, EMPTY_STATE, isStoredConversation);
+  const { state, setState, loaded } = useLocalStorageState<StoredConversation>(
+    scopedKey(DOMAIN_KEY, user?.id),
+    EMPTY_STATE,
+    isStoredConversation,
+  );
   const [syncError, setSyncError] = useState(false);
 
   useEffect(() => {
