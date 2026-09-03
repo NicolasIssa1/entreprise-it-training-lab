@@ -4,6 +4,7 @@ import { Card } from "@/components/Card";
 import { PageHeader } from "@/components/PageHeader";
 import { Disclaimer } from "@/components/Disclaimer";
 import { Badge } from "@/components/Badge";
+import { AskTutorLink } from "@/components/AskTutorLink";
 import {
   BoltIcon,
   PlayIcon,
@@ -158,6 +159,18 @@ export default function PowerAutomateCheatSheetPage() {
         </Link>{" "}
         for a private worksheet to organize your thinking before a real conversation.
       </Disclaimer>
+
+      <div className="flex justify-start">
+        <AskTutorLink
+          params={{
+            mode: "tutor",
+            prompt: "Walk me through how to troubleshoot an existing Power Automate flow that sometimes fails.",
+          }}
+          variant="button"
+        >
+          Ask Tutor how to troubleshoot a flow →
+        </AskTutorLink>
+      </div>
 
       {/* Sticky quick-navigation strip */}
       <div className="sticky top-[4.2rem] z-10 -mx-1 overflow-x-auto rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">

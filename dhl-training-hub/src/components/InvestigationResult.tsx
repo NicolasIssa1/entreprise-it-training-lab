@@ -5,6 +5,7 @@ import { Badge } from "@/components/Badge";
 import { TeamBadge } from "@/components/TeamBadge";
 import { RelatedTopics } from "@/components/RelatedTopics";
 import { AskTutorLink } from "@/components/AskTutorLink";
+import { buildInvestigationReviewPrompt } from "@/lib/ai/tutorPromptTemplates";
 import { getTeamLabel } from "@/lib/data/teams";
 import { skillDefinitions, getInvestigationsForSkill } from "@/lib/data/skills";
 import {
@@ -158,7 +159,7 @@ export function InvestigationResult({
       <Card>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <SectionHeading title="Better reasoning path" />
-          <AskTutorLink params={{ mode: "investigation-review", scenario: scenario.id }} variant="button">
+          <AskTutorLink params={{ mode: "investigation-review", scenario: scenario.id, prompt: buildInvestigationReviewPrompt(scenario) }} variant="button">
             Ask Tutor to explain this
           </AskTutorLink>
         </div>

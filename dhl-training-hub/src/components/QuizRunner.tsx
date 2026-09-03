@@ -9,6 +9,7 @@ import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { RelatedTopics } from "@/components/RelatedTopics";
 import { SyncErrorNotice } from "@/components/SyncErrorNotice";
 import { AskTutorLink } from "@/components/AskTutorLink";
+import { buildQuizCoachPrompt, buildQuizReviewPrompt } from "@/lib/ai/tutorPromptTemplates";
 import { useQuizAttempts, quizResultGuidance } from "@/lib/quizAttempts";
 import { Quiz, QuizAnswer, QuizAttempt, QuizQuestion } from "@/lib/types";
 
@@ -91,7 +92,7 @@ export function QuizRunner({ quiz }: { quiz: Quiz }) {
         <fieldset>
           <div className="flex items-start justify-between gap-3">
             <legend className="text-base font-medium text-slate-900 dark:text-slate-100">{question.prompt}</legend>
-            <AskTutorLink params={{ mode: "quiz-coach", quiz: quiz.id }}>Ask Tutor for a hint</AskTutorLink>
+            <AskTutorLink params={{ mode: "quiz-coach", quiz: quiz.id, prompt: buildQuizCoachPrompt(quiz) }}>Ask Tutor for a hint</AskTutorLink>
           </div>
           {question.type === "multi-select" && <p className="mt-1 text-xs text-slate-400">Select all that apply.</p>}
           <div className="mt-4 space-y-2">
@@ -297,7 +298,7 @@ function QuestionReviewCard({
         <Badge variant={correct ? "success" : "danger"}>{correct ? "Correct" : "Incorrect"}</Badge>
       </div>
       <div className="mt-2">
-        <AskTutorLink params={{ mode: "quiz-review", quiz: quizId, question: question.id }}>Explain with AI →</AskTutorLink>
+        <AskTutorLink params={{ mode: "quiz-review", quiz: quizId, question: question.id, prompt: buildQuizReviewPrompt(question) }}>Explain with AI →</AskTutorLink>
       </div>
       <ul className="mt-3 space-y-1.5">
         {question.options.map((option) => {

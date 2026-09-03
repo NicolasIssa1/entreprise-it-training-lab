@@ -14,6 +14,7 @@ import { RelatedInvestigations } from "@/components/RelatedInvestigations";
 import { RelatedQuizzes } from "@/components/RelatedQuizzes";
 import { TroubleshootingFramework } from "@/components/TroubleshootingFramework";
 import { categoryColor } from "@/lib/colors";
+import { buildTopicTutorPrompt } from "@/lib/ai/tutorPromptTemplates";
 import { learningTopics, getTopicById, getTopicsByIds } from "@/lib/data/learning";
 import { getTeamLabel } from "@/lib/data/teams";
 import { getTicketsForTopic } from "@/lib/data/tickets";
@@ -58,7 +59,7 @@ export default async function LearningTopicPage(props: PageProps<"/learn/[topicI
             ))}
           </div>
           <div className="flex items-center gap-3">
-            <AskTutorLink params={{ mode: "topic-tutor", topic: topic.id }} variant="button">
+            <AskTutorLink params={{ mode: "topic-tutor", topic: topic.id, prompt: buildTopicTutorPrompt(topic) }} variant="button">
               Ask Tutor about {topic.title}
             </AskTutorLink>
             <CompletionButton topicId={topic.id} />

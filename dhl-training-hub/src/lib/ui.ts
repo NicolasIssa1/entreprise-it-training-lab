@@ -5,7 +5,7 @@
  * regression, so every use pairs `outline-none` with a `ring`).
  */
 export const inputClass =
-  "w-full rounded-lg border border-slate-300 bg-white p-2 text-sm text-slate-900 transition-colors duration-200 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500";
+  "w-full rounded-lg border border-slate-300 bg-white p-2 text-sm text-slate-900 shadow-sm transition-all duration-200 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100 dark:placeholder:text-slate-500";
 
 export const textareaClass = `${inputClass} resize-none`;
 
@@ -30,18 +30,18 @@ export type ButtonSize = "sm" | "md";
  */
 export function buttonClass(variant: ButtonVariant = "primary", size: ButtonSize = "md") {
   const base =
-    "inline-flex items-center justify-center gap-1.5 rounded-lg font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-40";
+    "inline-flex items-center justify-center gap-1.5 rounded-lg font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100";
   const sizes: Record<ButtonSize, string> = {
     sm: "px-3 py-1.5 text-xs",
     md: "px-4 py-2 text-sm",
   };
   const variants: Record<ButtonVariant, string> = {
     primary:
-      "bg-blue-600 text-white shadow-sm shadow-blue-900/20 hover:bg-blue-700 hover:shadow-md hover:shadow-blue-900/25 active:bg-blue-800",
+      "bg-gradient-to-b from-blue-600 to-blue-700 text-white shadow-sm shadow-blue-900/25 hover:shadow-lg hover:shadow-blue-900/30 hover:brightness-110 active:brightness-95",
     secondary:
-      "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 active:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800",
+      "border border-slate-300 bg-white/80 text-slate-700 shadow-sm backdrop-blur-sm hover:border-slate-400 hover:bg-white active:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300 dark:hover:bg-slate-800",
     ghost: "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800",
-    destructive: "bg-red-600 text-white shadow-sm shadow-red-900/20 hover:bg-red-700 active:bg-red-800",
+    destructive: "bg-gradient-to-b from-red-600 to-red-700 text-white shadow-sm shadow-red-900/25 hover:shadow-lg hover:shadow-red-900/30 hover:brightness-110",
   };
   return `${base} ${sizes[size]} ${variants[variant]}`;
 }

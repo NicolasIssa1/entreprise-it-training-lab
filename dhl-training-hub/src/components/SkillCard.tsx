@@ -1,5 +1,7 @@
 import { Card } from "@/components/Card";
 import { Badge } from "@/components/Badge";
+import { AskTutorLink } from "@/components/AskTutorLink";
+import { buildSkillTutorPrompt } from "@/lib/ai/tutorPromptTemplates";
 import { skillColor } from "@/lib/colors";
 import { SkillLevel, SkillProgress } from "@/lib/types";
 
@@ -50,6 +52,12 @@ export function SkillCard({ progress }: { progress: SkillProgress }) {
           </dd>
         </div>
       </dl>
+
+      <div className="mt-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+        <AskTutorLink params={{ mode: "progress-coach", prompt: buildSkillTutorPrompt(skill.name) }}>
+          Ask Tutor about {skill.name} →
+        </AskTutorLink>
+      </div>
     </Card>
   );
 }

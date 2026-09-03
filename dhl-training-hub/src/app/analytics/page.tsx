@@ -10,6 +10,7 @@ import { Disclaimer } from "@/components/Disclaimer";
 import { EmptyState } from "@/components/EmptyState";
 import { BookIcon, LayersIcon, ChartIcon, BeakerIcon } from "@/components/icons";
 import { AskTutorLink } from "@/components/AskTutorLink";
+import { buildProgressTutorPrompt } from "@/lib/ai/tutorPromptTemplates";
 import { SkillAnalyticsCard } from "@/components/analytics/SkillAnalyticsCard";
 import { QuizAnalyticsCard } from "@/components/analytics/QuizAnalyticsCard";
 import { InvestigationAnalyticsSummary } from "@/components/analytics/InvestigationAnalyticsSummary";
@@ -182,7 +183,7 @@ export default function AnalyticsPage() {
       <Card>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <SectionHeading title="Ask the Tutor about your analytics" subtitle="Explains what's already here — never invents a new score" />
-          <AskTutorLink params={{ mode: "progress-coach" }} variant="button">
+          <AskTutorLink params={{ mode: "progress-coach", prompt: buildProgressTutorPrompt() }} variant="button">
             Ask Tutor to explain my analytics
           </AskTutorLink>
         </div>

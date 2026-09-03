@@ -7,6 +7,8 @@ import { Badge } from "@/components/Badge";
 import { PageHeader } from "@/components/PageHeader";
 import { Disclaimer } from "@/components/Disclaimer";
 import { AssignmentProgressSummary } from "@/components/AssignmentProgressSummary";
+import { AskTutorLink } from "@/components/AskTutorLink";
+import { buildAssignmentTutorPrompt } from "@/lib/ai/tutorPromptTemplates";
 import { getPathById } from "@/lib/data/learning";
 import { getQuizById } from "@/lib/data/quizzes";
 import { getScenarioById } from "@/lib/data/investigations";
@@ -126,7 +128,12 @@ export default function AssignmentsPage() {
               </div>
 
               <div className="mt-4 border-t border-slate-200 pt-4 dark:border-slate-800">
-                <SectionHeading title="Your progress against this template" />
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <SectionHeading title="Your progress against this template" />
+                  <AskTutorLink params={{ mode: "progress-coach", prompt: buildAssignmentTutorPrompt(assignment) }}>
+                    Ask Tutor →
+                  </AskTutorLink>
+                </div>
                 <AssignmentProgressSummary progress={progress} />
               </div>
             </Card>

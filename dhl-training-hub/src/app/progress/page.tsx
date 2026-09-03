@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Disclaimer } from "@/components/Disclaimer";
 import { SkillCard } from "@/components/SkillCard";
 import { AskTutorLink } from "@/components/AskTutorLink";
+import { buildProgressTutorPrompt } from "@/lib/ai/tutorPromptTemplates";
 import { learningTopics } from "@/lib/data/learning";
 import { quizzes } from "@/lib/data/quizzes";
 import { investigationScenarios } from "@/lib/data/investigations";
@@ -102,7 +103,7 @@ export default function ProgressPage() {
       <section className="space-y-3">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <SectionHeading title="Recommended Next Actions" subtitle="Deterministic suggestions based on your activity — no AI" />
-          <AskTutorLink params={{ mode: "progress-coach" }} variant="button">
+          <AskTutorLink params={{ mode: "progress-coach", prompt: buildProgressTutorPrompt() }} variant="button">
             Ask Tutor to explain my recommendations
           </AskTutorLink>
         </div>

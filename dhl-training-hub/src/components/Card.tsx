@@ -27,7 +27,7 @@ export function Card({
       id={id}
       className={`rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.03] transition-all duration-200 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none ${
         interactive
-          ? "hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-950/[0.06] dark:hover:border-blue-800/70"
+          ? "hover:-translate-y-0.5 hover:border-blue-300 hover:bg-slate-50/80 hover:shadow-lg hover:shadow-blue-950/[0.08] dark:hover:border-blue-800/70 dark:hover:bg-slate-800/60"
           : ""
       } ${className}`}
     >

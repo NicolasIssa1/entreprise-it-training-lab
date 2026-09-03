@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
@@ -22,6 +22,7 @@ import { useQuizAttempts } from "@/lib/quizAttempts";
 import { useInvestigationProgress, useInvestigationCompletions } from "@/lib/investigationProgress";
 import { TUTOR_MODES, TutorMessage, TutorMode } from "@/lib/types";
 import { TutorApiRequest, TutorApiResponse } from "@/lib/ai/types";
+import { TUTOR_PROMPT_MAX_LENGTH } from "@/lib/ai/tutorLinks";
 
 const SUGGESTED_QUESTIONS = [
   "Explain DNS simply",
@@ -50,6 +51,7 @@ function friendlyErrorMessage(errorCode: string | undefined): string {
 
 export function TutorChat() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const progressSummary = useTutorProgressSummary();
   const { messages, ensureConversation, addMessage, startNewConversation, syncError } = useTutorConversation();
 
@@ -58,6 +60,13 @@ export function TutorChat() {
   const questionId = searchParams.get("question") ?? undefined;
   const scenarioId = searchParams.get("scenario") ?? undefined;
   const modeParam = searchParams.get("mode") ?? undefined;
+  // Read once, at mount, via the lazy useState initializer below — a
+  // suggested question from an "Ask Tutor about X" link (see
+  // tutorLinks.ts's `prompt` param). Deliberately never re-read on every
+  // render: navigating here is always a full page mount (a different route),
+  // so re-reading on every render risks clobbering text Nicolas is actively
+  // typing if searchParams ever changes under this same mounted instance.
+  const initialPromptParam = searchParams.get("prompt");
 
   const topic = topicId ? getTopicById(topicId) : undefined;
   const quiz = quizId ? getQuizById(quizId) : undefined;
@@ -76,10 +85,22 @@ export function TutorChat() {
   }, [modeParam, scenario, scenarioCompleted, topic]);
 
   const [aiConfigured, setAiConfigured] = useState<boolean | null>(null);
-  const [input, setInput] = useState("");
+  // Lazy initializer — runs exactly once, on mount, which is what makes this
+  // safe: it can never overwrite text Nicolas has already typed, and it
+  // never fires a request on its own (it only ever sets local textarea
+  // state — see PART 2 / "must never auto-send" in the task this shipped
+  // under). Treated as plain text throughout: it flows into the same
+  // controlled <textarea> value every other keystroke does, and later, if
+  // sent, into TutorMessage.content, which TutorMessageBubble renders as a
+  // literal string for user turns (never parsed as Markdown/HTML — only
+  // assistant replies go through ReactMarkdown). Capped defensively even
+  // though tutorHref() already caps it at build time, since a hand-typed
+  // URL wouldn't have gone through that helper.
+  const [input, setInput] = useState(() => (initialPromptParam ?? "").slice(0, TUTOR_PROMPT_MAX_LENGTH));
   const [sending, setSending] = useState(false);
   const [requestError, setRequestError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     fetch("/api/tutor")
@@ -91,6 +112,31 @@ export function TutorChat() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages.length, sending]);
+
+  // Once, on mount, if a prompt arrived via the URL: focus the composer with
+  // the cursor at the end (so Nicolas can just start typing to extend it),
+  // and strip the `prompt` param from the URL via history.replaceState
+  // (no navigation/reload) — a refreshed page then shows the exact
+  // conversation state rather than re-seeding the same suggested question
+  // into an already-cleared or already-edited composer. Every other param
+  // (mode/topic/quiz/question/scenario) is left in place — those still
+  // describe real, still-relevant context on reload, unlike a one-time
+  // suggestion. No request is made here; this only ever touches the URL and
+  // local textarea focus/selection.
+  useEffect(() => {
+    if (!initialPromptParam) return;
+    const el = textareaRef.current;
+    if (el) {
+      el.focus();
+      const end = el.value.length;
+      el.setSelectionRange(end, end);
+    }
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("prompt");
+    const qs = params.toString();
+    router.replace(qs ? `/tutor?${qs}` : "/tutor", { scroll: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function sendMessage(rawText: string) {
     const text = rawText.trim();
@@ -190,7 +236,7 @@ export function TutorChat() {
         eyebrow="AI Tutor"
         title="Your grounded enterprise IT tutor."
         description="Ask questions about enterprise IT concepts and this application's own training material — never a generic chatbot."
-        accent="from-indigo-500/15 via-blue-500/10 to-transparent"
+        accent="from-violet-500/20 via-indigo-500/10 to-cyan-500/10"
       />
 
       <PrivacyNotice context="Also avoid internal URLs and real employee/customer names — see the context panel for exactly what the Tutor can see automatically." />
@@ -207,7 +253,11 @@ export function TutorChat() {
       {syncError && <SyncErrorNotice message="We couldn't sync this conversation to your account right now. It's still saved on this device." />}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <div className="flex min-h-[32rem] flex-col">
+        <div className="relative flex min-h-[32rem] flex-col">
+          <div
+            className="pointer-events-none absolute -inset-x-6 -inset-y-8 -z-10 bg-[radial-gradient(ellipse_60%_50%_at_20%_0%,rgba(139,92,246,0.10),transparent_60%),radial-gradient(ellipse_50%_45%_at_100%_100%,rgba(34,211,238,0.10),transparent_60%)] blur-2xl dark:bg-[radial-gradient(ellipse_60%_50%_at_20%_0%,rgba(139,92,246,0.18),transparent_60%),radial-gradient(ellipse_50%_45%_at_100%_100%,rgba(34,211,238,0.16),transparent_60%)]"
+            aria-hidden="true"
+          />
           <Card className="flex flex-1 flex-col">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3 dark:border-slate-800">
               <Badge variant="accent">{MODE_LABEL[resolvedMode]}</Badge>
@@ -276,6 +326,7 @@ export function TutorChat() {
             >
               <div className="flex items-end gap-2 rounded-xl border border-slate-300 bg-white p-1.5 transition-all duration-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/30 dark:border-slate-700 dark:bg-slate-950">
                 <textarea
+                  ref={textareaRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => {
@@ -286,7 +337,7 @@ export function TutorChat() {
                   }}
                   placeholder={aiConfigured === false ? "AI Tutor is not configured in this environment." : "Ask a question…"}
                   disabled={aiConfigured === false || sending}
-                  maxLength={2000}
+                  maxLength={TUTOR_PROMPT_MAX_LENGTH}
                   rows={2}
                   className="w-full resize-none border-0 bg-transparent p-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-100 dark:placeholder:text-slate-500"
                 />

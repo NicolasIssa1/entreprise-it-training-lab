@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { TextAreaField } from "@/components/FormField";
 import { FlowDiagram } from "@/components/FlowDiagram";
+import { AskTutorLink } from "@/components/AskTutorLink";
 import { ShieldIcon } from "@/components/icons";
 import { useBpoProjectPrep } from "@/lib/bpoProjectPrep";
 import { BPO_PROJECT_PREP_FIELDS, BpoProjectPrepFieldId } from "@/lib/types";
@@ -71,6 +72,18 @@ export default function BpoProjectPrepPage() {
           </Link>{" "}
           open for quick reference while you write.
         </p>
+        <div className="mt-3">
+          <AskTutorLink
+            params={{
+              mode: "tutor",
+              prompt:
+                "How can I decide whether a business process is a good candidate for Power Automate, and what should I map out about the As-Is process first?",
+            }}
+            variant="button"
+          >
+            Ask Tutor about mapping this process →
+          </AskTutorLink>
+        </div>
       </Card>
 
       <section className="space-y-3">

@@ -8,7 +8,7 @@ import { DashboardProgressSummary } from "@/components/DashboardProgressSummary"
 import { CurrentAssignmentCard } from "@/components/CurrentAssignmentCard";
 import { CompanyContextCard } from "@/components/CompanyContextCard";
 import { AskTutorLink } from "@/components/AskTutorLink";
-import { BeakerIcon, SparkleIcon, LayersIcon, BookIcon, BriefcaseIcon, ArrowRightIcon } from "@/components/icons";
+import { BeakerIcon, LayersIcon, BookIcon, BriefcaseIcon, ArrowRightIcon } from "@/components/icons";
 import { dashboardData } from "@/lib/data/dashboard";
 import { getTeamById } from "@/lib/data/teams";
 import { internshipState } from "@/lib/data/internshipState";
@@ -54,7 +54,6 @@ export default function DashboardPage() {
               Continue Learning
             </Link>
             <AskTutorLink params={{}} variant="button">
-              <SparkleIcon size={15} />
               Ask AI Tutor
             </AskTutorLink>
           </>

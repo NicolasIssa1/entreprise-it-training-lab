@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
+import { AskTutorLink } from "@/components/AskTutorLink";
+import { buildAssignmentTutorPrompt } from "@/lib/ai/tutorPromptTemplates";
 import { useLearningProgress } from "@/lib/learningProgress";
 import { useQuizAttempts } from "@/lib/quizAttempts";
 import { useInvestigationCompletions } from "@/lib/investigationProgress";
@@ -46,11 +48,16 @@ export function CurrentAssignmentCard() {
 
   return (
     <Card>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <SectionHeading title="Current Assignment" subtitle={progress.assignment.title} />
-        <Link href="/assignments" className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
-          View assignment →
-        </Link>
+        <div className="flex items-center gap-3">
+          <AskTutorLink params={{ mode: "progress-coach", prompt: buildAssignmentTutorPrompt(progress.assignment) }}>
+            Ask Tutor →
+          </AskTutorLink>
+          <Link href="/assignments" className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
+            View assignment →
+          </Link>
+        </div>
       </div>
       <div className="flex items-center justify-between text-sm">
         <p className="text-slate-600 dark:text-slate-400">Overall completion</p>
