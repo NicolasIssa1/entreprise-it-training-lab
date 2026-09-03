@@ -6,11 +6,13 @@ import Link from "next/link";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Badge } from "@/components/Badge";
+import { PageHeader } from "@/components/PageHeader";
 import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { Disclaimer } from "@/components/Disclaimer";
 import { SyncErrorNotice } from "@/components/SyncErrorNotice";
 import { TutorMessageBubble } from "@/components/TutorMessageBubble";
-import { buttonClass, inputClass } from "@/lib/ui";
+import { ProductMark } from "@/components/ProductMark";
+import { buttonClass } from "@/lib/ui";
 import { useTutorConversation } from "@/lib/tutorConversation";
 import { useTutorProgressSummary } from "@/lib/ai/useTutorProgressSummary";
 import { getTopicById } from "@/lib/data/learning";
@@ -22,13 +24,12 @@ import { TUTOR_MODES, TutorMessage, TutorMode } from "@/lib/types";
 import { TutorApiRequest, TutorApiResponse } from "@/lib/ai/types";
 
 const SUGGESTED_QUESTIONS = [
-  "What's the difference between an incident and a service request?",
-  "Explain DNS like I'm new to networking.",
-  "Why can a VPN connect but internal resources still fail?",
+  "Explain DNS simply",
+  "Help me debug a Power Automate flow",
+  "What should I learn next?",
+  "Explain freight forwarding",
   "What's the difference between authentication and authorization?",
   "How do I troubleshoot a slow application?",
-  "How do APIs connect business systems?",
-  "What should I learn after Infrastructure Foundations?",
 ];
 
 const MODE_LABEL: Record<TutorMode, string> = {
@@ -185,12 +186,12 @@ export function TutorChat() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">AI Tutor</h1>
-        <p className="mt-1 text-slate-600 dark:text-slate-400">
-          Ask questions about enterprise IT concepts and this application&rsquo;s training material.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="AI Tutor"
+        title="Your grounded enterprise IT tutor."
+        description="Ask questions about enterprise IT concepts and this application's own training material — never a generic chatbot."
+        accent="from-indigo-500/15 via-blue-500/10 to-transparent"
+      />
 
       <PrivacyNotice context="Also avoid internal URLs and real employee/customer names — see the context panel for exactly what the Tutor can see automatically." />
 
@@ -206,7 +207,7 @@ export function TutorChat() {
       {syncError && <SyncErrorNotice message="We couldn't sync this conversation to your account right now. It's still saved on this device." />}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <div className="flex min-h-[28rem] flex-col">
+        <div className="flex min-h-[32rem] flex-col">
           <Card className="flex flex-1 flex-col">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3 dark:border-slate-800">
               <Badge variant="accent">{MODE_LABEL[resolvedMode]}</Badge>
@@ -220,19 +221,23 @@ export function TutorChat() {
               )}
             </div>
 
-            <div className="flex-1 space-y-3 overflow-y-auto pr-1" style={{ maxHeight: "28rem" }}>
+            <div className="flex-1 space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "32rem" }}>
               {messages.length === 0 && (
-                <div className="space-y-3">
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    No messages yet. Ask a question below, or try one of these:
-                  </p>
-                  <div className="flex flex-wrap gap-2">
+                <div className="flex h-full flex-col items-center justify-center gap-4 py-8 text-center">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-sm shadow-blue-900/25">
+                    <ProductMark size={26} />
+                  </span>
+                  <div>
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Ask me anything about enterprise IT</p>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Grounded in this app&rsquo;s own curriculum — try a question below.</p>
+                  </div>
+                  <div className="flex max-w-md flex-wrap justify-center gap-2">
                     {SUGGESTED_QUESTIONS.map((q) => (
                       <button
                         key={q}
                         onClick={() => sendMessage(q)}
                         disabled={aiConfigured === false}
-                        className="rounded-lg border border-slate-300 px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        className="rounded-lg border border-slate-300 px-3 py-1.5 text-left text-xs text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:border-blue-800 dark:hover:bg-blue-950/30"
                       >
                         {q}
                       </button>
@@ -267,33 +272,36 @@ export function TutorChat() {
                 e.preventDefault();
                 sendMessage(input);
               }}
-              className="mt-4 flex items-end gap-2 border-t border-slate-100 pt-4 dark:border-slate-800"
+              className="mt-4 border-t border-slate-100 pt-4 dark:border-slate-800"
             >
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage(input);
-                  }
-                }}
-                placeholder={aiConfigured === false ? "AI Tutor is not configured in this environment." : "Ask a question…"}
-                disabled={aiConfigured === false || sending}
-                maxLength={2000}
-                rows={2}
-                className={`${inputClass} resize-none disabled:cursor-not-allowed disabled:opacity-60`}
-              />
-              <button
-                type="submit"
-                disabled={aiConfigured === false || sending || !input.trim()}
-                className={`shrink-0 ${buttonClass("primary")}`}
-              >
-                Send
-                <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
-                  <path d="M2 8h11M8.5 3.5 13 8l-4.5 4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
+              <div className="flex items-end gap-2 rounded-xl border border-slate-300 bg-white p-1.5 transition-all duration-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/30 dark:border-slate-700 dark:bg-slate-950">
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage(input);
+                    }
+                  }}
+                  placeholder={aiConfigured === false ? "AI Tutor is not configured in this environment." : "Ask a question…"}
+                  disabled={aiConfigured === false || sending}
+                  maxLength={2000}
+                  rows={2}
+                  className="w-full resize-none border-0 bg-transparent p-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-100 dark:placeholder:text-slate-500"
+                />
+                <button
+                  type="submit"
+                  disabled={aiConfigured === false || sending || !input.trim()}
+                  className={`shrink-0 ${buttonClass("primary")}`}
+                >
+                  Send
+                  <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
+                    <path d="M2 8h11M8.5 3.5 13 8l-4.5 4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </div>
+              <p className="mt-1.5 px-1 text-[0.68rem] text-slate-400">Enter to send · Shift+Enter for a new line</p>
             </form>
           </Card>
         </div>

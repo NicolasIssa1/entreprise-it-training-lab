@@ -13,6 +13,7 @@ import { RelatedTickets } from "@/components/RelatedTickets";
 import { RelatedInvestigations } from "@/components/RelatedInvestigations";
 import { RelatedQuizzes } from "@/components/RelatedQuizzes";
 import { TroubleshootingFramework } from "@/components/TroubleshootingFramework";
+import { categoryColor } from "@/lib/colors";
 import { learningTopics, getTopicById, getTopicsByIds } from "@/lib/data/learning";
 import { getTeamLabel } from "@/lib/data/teams";
 import { getTicketsForTopic } from "@/lib/data/tickets";
@@ -31,11 +32,16 @@ export default async function LearningTopicPage(props: PageProps<"/learn/[topicI
     notFound();
   }
 
+  const color = categoryColor(topic.category);
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
+      <div className={`relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-900/[0.03] dark:border-slate-800 dark:bg-slate-900`}>
+        <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${color.gradient}`} aria-hidden="true" />
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="neutral">{topic.category}</Badge>
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${color.badge}`}>
+            {topic.category}
+          </span>
           <Badge variant="neutral">{topic.level}</Badge>
           <span className="text-xs text-slate-400">{topic.estimatedMinutes} min read</span>
         </div>
@@ -105,19 +111,19 @@ export default async function LearningTopicPage(props: PageProps<"/learn/[topicI
         </div>
       )}
 
-      <LearningSection title="Explain Like I'm 10" emphasized>
+      <LearningSection title="Explain Like I'm 10" tone="friendly">
         <p className="text-sm text-slate-800 dark:text-slate-200">{topic.eli10}</p>
       </LearningSection>
 
-      <LearningSection title="Technical explanation">
+      <LearningSection title="Technical explanation" tone="technical">
         <p className="text-sm text-slate-700 dark:text-slate-300">{topic.technicalExplanation}</p>
       </LearningSection>
 
-      <LearningSection title="Why companies need it">
+      <LearningSection title="Why companies need it" tone="business">
         <p className="text-sm text-slate-700 dark:text-slate-300">{topic.businessPurpose}</p>
       </LearningSection>
 
-      <LearningSection title="Common problems" subtitle="Generic training examples, not real incidents">
+      <LearningSection title="Common problems" subtitle="Generic training examples, not real incidents" tone="warning">
         <ul className="space-y-2">
           {topic.commonProblems.map((p) => (
             <li key={p} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
@@ -170,7 +176,7 @@ export default async function LearningTopicPage(props: PageProps<"/learn/[topicI
 
       <PracticeScenario {...topic.practiceScenario} />
 
-      <LearningSection title="Question to ask at work">
+      <LearningSection title="Question to ask at work" tone="question">
         <p className="text-sm text-slate-700 dark:text-slate-300">{topic.questionToAskAtWork}</p>
       </LearningSection>
 

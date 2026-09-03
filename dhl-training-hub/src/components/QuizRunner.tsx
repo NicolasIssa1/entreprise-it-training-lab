@@ -170,24 +170,50 @@ export function QuizRunner({ quiz }: { quiz: Quiz }) {
   );
 }
 
+const GUIDANCE_RING: Record<string, string> = {
+  success: "stroke-emerald-600 dark:stroke-emerald-400",
+  accent: "stroke-blue-600 dark:stroke-blue-400",
+  warning: "stroke-amber-500 dark:stroke-amber-400",
+  danger: "stroke-rose-500 dark:stroke-rose-400",
+};
+
 function QuizReview({ quiz, attempt, onRetake }: { quiz: Quiz; attempt: QuizAttempt; onRetake: () => void }) {
   const { best, syncError } = useQuizAttempts(quiz.id);
   const guidance = quizResultGuidance(attempt.percentage);
+  const ringCircumference = 2 * Math.PI * 38;
 
   return (
     <div className="space-y-6">
-      <Card>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
+      <Card className="border-blue-100 bg-gradient-to-br from-slate-50 to-transparent dark:border-slate-800 dark:from-slate-900/60">
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
+            <svg viewBox="0 0 88 88" className="h-24 w-24 -rotate-90">
+              <circle cx="44" cy="44" r="38" fill="none" strokeWidth="8" className="stroke-slate-100 dark:stroke-slate-800" />
+              <circle
+                cx="44"
+                cy="44"
+                r="38"
+                fill="none"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray={ringCircumference}
+                strokeDashoffset={ringCircumference - (attempt.percentage / 100) * ringCircumference}
+                className={`transition-all duration-1000 ease-out ${GUIDANCE_RING[guidance.variant]}`}
+              />
+            </svg>
+            <span className="absolute text-lg font-bold text-slate-900 dark:text-slate-100">{attempt.percentage}%</span>
+          </div>
+          <div className="flex-1">
             <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Assessment complete</p>
             <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
-              {attempt.correctCount} / {attempt.totalQuestions} &middot; {attempt.percentage}%
+              {attempt.correctCount} / {attempt.totalQuestions} correct
             </p>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{guidance.label}</p>
+            <div className="mt-1.5">
+              <Badge variant={guidance.variant}>{guidance.label}</Badge>
+            </div>
+            <p className="mt-3 text-xs text-slate-400">{quiz.passingGuidance}</p>
           </div>
-          <Badge variant={guidance.variant}>{guidance.label}</Badge>
         </div>
-        <p className="mt-3 text-xs text-slate-400">{quiz.passingGuidance}</p>
         {syncError && (
           <div className="mt-3">
             <SyncErrorNotice message="We couldn't save this result to your account right now. It's saved on this device and will sync on your next attempt." />

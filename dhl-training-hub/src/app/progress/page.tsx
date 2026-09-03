@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
+import { PageHeader } from "@/components/PageHeader";
 import { Disclaimer } from "@/components/Disclaimer";
 import { SkillCard } from "@/components/SkillCard";
 import { AskTutorLink } from "@/components/AskTutorLink";
@@ -33,17 +34,21 @@ export default function ProgressPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Training Progress</h1>
-        <p className="mt-1 text-slate-600 dark:text-slate-400">
-          An educational progress indicator across your lessons, knowledge checks, and practical investigations. For a
-          fuller breakdown of what you&rsquo;ve done — quiz trends, investigation history, a shareable summary — see{" "}
-          <Link href="/analytics" className="font-medium text-blue-600 hover:underline dark:text-blue-400">
-            Training Analytics
-          </Link>
-          .
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Progress"
+        title="See how your training is developing."
+        description={
+          <>
+            An educational progress indicator across your lessons, knowledge checks, and practical investigations.
+            For a fuller breakdown — quiz trends, investigation history, a shareable summary — see{" "}
+            <Link href="/analytics" className="font-medium underline">
+              Training Analytics
+            </Link>
+            .
+          </>
+        }
+        accent="from-blue-500/15 via-cyan-500/10 to-transparent"
+      />
 
       <Disclaimer>
         These scores are educational progress indicators inside this training application. They are not validated

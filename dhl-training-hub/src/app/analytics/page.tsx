@@ -4,8 +4,11 @@ import Link from "next/link";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
 import { PageGroupHeading } from "@/components/PageGroupHeading";
+import { PageHeader } from "@/components/PageHeader";
+import { MetricCard } from "@/components/MetricCard";
 import { Disclaimer } from "@/components/Disclaimer";
 import { EmptyState } from "@/components/EmptyState";
+import { BookIcon, LayersIcon, ChartIcon, BeakerIcon } from "@/components/icons";
 import { AskTutorLink } from "@/components/AskTutorLink";
 import { SkillAnalyticsCard } from "@/components/analytics/SkillAnalyticsCard";
 import { QuizAnalyticsCard } from "@/components/analytics/QuizAnalyticsCard";
@@ -42,32 +45,36 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Training Analytics</h1>
-          <p className="mt-1 text-slate-600 dark:text-slate-400">
+      <PageHeader
+        eyebrow="Analytics"
+        title="Understand how your training is developing."
+        description={
+          <>
             What you&rsquo;ve done and how your training is developing — for what to learn next, see{" "}
-            <Link href="/progress" className="font-medium text-blue-600 hover:underline dark:text-blue-400">
+            <Link href="/progress" className="font-medium underline">
               Training Progress
             </Link>
             .
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/analytics/summary"
-            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
-          >
-            Shareable Summary
-          </Link>
-          <Link
-            href="/manager-preview"
-            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
-          >
-            Manager Preview
-          </Link>
-        </div>
-      </div>
+          </>
+        }
+        accent="from-cyan-500/15 via-blue-500/10 to-transparent"
+        actions={
+          <>
+            <Link
+              href="/analytics/summary"
+              className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Shareable Summary
+            </Link>
+            <Link
+              href="/manager-preview"
+              className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Manager Preview
+            </Link>
+          </>
+        }
+      />
 
       <Disclaimer>
         These are educational progress indicators inside this training application — not a validated professional
@@ -75,16 +82,37 @@ export default function AnalyticsPage() {
       </Disclaimer>
 
       <PageGroupHeading label="Training Overview" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          label="Topics completed"
+          value={`${overview.topicsCompleted}/${overview.topicsTotal}`}
+          icon={<BookIcon size={16} />}
+          accentClass="bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-300"
+        />
+        <MetricCard
+          label="Learning paths"
+          value={`${overview.pathsCompleted} done`}
+          hint={`${overview.pathsInProgress} in progress`}
+          icon={<LayersIcon size={16} />}
+          accentClass="bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300"
+        />
+        <MetricCard
+          label="Assessments attempted"
+          value={`${overview.quizzesAttempted}/${overview.quizzesTotal}`}
+          icon={<ChartIcon size={16} />}
+          accentClass="bg-cyan-100 text-cyan-600 dark:bg-cyan-950 dark:text-cyan-300"
+        />
+        <MetricCard
+          label="Investigations completed"
+          value={`${overview.investigationsCompleted}/${overview.investigationsTotal}`}
+          icon={<BeakerIcon size={16} />}
+          accentClass="bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-300"
+        />
+      </div>
       <Card>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <OverviewStat label="Topics completed" value={`${overview.topicsCompleted}/${overview.topicsTotal}`} />
-          <OverviewStat label="Learning paths" value={`${overview.pathsCompleted} done, ${overview.pathsInProgress} in progress`} />
-          <OverviewStat label="Assessments attempted" value={`${overview.quizzesAttempted}/${overview.quizzesTotal}`} />
-          <OverviewStat label="Investigations completed" value={`${overview.investigationsCompleted}/${overview.investigationsTotal}`} />
-        </div>
-        <div className="mt-4 flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-            <div className="h-2.5 rounded-full bg-blue-600 transition-all" style={{ width: `${overview.overallProgress}%` }} />
+            <div className="h-2.5 rounded-full bg-blue-600 transition-all duration-700 ease-out" style={{ width: `${overview.overallProgress}%` }} />
           </div>
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{overview.overallProgress}% overall</p>
         </div>
@@ -159,15 +187,6 @@ export default function AnalyticsPage() {
           </AskTutorLink>
         </div>
       </Card>
-    </div>
-  );
-}
-
-function OverviewStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
-      <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">{value}</p>
     </div>
   );
 }

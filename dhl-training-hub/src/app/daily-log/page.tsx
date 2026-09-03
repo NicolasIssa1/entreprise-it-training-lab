@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
+import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/Badge";
 import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { FormSection } from "@/components/FormSection";
@@ -75,7 +76,7 @@ function DailyLogContent() {
 
   return (
     <div className="space-y-8">
-      <SectionHeading level="h1" title="Daily Log" subtitle="Journal your internship — no employee names required" />
+      <PageHeader eyebrow="Daily Log" title="A professional internship journal." description="Journal your internship — no employee names required." accent="from-emerald-500/15 via-teal-500/10 to-transparent" />
       <PrivacyNotice context="Personal observations are welcome, but exclude anything restricted or confidential." />
 
       <Card>

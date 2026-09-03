@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Badge } from "@/components/Badge";
+import { PageHeader } from "@/components/PageHeader";
 import { Disclaimer } from "@/components/Disclaimer";
 import { AssignmentProgressSummary } from "@/components/AssignmentProgressSummary";
 import { getPathById } from "@/lib/data/learning";
@@ -31,13 +32,12 @@ export default function AssignmentsPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Training Assignments</h1>
-        <p className="mt-1 text-slate-600 dark:text-slate-400">
-          Curated templates bundling required learning paths, assessments, and investigations — activate one to get a
-          focused, trackable list of what to work through next.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Assignments"
+        title="Structured training programs, ready to activate."
+        description="Curated templates bundling required learning paths, assessments, and investigations — activate one to get a focused, trackable list of what to work through next."
+        accent="from-indigo-500/15 via-blue-500/10 to-transparent"
+      />
 
       <Disclaimer>
         These are generic templates, not company-specific programs. Activating one is a personal preference stored on

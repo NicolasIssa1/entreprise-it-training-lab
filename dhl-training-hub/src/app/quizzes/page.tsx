@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
+import { PageHeader } from "@/components/PageHeader";
 import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { QuizCard } from "@/components/QuizCard";
 import { quizzes } from "@/lib/data/quizzes";
@@ -28,12 +29,12 @@ export default function QuizzesPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Knowledge Assessments</h1>
-        <p className="mt-1 text-slate-600 dark:text-slate-400">
-          Test your applied understanding — scenario-based questions, not definitions.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Assessments"
+        title="Prove it, don't just recognize it."
+        description="Scenario-based questions that test applied judgment — never bare definitions — with detailed answer review and unlimited retakes."
+        accent="from-emerald-500/15 via-teal-500/10 to-transparent"
+      />
       <PrivacyNotice context="These are fictional, generic knowledge checks — not real DHL data or terminology." />
 
       {recommendations.length > 0 && (

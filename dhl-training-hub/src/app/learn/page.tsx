@@ -5,8 +5,11 @@ import Link from "next/link";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Badge } from "@/components/Badge";
+import { PageHeader } from "@/components/PageHeader";
+import { EmptyState } from "@/components/EmptyState";
 import { LearningTopicCard } from "@/components/LearningTopicCard";
 import { TroubleshootingFramework } from "@/components/TroubleshootingFramework";
+import { categoryColor } from "@/lib/colors";
 import {
   learningTopics,
   learningPaths,
@@ -74,13 +77,11 @@ export default function LearnPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Enterprise IT Learning</h1>
-        <p className="mt-1 text-slate-600 dark:text-slate-400">
-          Learn the concepts behind Infrastructure, Applications, Support &amp; Network, and enterprise IT service
-          management.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Learn"
+        title="Build the enterprise IT knowledge universities rarely teach."
+        description={`${learningTopics.length} lessons across ${LEARNING_CATEGORIES.length} categories — Infrastructure, Networking, Applications, Security, ITSM, Business & Logistics, and BPO & Process Automation — each following the same explain-simply-then-technically structure.`}
+      />
 
       <Card>
         <div className="flex items-center justify-between text-sm">
@@ -225,16 +226,23 @@ export default function LearnPage() {
               >
                 {ALL_CATEGORIES}
               </button>
-              {LEARNING_CATEGORIES.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setCategory(c)}
-                  aria-pressed={category === c}
-                  className={toggleButtonClass(category === c)}
-                >
-                  {c}
-                </button>
-              ))}
+              {LEARNING_CATEGORIES.map((c) => {
+                const isActive = category === c;
+                const color = categoryColor(c);
+                return (
+                  <button
+                    key={c}
+                    onClick={() => setCategory(c)}
+                    aria-pressed={isActive}
+                    className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+                      isActive ? `border-transparent text-white shadow-sm bg-gradient-to-b ${color.gradient}` : `border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800`
+                    }`}
+                  >
+                    <span className={isActive ? "" : `mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${color.dot} align-middle`} />
+                    {c}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -290,9 +298,12 @@ export default function LearnPage() {
             <LearningTopicCard key={topic.id} topic={topic} completed={!!completed[topic.id]} />
           ))}
           {filtered.length === 0 && (
-            <p className="text-sm text-slate-500 sm:col-span-2 lg:col-span-3">
-              No topics match your search or filters. Try a different term or clear the filters above.
-            </p>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <EmptyState
+                title="No topics match your search or filters"
+                description="Try a different term, or clear the filters above."
+              />
+            </div>
           )}
         </div>
       </section>

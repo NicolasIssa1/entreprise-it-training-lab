@@ -77,18 +77,34 @@ export function InvestigationResult({
         )}
       </Card>
 
-      <Card>
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <Card className="border-blue-200 bg-gradient-to-br from-blue-50/60 to-transparent dark:border-blue-900 dark:from-blue-950/20">
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
+            <svg viewBox="0 0 88 88" className="h-24 w-24 -rotate-90">
+              <circle cx="44" cy="44" r="38" fill="none" strokeWidth="8" className="stroke-slate-100 dark:stroke-slate-800" />
+              <circle
+                cx="44"
+                cy="44"
+                r="38"
+                fill="none"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray={2 * Math.PI * 38}
+                strokeDashoffset={2 * Math.PI * 38 - (score.overall / 100) * 2 * Math.PI * 38}
+                className="stroke-blue-600 transition-all duration-1000 ease-out dark:stroke-blue-400"
+              />
+            </svg>
+            <span className="absolute text-xl font-bold text-slate-900 dark:text-slate-100">{score.overall}</span>
+          </div>
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Investigation complete</p>
-            <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
-              {score.overall}/100 &middot; {score.overallCategory}
-            </p>
-            <p className="mt-1 text-xs text-slate-400">
+            <div className="mt-1 flex items-center gap-2">
+              <Badge variant={CATEGORY_BADGE_VARIANT[score.overallCategory]}>{score.overallCategory}</Badge>
+            </div>
+            <p className="mt-2 max-w-md text-xs text-slate-400">
               A training indicator of your reasoning process, not a scientifically validated assessment.
             </p>
           </div>
-          <Badge variant={CATEGORY_BADGE_VARIANT[score.overallCategory]}>{score.overallCategory}</Badge>
         </div>
       </Card>
 
@@ -107,7 +123,7 @@ export function InvestigationResult({
                 </span>
               </div>
               <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                <div className="h-1.5 rounded-full bg-blue-600" style={{ width: `${c.score}%` }} />
+                <div className="h-1.5 rounded-full bg-blue-600 transition-all duration-700 ease-out" style={{ width: `${c.score}%` }} />
               </div>
             </div>
           ))}

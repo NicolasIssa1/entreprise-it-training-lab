@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Matches Tailwind's slate-50/slate-950 exactly (layout.tsx's body
+     className) so this variable and the utility class never disagree. */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --surface-hover: #f1f5f9;
+  --border-subtle: #e2e8f0;
+  --muted: #64748b;
 }
 
 @theme inline {
@@ -14,8 +20,12 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #020617;
+    --foreground: #f1f5f9;
+    --surface: #0f172a;
+    --surface-hover: #1e293b;
+    --border-subtle: #1e293b;
+    --muted: #94a3b8;
   }
 }
 
@@ -46,19 +56,23 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background-image:
-    radial-gradient(ellipse 80% 50% at 15% -10%, rgba(37, 99, 235, 0.08), transparent 60%),
-    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(99, 102, 241, 0.06), transparent 55%),
-    radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.05) 1px, transparent 0);
-  background-size: auto, auto, 28px 28px;
+    radial-gradient(ellipse 65% 45% at 8% -8%, rgba(79, 70, 229, 0.14), transparent 62%),
+    radial-gradient(ellipse 55% 40% at 100% 0%, rgba(37, 99, 235, 0.09), transparent 58%),
+    radial-gradient(ellipse 55% 45% at 100% 100%, rgba(6, 182, 212, 0.10), transparent 60%),
+    radial-gradient(ellipse 45% 35% at 0% 100%, rgba(139, 92, 246, 0.06), transparent 55%),
+    radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.055) 1px, transparent 0);
+  background-size: auto, auto, auto, auto, 30px 30px;
 }
 
 @media (prefers-color-scheme: dark) {
   body::before {
     background-image:
-      radial-gradient(ellipse 80% 50% at 15% -10%, rgba(59, 130, 246, 0.12), transparent 60%),
-      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(129, 140, 248, 0.08), transparent 55%),
-      radial-gradient(circle at 1px 1px, rgba(226, 232, 240, 0.06) 1px, transparent 0);
-    background-size: auto, auto, 28px 28px;
+      radial-gradient(ellipse 65% 45% at 8% -8%, rgba(99, 102, 241, 0.22), transparent 62%),
+      radial-gradient(ellipse 55% 40% at 100% 0%, rgba(59, 130, 246, 0.14), transparent 58%),
+      radial-gradient(ellipse 55% 45% at 100% 100%, rgba(34, 211, 238, 0.13), transparent 60%),
+      radial-gradient(ellipse 45% 35% at 0% 100%, rgba(167, 139, 250, 0.10), transparent 55%),
+      radial-gradient(circle at 1px 1px, rgba(226, 232, 240, 0.07) 1px, transparent 0);
+    background-size: auto, auto, auto, auto, 30px 30px;
   }
 }
 
@@ -250,4 +264,92 @@ body::before {
 }
 .typing-dot {
   animation: typing-dot 1.2s ease-in-out infinite;
+}
+
+/* ---------------------------------------------------------------------
+ * Route entrance animation (see PageTransition.tsx) — a very short fade +
+ * lift, replayed on every navigation by remounting on pathname change.
+ * Reduced-motion is handled globally above (every animation-duration is
+ * zeroed), so this needs no separate media query.
+ * --------------------------------------------------------------------- */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-page-in {
+  animation: page-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Selective glass surface — used sparingly (Nav, composer, hero overlays),
+ * never as the default card treatment. */
+.surface-glass {
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Gradient border utility — a padding trick (gradient box + inset solid
+ * box) rather than `border-image`, so radius/box-shadow keep working
+ * normally on the inner surface. Used sparingly for a small number of
+ * "special" cards (active assignment, current-context Tutor card). */
+.gradient-border {
+  position: relative;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(135deg, #6366f1, #3b82f6, #06b6d4) border-box;
+}
+
+/* Skeleton loading shimmer — for the rare moment before client-hydrated
+ * data is available (Tutor mode badge, etc.), not a general spinner
+ * replacement. */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.15) 25%, rgba(148, 163, 184, 0.3) 37%, rgba(148, 163, 184, 0.15) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+/* Lightweight tooltip — CSS-only, `title`-attribute-adjacent affordance for
+ * a handful of chart/metric hovers (Analytics). Not used for anything that
+ * must be keyboard-accessible on its own (those get real visible text). */
+[data-tooltip] {
+  position: relative;
+}
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(2px);
+  white-space: nowrap;
+  padding: 0.3rem 0.55rem;
+  border-radius: 0.4rem;
+  background: #0f172a;
+  color: #f1f5f9;
+  font-size: 0.7rem;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease, transform 150ms ease;
+  z-index: 20;
+}
+[data-tooltip]:hover::after,
+[data-tooltip]:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }

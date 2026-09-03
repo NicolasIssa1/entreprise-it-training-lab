@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
+import { PageHeader } from "@/components/PageHeader";
 import { Disclaimer } from "@/components/Disclaimer";
 import { SkillAnalyticsCard } from "@/components/analytics/SkillAnalyticsCard";
 import { PrintSummaryButton } from "@/components/PrintSummaryButton";
@@ -55,12 +56,12 @@ export default function PilotReportPage() {
         <PrintSummaryButton />
       </div>
 
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Pilot Training Summary</h1>
-        <p className="mt-1 text-slate-600 dark:text-slate-400">
-          {internshipState.organization} · {internshipState.role}
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Pilot Report"
+        title="Pilot Training Summary"
+        description={`${internshipState.organization} · ${internshipState.role}`}
+        accent="from-blue-500/15 via-indigo-500/10 to-transparent"
+      />
 
       <Disclaimer>
         Pilot training summary — not a certification or employee performance evaluation. Daily Log entries, CV

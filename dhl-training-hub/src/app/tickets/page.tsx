@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/Card";
 import { Badge } from "@/components/Badge";
-import { SectionHeading } from "@/components/SectionHeading";
+import { PageHeader } from "@/components/PageHeader";
 import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { InvestigationCard } from "@/components/InvestigationCard";
 import { tickets, getTicketById } from "@/lib/data/tickets";
@@ -25,10 +25,11 @@ export default function TicketSimulatorPage() {
 
   return (
     <div className="space-y-6">
-      <SectionHeading
-        level="h1"
-        title="Ticket Simulator"
-        subtitle="Fake, generic training tickets and investigations — not real DHL data or terminology"
+      <PageHeader
+        eyebrow="Ticket Simulator"
+        title="Practice diagnosing realistic enterprise incidents."
+        description="Fake, generic training tickets and investigations — not real DHL data or terminology."
+        accent="from-amber-500/15 via-orange-500/10 to-transparent"
       />
       <PrivacyNotice context="All tickets and scenarios below are fictional training content, not real DHL incidents." />
 

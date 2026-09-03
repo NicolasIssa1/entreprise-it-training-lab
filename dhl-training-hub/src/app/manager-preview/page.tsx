@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
+import { PageHeader } from "@/components/PageHeader";
 import { Disclaimer } from "@/components/Disclaimer";
 import { SkillAnalyticsCard } from "@/components/analytics/SkillAnalyticsCard";
 import { InvestigationAnalyticsSummary } from "@/components/analytics/InvestigationAnalyticsSummary";
@@ -59,12 +60,12 @@ export default function ManagerPreviewPage() {
         <PrintSummaryButton />
       </div>
 
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Manager Preview</h1>
-        <p className="mt-1 text-slate-600 dark:text-slate-400">
-          {internshipState.organization} · {internshipState.role}
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Manager Preview"
+        title="Manager Preview"
+        description={`${internshipState.organization} · ${internshipState.role}`}
+        accent="from-slate-500/10 via-blue-500/10 to-transparent"
+      />
 
       <Disclaimer>
         Preview only — this page displays your own training data. Multi-user manager accounts are not implemented

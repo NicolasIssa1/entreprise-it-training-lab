@@ -5,10 +5,16 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { displayProductName, product } from "@/lib/product";
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { ProductMarkTile } from "@/components/ProductMark";
 
 // Grouped for scannability (Phase 10) — flat list of 12 links was hard to scan.
-// Manager Preview / Privacy / Onboarding are deliberately reached via footer/
-// in-page links, not top nav, to keep this list from growing further.
+// Kept as an upgraded top nav rather than a sidebar for this visual pass: with
+// four groups and ~13 links total, a sidebar would cost a fixed column of
+// horizontal space on every page (including the long-form Learn/Tutor/BPO
+// pages this pass specifically widened for readability) without actually
+// making navigation faster to scan than the existing grouped bar. Manager
+// Preview / Privacy / Onboarding are deliberately reached via footer/in-page
+// links, not top nav, to keep this list from growing further.
 const NAV_GROUPS: { label: string; links: { href: string; label: string }[] }[] = [
   {
     label: "Learn",
@@ -48,9 +54,9 @@ function isLinkActive(pathname: string, href: string) {
 }
 
 function linkClasses(isActive: boolean) {
-  return `whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+  return `relative whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 ${
     isActive
-      ? "bg-blue-600 text-white"
+      ? "bg-gradient-to-b from-blue-600 to-blue-700 text-white shadow-sm shadow-blue-900/25"
       : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
   }`;
 }
@@ -67,19 +73,17 @@ export function Nav() {
   }
 
   return (
-    <header className="border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
+    <header className="surface-glass sticky top-0 z-30 border-b border-slate-200/80 dark:border-slate-800/80">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-        <div className="flex shrink-0 items-center gap-2">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">
-            IT
-          </span>
+        <Link href="/" className="flex shrink-0 items-center gap-2.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
+          <ProductMarkTile size={34} />
           <div className="leading-tight whitespace-nowrap">
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            <p className="text-sm font-semibold tracking-tight text-slate-900 dark:text-slate-100">
               {displayProductName}
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{product.navTagline}</p>
+            <p className="text-[0.7rem] text-slate-500 dark:text-slate-400">{product.navTagline}</p>
           </div>
-        </div>
+        </Link>
 
         {/* Desktop / wide nav: grouped inline links with dividers between groups */}
         <nav className="hidden flex-1 flex-wrap items-center gap-x-1 gap-y-1 lg:flex" aria-label="Main">
@@ -104,7 +108,8 @@ export function Nav() {
 
         <div className="flex shrink-0 items-center gap-2">
           {!isConfigured ? (
-            <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+            <span className="hidden items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800 sm:inline-flex dark:bg-amber-950 dark:text-amber-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
               Local Demo Mode
             </span>
           ) : loading ? (
@@ -116,7 +121,7 @@ export function Nav() {
               </span>
               <button
                 onClick={handleSignOut}
-                className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors duration-200 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Sign Out
               </button>
@@ -125,13 +130,13 @@ export function Nav() {
             <>
               <Link
                 href="/login"
-                className="hidden whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:inline-block dark:text-slate-300 dark:hover:bg-slate-800"
+                className="hidden whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors duration-200 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:inline-block dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Sign In
               </Link>
               <Link
                 href="/signup"
-                className="hidden whitespace-nowrap rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:inline-block"
+                className="hidden whitespace-nowrap rounded-lg bg-gradient-to-b from-blue-600 to-blue-700 px-3 py-1.5 text-sm font-medium text-white shadow-sm shadow-blue-900/25 transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:inline-block"
               >
                 Create Account
               </Link>
@@ -145,7 +150,7 @@ export function Nav() {
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav-panel"
             aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors duration-200 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
           >
             <svg viewBox="0 0 20 20" fill="none" className="h-5 w-5" aria-hidden="true">
               {mobileOpen ? (
@@ -172,7 +177,7 @@ export function Nav() {
         <nav
           id="mobile-nav-panel"
           aria-label="Main, expanded"
-          className="border-t border-slate-200 px-4 py-3 lg:hidden dark:border-slate-800"
+          className="surface-glass border-t border-slate-200/80 px-4 py-3 lg:hidden dark:border-slate-800/80"
         >
           {!user && isConfigured && (
             <div className="mb-3 flex gap-2 sm:hidden">
@@ -186,7 +191,7 @@ export function Nav() {
               <Link
                 href="/signup"
                 onClick={() => setMobileOpen(false)}
-                className="flex-1 rounded-lg bg-blue-600 px-3 py-1.5 text-center text-sm font-medium text-white hover:bg-blue-700"
+                className="flex-1 rounded-lg bg-gradient-to-b from-blue-600 to-blue-700 px-3 py-1.5 text-center text-sm font-medium text-white shadow-sm shadow-blue-900/25"
               >
                 Create Account
               </Link>

@@ -1,5 +1,6 @@
 import { Card } from "@/components/Card";
 import { Badge } from "@/components/Badge";
+import { skillColor } from "@/lib/colors";
 import { SkillLevel, SkillProgress } from "@/lib/types";
 
 const LEVEL_VARIANT: Record<SkillLevel, "neutral" | "warning" | "accent" | "success"> = {
@@ -12,18 +13,20 @@ const LEVEL_VARIANT: Record<SkillLevel, "neutral" | "warning" | "accent" | "succ
 
 export function SkillCard({ progress }: { progress: SkillProgress }) {
   const { skill, overall, level, evidence } = progress;
+  const color = skillColor(skill.id);
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
+      <div className={`-mx-5 -mt-5 mb-4 h-1.5 bg-gradient-to-r ${color.gradient}`} aria-hidden="true" />
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{skill.name}</p>
+          <p className={`text-xs font-semibold uppercase tracking-wide ${color.text}`}>{skill.name}</p>
           <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">{overall}%</p>
         </div>
         <Badge variant={LEVEL_VARIANT[level]}>{level}</Badge>
       </div>
       <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-        <div className="h-2 rounded-full bg-blue-600 transition-all" style={{ width: `${overall}%` }} />
+        <div className={`h-2 rounded-full ${color.bar} transition-all duration-700 ease-out`} style={{ width: `${overall}%` }} />
       </div>
       <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{skill.description}</p>
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Nav } from "@/components/Nav";
 import { MigrationBanner } from "@/components/MigrationBanner";
+import { PageTransition } from "@/components/PageTransition";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { displayProductName, product } from "@/lib/product";
 import "./globals.css";
@@ -34,7 +35,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Nav />
             <MigrationBanner />
           </div>
-          <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
+          <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+            <PageTransition>{children}</PageTransition>
+          </main>
           <footer className="print:hidden border-t border-slate-200 py-4 text-center text-xs text-slate-400 dark:border-slate-800">
             {product.trainingDisclaimer}{" "}
             <Link href="/privacy" className="underline hover:text-slate-600 dark:hover:text-slate-300">

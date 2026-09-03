@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
+import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/Badge";
 import { Disclaimer } from "@/components/Disclaimer";
 import { useAuth } from "@/lib/auth/AuthProvider";
@@ -39,14 +40,18 @@ export default function PilotReadinessPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Pilot Readiness Checklist</h1>
-        <p className="mt-1 text-slate-600 dark:text-slate-400">
-          An honest, self-assessed picture of what&rsquo;s ready and what isn&rsquo;t before proposing a real pilot —
-          see <code className="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">ENTERPRISE-READINESS.md</code>{" "}
-          for the full future-requirements list.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Pilot"
+        title="Pilot Readiness Checklist"
+        description={
+          <>
+            An honest, self-assessed picture of what&rsquo;s ready and what isn&rsquo;t before proposing a real pilot —
+            see <code className="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">ENTERPRISE-READINESS.md</code>{" "}
+            for the full future-requirements list.
+          </>
+        }
+        accent="from-slate-500/10 via-blue-500/10 to-transparent"
+      />
 
       <Disclaimer>
         This checklist reflects a polished training prototype, not production enterprise software. Honesty about gaps

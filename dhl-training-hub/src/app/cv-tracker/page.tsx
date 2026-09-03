@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
+import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/Badge";
 import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { Disclaimer } from "@/components/Disclaimer";
@@ -60,7 +61,7 @@ export default function CvTrackerPage() {
 
   return (
     <div className="space-y-8">
-      <SectionHeading level="h1" title="CV Achievement Tracker" subtitle="Honest, evidence-based CV bullets — never exaggerated" />
+      <PageHeader eyebrow="CV Tracker" title="Turn today's work into honest CV bullets." description="Evidence-based CV wording, matched to how involved you actually were — never exaggerated." accent="from-violet-500/15 via-indigo-500/10 to-transparent" />
       <PrivacyNotice context="Achievements should reflect your own honest involvement, without confidential specifics." />
       <Disclaimer>
         Never overstate what actually happened. If you only observed something, it must

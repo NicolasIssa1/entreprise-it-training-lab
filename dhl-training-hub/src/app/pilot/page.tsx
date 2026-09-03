@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
+import { PageHeader } from "@/components/PageHeader";
 import { Disclaimer } from "@/components/Disclaimer";
 import { Badge } from "@/components/Badge";
 import { displayProductName } from "@/lib/product";
+import { buttonClass } from "@/lib/ui";
+import { ArrowRightIcon } from "@/components/icons";
 
 const INTENDED_USERS = ["Interns", "Graduates", "Junior IT employees", "Career switchers", "Technical trainees"];
 
@@ -34,15 +37,18 @@ const CUSTOMIZATION_PREVIEW = [
 export default function PilotPage() {
   return (
     <div className="space-y-8">
-      <div>
-        <Badge variant="accent">Enterprise Pilot Concept</Badge>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{displayProductName}</h1>
-        <p className="mt-2 max-w-3xl text-slate-600 dark:text-slate-400">
-          A structured training tool for enterprise IT interns and junior staff — realistic fictional scenarios,
-          knowledge checks, guided investigations, and progress reporting, built to demonstrate how a company could
-          use it to train new IT hires.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Enterprise Pilot Concept"
+        title="Structured enterprise IT training for interns and junior professionals."
+        description={`${displayProductName} — realistic fictional scenarios, knowledge checks, guided investigations, and progress reporting, built to demonstrate how a company could use it to train new IT hires.`}
+        accent="from-blue-500/15 via-indigo-500/10 to-transparent"
+        actions={
+          <Link href="/pilot/demo" className={buttonClass("primary")}>
+            Explore Demo
+            <ArrowRightIcon size={15} />
+          </Link>
+        }
+      />
 
       <Disclaimer>
         Not an official product of, or endorsed by, any specific company. Not certified, not validated by any

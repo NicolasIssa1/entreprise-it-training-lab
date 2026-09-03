@@ -8,6 +8,7 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { Disclaimer } from "@/components/Disclaimer";
 import { InputField } from "@/components/FormField";
 import { Button } from "@/components/Button";
+import { ProductMarkTile } from "@/components/ProductMark";
 import { useAuth } from "@/lib/auth/AuthProvider";
 
 export default function SignUpPage() {
@@ -46,11 +47,13 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md space-y-6 py-6">
+    <div className="relative mx-auto max-w-md space-y-6 py-6">
+      <div
+        className="pointer-events-none absolute left-1/2 top-0 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-500/20 via-indigo-500/10 to-transparent blur-3xl"
+        aria-hidden="true"
+      />
       <div className="text-center">
-        <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-sm font-bold text-white shadow-sm shadow-blue-900/20">
-          IT
-        </span>
+        <ProductMarkTile size={44} className="mx-auto mb-3" />
         <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Create your account</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
           Save your learning progress, quiz results, and investigations to your own account.
