@@ -81,7 +81,7 @@ export default function BpoProjectPrepPage() {
             onClick={() => {
               if (window.confirm("Clear every field in this worksheet? This can't be undone.")) clearAll();
             }}
-            className="rounded-md px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+            className="rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
           >
             Clear all fields
           </button>

@@ -9,6 +9,7 @@ import { Disclaimer } from "@/components/Disclaimer";
 import { FormSection } from "@/components/FormSection";
 import { TextAreaField, InputField, SelectField } from "@/components/FormField";
 import { SyncErrorNotice } from "@/components/SyncErrorNotice";
+import { EmptyState } from "@/components/EmptyState";
 import { useCvAchievements } from "@/lib/cvAchievements";
 import { teams, getTeamLabel } from "@/lib/data/teams";
 import { internshipState } from "@/lib/data/internshipState";
@@ -136,7 +137,7 @@ export default function CvTrackerPage() {
 
         <button
           onClick={handleAddAchievement}
-          className="mt-5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+          className="mt-5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
         >
           Save achievement
         </button>
@@ -150,10 +151,10 @@ export default function CvTrackerPage() {
       <div className="space-y-4">
         <SectionHeading title="Logged achievements" />
         {achievements.length === 0 && (
-          <p className="text-sm text-slate-500">
-            No achievements recorded yet. Add your first internship activity when you
-            have something worth tracking.
-          </p>
+          <EmptyState
+            title="No achievements recorded yet"
+            description="Add your first internship activity above when you have something worth tracking."
+          />
         )}
         {achievements.map((a) => (
           <Card key={a.id}>
@@ -175,7 +176,7 @@ export default function CvTrackerPage() {
               {a.rawNote}
             </p>
             {a.suggestedCvWording && (
-              <p className="mt-2 rounded-md bg-slate-50 p-2 text-sm italic text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+              <p className="mt-2 rounded-lg bg-slate-50 p-2 text-sm italic text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                 &ldquo;{a.suggestedCvWording}&rdquo;
               </p>
             )}

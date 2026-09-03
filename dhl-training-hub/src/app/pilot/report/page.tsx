@@ -56,7 +56,7 @@ export default function PilotReportPage() {
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Pilot Training Summary</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Pilot Training Summary</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
           {internshipState.organization} · {internshipState.role}
         </p>

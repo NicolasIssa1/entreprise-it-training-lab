@@ -25,7 +25,7 @@ export default async function QuizPage(props: PageProps<"/quizzes/[quizId]">) {
             {quiz.questions.length} questions &middot; {quiz.estimatedMinutes} min
           </span>
         </div>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">{quiz.title}</h1>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{quiz.title}</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">{quiz.description}</p>
       </div>
 

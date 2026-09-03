@@ -50,7 +50,7 @@ export default function OnboardingPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">You&rsquo;re set up</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">You&rsquo;re set up</h1>
           <p className="mt-1 text-slate-600 dark:text-slate-400">Based on your answers, here&rsquo;s a suggested starting point.</p>
         </div>
 
@@ -61,13 +61,13 @@ export default function OnboardingPage() {
           <div className="mt-4 flex flex-wrap gap-3">
             <button
               onClick={handleActivate}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
             >
               Activate this assignment
             </button>
             <Link
               href="/assignments"
-              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors duration-200 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               See all assignment templates
             </Link>
@@ -144,7 +144,7 @@ export default function OnboardingPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Welcome</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Welcome</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
           A few quick questions to suggest a starting Training Assignment — you can change it any time.
         </p>
@@ -163,7 +163,7 @@ export default function OnboardingPage() {
           <button
             onClick={() => setStep((s) => Math.max(0, s - 1))}
             disabled={step === 0}
-            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             Back
           </button>
@@ -171,7 +171,7 @@ export default function OnboardingPage() {
             <button
               onClick={handleSubmit}
               disabled={!canGoNext}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
             >
               See my suggested assignment
             </button>
@@ -179,7 +179,7 @@ export default function OnboardingPage() {
             <button
               onClick={() => setStep((s) => Math.min(steps.length - 1, s + 1))}
               disabled={!canGoNext}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Next
             </button>

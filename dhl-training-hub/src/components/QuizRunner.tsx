@@ -125,7 +125,7 @@ export function QuizRunner({ quiz }: { quiz: Quiz }) {
         <button
           onClick={() => setIndex((i) => Math.max(0, i - 1))}
           disabled={index === 0}
-          className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
         >
           Back
         </button>
@@ -133,14 +133,14 @@ export function QuizRunner({ quiz }: { quiz: Quiz }) {
         {index < total - 1 ? (
           <button
             onClick={() => setIndex((i) => Math.min(total - 1, i + 1))}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
           >
             Next
           </button>
         ) : (
           <button
             onClick={submit}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
           >
             Submit Assessment
           </button>
@@ -154,7 +154,7 @@ export function QuizRunner({ quiz }: { quiz: Quiz }) {
             onClick={() => setIndex(i)}
             aria-current={i === index ? "step" : undefined}
             aria-label={`Question ${i + 1}${(answers[q.id] ?? []).length > 0 ? ", answered" : ", not answered"}`}
-            className={`h-8 w-8 rounded-md border text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+            className={`h-8 w-8 rounded-lg border text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
               i === index
                 ? "border-blue-600 bg-blue-600 text-white"
                 : (answers[q.id] ?? []).length > 0
@@ -226,13 +226,13 @@ function QuizReview({ quiz, attempt, onRetake }: { quiz: Quiz; attempt: QuizAtte
       <div className="flex flex-wrap items-center gap-4 border-t border-slate-200 pt-4 dark:border-slate-800">
         <button
           onClick={onRetake}
-          className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
         >
           Retake Assessment
         </button>
         <Link
           href="/quizzes"
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
         >
           Back to Assessments
         </Link>
@@ -280,7 +280,7 @@ function QuestionReviewCard({
           return (
             <li
               key={option.id}
-              className={`rounded-md border px-3 py-2 text-sm ${
+              className={`rounded-lg border px-3 py-2 text-sm ${
                 isCorrectOption
                   ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200"
                   : wasSelected
@@ -300,7 +300,7 @@ function QuestionReviewCard({
       {missedMisconceptions.map((text) => (
         <p
           key={text}
-          className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+          className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
         >
           {text}
         </p>

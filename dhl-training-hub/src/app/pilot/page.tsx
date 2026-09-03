@@ -36,7 +36,7 @@ export default function PilotPage() {
     <div className="space-y-8">
       <div>
         <Badge variant="accent">Enterprise Pilot Concept</Badge>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">{displayProductName}</h1>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{displayProductName}</h1>
         <p className="mt-2 max-w-3xl text-slate-600 dark:text-slate-400">
           A structured training tool for enterprise IT interns and junior staff — realistic fictional scenarios,
           knowledge checks, guided investigations, and progress reporting, built to demonstrate how a company could
@@ -54,20 +54,20 @@ export default function PilotPage() {
       </Disclaimer>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Link href="/pilot/demo" className="block">
-          <Card className="h-full transition hover:border-blue-400">
+        <Link href="/pilot/demo" className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
+          <Card className="h-full" interactive>
             <p className="font-medium text-slate-900 dark:text-slate-100">Take the guided tour →</p>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">A walkthrough of every major feature</p>
           </Card>
         </Link>
-        <Link href="/pilot/report" className="block">
-          <Card className="h-full transition hover:border-blue-400">
+        <Link href="/pilot/report" className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
+          <Card className="h-full" interactive>
             <p className="font-medium text-slate-900 dark:text-slate-100">View a sample pilot report →</p>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">What a trainer/manager would see</p>
           </Card>
         </Link>
-        <Link href="/pilot/readiness" className="block">
-          <Card className="h-full transition hover:border-blue-400">
+        <Link href="/pilot/readiness" className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
+          <Card className="h-full" interactive>
             <p className="font-medium text-slate-900 dark:text-slate-100">Check pilot readiness →</p>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Honest checklist of what&rsquo;s ready</p>
           </Card>
@@ -128,23 +128,23 @@ export default function PilotPage() {
       <Card>
         <SectionHeading title="Pilot use case templates" subtitle="Generic templates, not company-specific programs — see /assignments" />
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-md border border-slate-200 p-3 dark:border-slate-800">
+          <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
             <p className="text-sm font-medium text-slate-900 dark:text-slate-100">IT Intern Onboarding</p>
             <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
               Enterprise IT Foundations, ITSM, Infrastructure/Networking basics, and selected investigations.
             </p>
           </div>
-          <div className="rounded-md border border-slate-200 p-3 dark:border-slate-800">
+          <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
             <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Application Support Graduate</p>
             <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
               Applications, APIs, integration, logs, deployment, and troubleshooting.
             </p>
           </div>
-          <div className="rounded-md border border-slate-200 p-3 dark:border-slate-800">
+          <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
             <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Infrastructure / Support Intern</p>
             <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Networking, infrastructure, VPN, DNS, and ticket reasoning.</p>
           </div>
-          <div className="rounded-md border border-slate-200 p-3 dark:border-slate-800">
+          <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
             <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Logistics Technology Intern</p>
             <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
               Enterprise IT, business/logistics foundations, system integration, and business impact.

@@ -40,7 +40,7 @@ export default function PilotReadinessPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Pilot Readiness Checklist</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Pilot Readiness Checklist</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
           An honest, self-assessed picture of what&rsquo;s ready and what isn&rsquo;t before proposing a real pilot —
           see <code className="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">ENTERPRISE-READINESS.md</code>{" "}

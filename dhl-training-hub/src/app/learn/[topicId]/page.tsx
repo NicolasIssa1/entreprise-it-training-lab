@@ -32,14 +32,14 @@ export default async function LearningTopicPage(props: PageProps<"/learn/[topicI
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <div>
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="neutral">{topic.category}</Badge>
           <Badge variant="neutral">{topic.level}</Badge>
           <span className="text-xs text-slate-400">{topic.estimatedMinutes} min read</span>
         </div>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">{topic.title}</h1>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{topic.title}</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">{topic.shortDescription}</p>
       </div>
 

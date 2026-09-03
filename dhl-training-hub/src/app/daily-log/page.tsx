@@ -9,6 +9,7 @@ import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { FormSection } from "@/components/FormSection";
 import { TextAreaField, InputField, SelectField } from "@/components/FormField";
 import { SyncErrorNotice } from "@/components/SyncErrorNotice";
+import { EmptyState } from "@/components/EmptyState";
 import { useDailyLogEntries } from "@/lib/dailyLog";
 import { teamQuestions } from "@/lib/data/questions";
 import { teams, getTeamLabel } from "@/lib/data/teams";
@@ -123,7 +124,7 @@ function DailyLogContent() {
 
         <button
           onClick={handleAddEntry}
-          className="mt-5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+          className="mt-5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
         >
           Save entry
         </button>
@@ -137,10 +138,10 @@ function DailyLogContent() {
       <div className="space-y-4">
         <SectionHeading title="Past entries" />
         {sortedEntries.length === 0 && (
-          <p className="text-sm text-slate-500">
-            No daily log entries yet. Save your first entry above once you have
-            something worth recording.
-          </p>
+          <EmptyState
+            title="No daily log entries yet"
+            description="Save your first entry above once you have something worth recording."
+          />
         )}
         {sortedEntries.map((entry) => (
           <Card key={entry.id}>

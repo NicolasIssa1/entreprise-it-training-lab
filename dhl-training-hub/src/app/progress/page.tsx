@@ -34,7 +34,7 @@ export default function ProgressPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Training Progress</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Training Progress</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
           An educational progress indicator across your lessons, knowledge checks, and practical investigations. For a
           fuller breakdown of what you&rsquo;ve done — quiz trends, investigation history, a shareable summary — see{" "}
@@ -103,8 +103,8 @@ export default function ProgressPage() {
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {recommendations.map((r) => (
-            <Link key={r.id} href={r.href} className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
-              <Card className="h-full transition hover:border-blue-400">
+            <Link key={r.id} href={r.href} className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
+              <Card className="h-full" interactive>
                 <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{r.title}</p>
                 <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{r.description}</p>
               </Card>

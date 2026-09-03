@@ -14,7 +14,7 @@ export default function PrivacyPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Privacy &amp; Data Safety</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Privacy &amp; Data Safety</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
           A plain-English explanation of what {displayProductName} stores, what it deliberately never collects, and
           what reaches the AI Tutor.

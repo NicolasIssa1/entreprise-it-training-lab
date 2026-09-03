@@ -48,7 +48,7 @@ function isLinkActive(pathname: string, href: string) {
 }
 
 function linkClasses(isActive: boolean) {
-  return `whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+  return `whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
     isActive
       ? "bg-blue-600 text-white"
       : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
@@ -70,7 +70,7 @@ export function Nav() {
     <header className="border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
         <div className="flex shrink-0 items-center gap-2">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-600 text-sm font-bold text-white">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">
             IT
           </span>
           <div className="leading-tight whitespace-nowrap">
@@ -116,7 +116,7 @@ export function Nav() {
               </span>
               <button
                 onClick={handleSignOut}
-                className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Sign Out
               </button>
@@ -125,13 +125,13 @@ export function Nav() {
             <>
               <Link
                 href="/login"
-                className="hidden whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:inline-block dark:text-slate-300 dark:hover:bg-slate-800"
+                className="hidden whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:inline-block dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Sign In
               </Link>
               <Link
                 href="/signup"
-                className="hidden whitespace-nowrap rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:inline-block"
+                className="hidden whitespace-nowrap rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:inline-block"
               >
                 Create Account
               </Link>
@@ -145,7 +145,7 @@ export function Nav() {
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav-panel"
             aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
           >
             <svg viewBox="0 0 20 20" fill="none" className="h-5 w-5" aria-hidden="true">
               {mobileOpen ? (
@@ -186,7 +186,7 @@ export function Nav() {
               <Link
                 href="/signup"
                 onClick={() => setMobileOpen(false)}
-                className="flex-1 rounded-md bg-blue-600 px-3 py-1.5 text-center text-sm font-medium text-white hover:bg-blue-700"
+                className="flex-1 rounded-lg bg-blue-600 px-3 py-1.5 text-center text-sm font-medium text-white hover:bg-blue-700"
               >
                 Create Account
               </Link>

@@ -7,9 +7,9 @@ export function InvestigationCard({ scenario, completed }: { scenario: Investiga
   return (
     <Link
       href={`/tickets/investigate/${scenario.id}`}
-      className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+      className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
     >
-      <Card className="h-full transition hover:border-blue-400">
+      <Card className="h-full" interactive>
         <div className="flex items-start justify-between gap-2">
           <Badge variant="neutral">{scenario.difficulty}</Badge>
           {completed && <Badge variant="success">Completed</Badge>}

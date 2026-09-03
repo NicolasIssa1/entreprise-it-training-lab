@@ -19,8 +19,235 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  position: relative;
+}
+
+/*
+ * Global page depth (UI polish pass): a restrained, layered background — two
+ * soft radial glows plus a very faint dot grid — instead of a flat single
+ * color. Deliberately subtle: readability and a "calm enterprise SaaS" feel
+ * take priority over anything that reads as flashy or gaming-like. Lives on
+ * body::before (fixed, behind all content, non-interactive) rather than in
+ * layout.tsx so it's one definition for every page, in both themes, with
+ * zero component changes.
+ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 15% -10%, rgba(37, 99, 235, 0.08), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(99, 102, 241, 0.06), transparent 55%),
+    radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.05) 1px, transparent 0);
+  background-size: auto, auto, 28px 28px;
+}
+
+@media (prefers-color-scheme: dark) {
+  body::before {
+    background-image:
+      radial-gradient(ellipse 80% 50% at 15% -10%, rgba(59, 130, 246, 0.12), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(129, 140, 248, 0.08), transparent 55%),
+      radial-gradient(circle at 1px 1px, rgba(226, 232, 240, 0.06) 1px, transparent 0);
+    background-size: auto, auto, 28px 28px;
+  }
+}
+
+@media print {
+  body::before {
+    display: none;
+  }
+}
+
+/* Respect prefers-reduced-motion everywhere, per the app's own micro-interactions
+   (card lift, button transitions, progress bars) — this is the one global override
+   point rather than repeating a media query in every component. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+::selection {
+  background-color: rgba(37, 99, 235, 0.25);
+}
+
+/* Thin, unobtrusive scrollbar for internal scroll containers (Tutor chat,
+   Investigation timeline) — most of the page uses native page scroll, so this
+   mainly matters for those constrained-height panels. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.35);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.55);
+}
+
+/* ---------------------------------------------------------------------
+ * Markdown / rich-text rendering (AI Tutor assistant messages, and any
+ * future rendered-Markdown surface). Hand-rolled rather than a Tailwind
+ * typography plugin so light/dark and the compact chat-bubble sizing stay
+ * under precise control with zero extra dependency weight. See
+ * TutorMessageBubble.tsx, which applies this class around react-markdown's
+ * output.
+ * --------------------------------------------------------------------- */
+.markdown-content {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: inherit;
+  word-break: break-word;
+}
+.markdown-content > *:first-child {
+  margin-top: 0;
+}
+.markdown-content > *:last-child {
+  margin-bottom: 0;
+}
+.markdown-content p {
+  margin: 0.6em 0;
+}
+.markdown-content ul,
+.markdown-content ol {
+  margin: 0.6em 0;
+  padding-left: 1.35em;
+}
+.markdown-content ul {
+  list-style-type: disc;
+}
+.markdown-content ol {
+  list-style-type: decimal;
+}
+.markdown-content li {
+  margin: 0.25em 0;
+}
+.markdown-content li > p {
+  margin: 0.15em 0;
+}
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0.9em 0 0.35em;
+  letter-spacing: -0.01em;
+}
+.markdown-content h1 {
+  font-size: 1.05em;
+}
+.markdown-content h2 {
+  font-size: 1em;
+}
+.markdown-content h3 {
+  font-size: 0.95em;
+}
+.markdown-content strong {
+  font-weight: 600;
+}
+.markdown-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+:where(.dark) .markdown-content a {
+  color: #60a5fa;
+}
+.markdown-content blockquote {
+  margin: 0.6em 0;
+  padding: 0.1em 0 0.1em 0.9em;
+  border-left: 3px solid rgba(100, 116, 139, 0.35);
+  color: rgba(71, 85, 105, 0.95);
+  font-style: italic;
+}
+:where(.dark) .markdown-content blockquote {
+  color: rgba(148, 163, 184, 0.95);
+}
+.markdown-content code {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85em;
+  background: rgba(100, 116, 139, 0.12);
+  padding: 0.15em 0.4em;
+  border-radius: 0.35em;
+}
+.markdown-content pre {
+  margin: 0.7em 0;
+  padding: 0.8em 1em;
+  border-radius: 0.75em;
+  background: #0f172a;
+  color: #e2e8f0;
+  overflow-x: auto;
+}
+.markdown-content pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.82em;
+  line-height: 1.5;
+}
+.markdown-content hr {
+  margin: 1em 0;
+  border: none;
+  border-top: 1px solid rgba(100, 116, 139, 0.25);
+}
+.markdown-content table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin: 0.7em 0;
+  border-collapse: collapse;
+  font-size: 0.9em;
+  overflow-x: auto;
+}
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid rgba(100, 116, 139, 0.25);
+  padding: 0.4em 0.6em;
+  text-align: left;
+}
+.markdown-content th {
+  font-weight: 600;
+  background: rgba(100, 116, 139, 0.08);
+}
+
+/* Subtle "typing" indicator dots for the Tutor's loading state. */
+@keyframes typing-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+.typing-dot {
+  animation: typing-dot 1.2s ease-in-out infinite;
 }

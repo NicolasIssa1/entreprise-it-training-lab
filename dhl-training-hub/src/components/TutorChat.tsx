@@ -10,7 +10,7 @@ import { PrivacyNotice } from "@/components/PrivacyNotice";
 import { Disclaimer } from "@/components/Disclaimer";
 import { SyncErrorNotice } from "@/components/SyncErrorNotice";
 import { TutorMessageBubble } from "@/components/TutorMessageBubble";
-import { inputClass } from "@/lib/ui";
+import { buttonClass, inputClass } from "@/lib/ui";
 import { useTutorConversation } from "@/lib/tutorConversation";
 import { useTutorProgressSummary } from "@/lib/ai/useTutorProgressSummary";
 import { getTopicById } from "@/lib/data/learning";
@@ -186,7 +186,7 @@ export function TutorChat() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">AI Tutor</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">AI Tutor</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
           Ask questions about enterprise IT concepts and this application&rsquo;s training material.
         </p>
@@ -232,7 +232,7 @@ export function TutorChat() {
                         key={q}
                         onClick={() => sendMessage(q)}
                         disabled={aiConfigured === false}
-                        className="rounded-md border border-slate-300 px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        className="rounded-lg border border-slate-300 px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                       >
                         {q}
                       </button>
@@ -245,9 +245,17 @@ export function TutorChat() {
                 <TutorMessageBubble key={m.id} message={m} />
               ))}
 
-              {sending && <p className="text-xs text-slate-400">Thinking…</p>}
+              {sending && (
+                <div className="flex justify-start" role="status" aria-label="AI Tutor is responding">
+                  <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 shadow-sm shadow-slate-900/[0.03] dark:border-slate-800 dark:bg-slate-900">
+                    <span className="typing-dot h-1.5 w-1.5 rounded-full bg-slate-400" style={{ animationDelay: "0ms" }} />
+                    <span className="typing-dot h-1.5 w-1.5 rounded-full bg-slate-400" style={{ animationDelay: "150ms" }} />
+                    <span className="typing-dot h-1.5 w-1.5 rounded-full bg-slate-400" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+              )}
               {requestError && (
-                <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">
+                <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">
                   {requestError}
                 </p>
               )}
@@ -279,9 +287,12 @@ export function TutorChat() {
               <button
                 type="submit"
                 disabled={aiConfigured === false || sending || !input.trim()}
-                className="shrink-0 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-40"
+                className={`shrink-0 ${buttonClass("primary")}`}
               >
                 Send
+                <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
+                  <path d="M2 8h11M8.5 3.5 13 8l-4.5 4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
             </form>
           </Card>
@@ -303,7 +314,7 @@ export function TutorChat() {
               )}
             </dl>
             {(resolvedMode === "investigation-coach" || resolvedMode === "quiz-coach") && (
-              <p className="mt-3 rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:bg-slate-900/60 dark:text-slate-400">
+              <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:bg-slate-900/60 dark:text-slate-400">
                 Coach mode: the Tutor will guide with questions here rather than give away the answer.
               </p>
             )}

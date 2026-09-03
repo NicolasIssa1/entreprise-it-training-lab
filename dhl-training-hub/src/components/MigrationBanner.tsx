@@ -15,7 +15,7 @@ export function MigrationBanner() {
         <button
           onClick={dismissMigrationMessage}
           aria-label="Dismiss"
-          className="rounded-md px-2 py-0.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-emerald-300 dark:hover:bg-emerald-900"
+          className="rounded-lg px-2 py-0.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-emerald-300 dark:hover:bg-emerald-900"
         >
           Dismiss
         </button>

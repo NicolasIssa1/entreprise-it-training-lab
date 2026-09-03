@@ -103,10 +103,10 @@ function TicketSimulatorContent() {
             key={ticket.id}
             onClick={() => setSelectedId(ticket.id)}
             aria-pressed={ticket.id === selectedId}
-            className={`w-full rounded-xl border p-4 text-left transition focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+            className={`w-full rounded-2xl border p-4 text-left shadow-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 ${
               ticket.id === selectedId
-                ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40"
-                : "border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900"
+                ? "border-blue-500 bg-blue-50 shadow-blue-900/[0.06] dark:bg-blue-950/40"
+                : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-800/70"
             }`}
           >
             <div className="flex items-center justify-between gap-2">
@@ -214,7 +214,7 @@ function TicketWorkbench({ ticket }: { ticket: Ticket }) {
           <button
             onClick={() => setRevealed(true)}
             disabled={!team || !urgency}
-            className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
           >
             Reveal guidance
           </button>
@@ -271,7 +271,7 @@ function TicketGuidance({ ticket, chosenTeam }: { ticket: Ticket; chosenTeam: Te
               <Link
                 key={topic.id}
                 href={`/learn/${topic.id}`}
-                className="rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950"
+                className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950"
               >
                 Review {topic.title} →
               </Link>

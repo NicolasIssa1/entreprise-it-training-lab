@@ -7,6 +7,7 @@ import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Disclaimer } from "@/components/Disclaimer";
 import { InputField } from "@/components/FormField";
+import { Button } from "@/components/Button";
 import { useAuth } from "@/lib/auth/AuthProvider";
 
 export default function SignUpPage() {
@@ -45,9 +46,12 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Create your account</h1>
+    <div className="mx-auto max-w-md space-y-6 py-6">
+      <div className="text-center">
+        <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-sm font-bold text-white shadow-sm shadow-blue-900/20">
+          IT
+        </span>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Create your account</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
           Save your learning progress, quiz results, and investigations to your own account.
         </p>
@@ -70,7 +74,7 @@ export default function SignUpPage() {
           </p>
           <Link
             href="/login"
-            className="mt-4 inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            className="mt-4 inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
           >
             Go to sign in →
           </Link>
@@ -83,18 +87,14 @@ export default function SignUpPage() {
             <InputField label="Password (at least 6 characters)" value={password} onChange={setPassword} type="password" />
 
             {error && (
-              <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-200">
+              <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-200">
                 {error}
               </p>
             )}
 
-            <button
-              type="submit"
-              disabled={submitting || !isConfigured || !email || !password}
-              className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
-            >
+            <Button type="submit" className="w-full" loading={submitting} disabled={!isConfigured || !email || !password}>
               {submitting ? "Creating account…" : "Create account"}
-            </button>
+            </Button>
           </form>
         </Card>
       )}

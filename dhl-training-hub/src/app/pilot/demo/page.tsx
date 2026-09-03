@@ -27,7 +27,7 @@ export default function PilotDemoPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Guided Product Tour</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Guided Product Tour</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
           A quick, ordered walkthrough of the product for a manager, trainer, or internship lead — every step links
           into the real, working application.
@@ -42,7 +42,7 @@ export default function PilotDemoPage() {
       <div className="space-y-3">
         {TOUR_STEPS.map((s) => (
           <Link key={s.step} href={s.href} className="block">
-            <Card className="transition hover:border-blue-400">
+            <Card interactive>
               <div className="flex items-start gap-4">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                   {s.step}

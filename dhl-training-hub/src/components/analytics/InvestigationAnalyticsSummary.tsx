@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Card } from "@/components/Card";
 import { Badge } from "@/components/Badge";
 import { SectionHeading } from "@/components/SectionHeading";
+import { EmptyState } from "@/components/EmptyState";
 import { InvestigationAnalytics } from "@/lib/types";
 
 const CATEGORY_VARIANT: Record<string, "success" | "accent" | "warning" | "danger"> = {
@@ -16,11 +17,10 @@ export function InvestigationAnalyticsSummary({ analytics }: { analytics: Invest
 
   if (completedCount === 0) {
     return (
-      <Card>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          No Advanced Investigations completed yet. Complete one to see your training performance summarized here.
-        </p>
-      </Card>
+      <EmptyState
+        title="No Advanced Investigations completed yet"
+        description="Complete one to see your training performance summarized here."
+      />
     );
   }
 

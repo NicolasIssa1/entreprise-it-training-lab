@@ -6,8 +6,8 @@ import { LearningTopic } from "@/lib/types";
 
 export function LearningTopicCard({ topic, completed }: { topic: LearningTopic; completed: boolean }) {
   return (
-    <Link href={`/learn/${topic.id}`} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-xl">
-      <Card className="h-full transition hover:border-blue-400">
+    <Link href={`/learn/${topic.id}`} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-2xl">
+      <Card className="h-full" interactive>
         <div className="flex items-start justify-between gap-2">
           <Badge variant="neutral">{topic.category}</Badge>
           <Badge variant={completed ? "success" : "neutral"}>{completed ? "Completed" : "Not completed"}</Badge>

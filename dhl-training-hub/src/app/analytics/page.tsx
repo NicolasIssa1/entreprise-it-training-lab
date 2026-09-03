@@ -5,6 +5,7 @@ import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
 import { PageGroupHeading } from "@/components/PageGroupHeading";
 import { Disclaimer } from "@/components/Disclaimer";
+import { EmptyState } from "@/components/EmptyState";
 import { AskTutorLink } from "@/components/AskTutorLink";
 import { SkillAnalyticsCard } from "@/components/analytics/SkillAnalyticsCard";
 import { QuizAnalyticsCard } from "@/components/analytics/QuizAnalyticsCard";
@@ -43,7 +44,7 @@ export default function AnalyticsPage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Training Analytics</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Training Analytics</h1>
           <p className="mt-1 text-slate-600 dark:text-slate-400">
             What you&rsquo;ve done and how your training is developing — for what to learn next, see{" "}
             <Link href="/progress" className="font-medium text-blue-600 hover:underline dark:text-blue-400">
@@ -55,13 +56,13 @@ export default function AnalyticsPage() {
         <div className="flex flex-wrap gap-2">
           <Link
             href="/analytics/summary"
-            className="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
           >
             Shareable Summary
           </Link>
           <Link
             href="/manager-preview"
-            className="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
           >
             Manager Preview
           </Link>
@@ -103,9 +104,7 @@ export default function AnalyticsPage() {
       <section className="space-y-3">
         <SectionHeading title="Quiz Analytics" subtitle="Latest/best score, attempt count, and trend where you have 2+ attempts" />
         {attemptedQuizAnalytics.length === 0 ? (
-          <Card>
-            <p className="text-sm text-slate-500 dark:text-slate-400">No quiz attempts yet. Complete an assessment to see score trends.</p>
-          </Card>
+          <EmptyState title="No quiz attempts yet" description="Complete an assessment to see score trends." />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {attemptedQuizAnalytics.map((entry) => (

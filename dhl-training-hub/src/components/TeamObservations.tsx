@@ -1,6 +1,7 @@
 "use client";
 
 import { useDailyLogEntries } from "@/lib/dailyLog";
+import { EmptyState } from "@/components/EmptyState";
 import { TeamId } from "@/lib/types";
 
 /**
@@ -17,11 +18,7 @@ export function TeamObservations({ teamId }: { teamId: TeamId }) {
     .sort((a, b) => b.dayNumber - a.dayNumber);
 
   if (relevant.length === 0) {
-    return (
-      <p className="text-sm text-slate-500 dark:text-slate-400">
-        No observations recorded yet.
-      </p>
-    );
+    return <EmptyState title="No observations recorded yet" description="Log a Daily Log entry for this team to see it here." />;
   }
 
   return (

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/Badge";
+import { EmptyState } from "@/components/EmptyState";
 import { TrainingActivityEvent } from "@/lib/types";
 
 const TYPE_VARIANT: Record<TrainingActivityEvent["type"], "accent" | "success"> = {
@@ -20,9 +21,10 @@ const TYPE_LABEL: Record<TrainingActivityEvent["type"], string> = {
 export function ActivityTimelineList({ events }: { events: TrainingActivityEvent[] }) {
   if (events.length === 0) {
     return (
-      <p className="text-sm text-slate-500 dark:text-slate-400">
-        No dated training activity yet. Completing a quiz or an Advanced Investigation will show up here.
-      </p>
+      <EmptyState
+        title="No dated training activity yet"
+        description="Completing a quiz or an Advanced Investigation will show up here."
+      />
     );
   }
 

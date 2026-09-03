@@ -24,7 +24,7 @@ export function LearningSection({
       }
     >
       <SectionHeading title={title} subtitle={subtitle} />
-      {children}
+      <div className="leading-relaxed">{children}</div>
     </Card>
   );
 }

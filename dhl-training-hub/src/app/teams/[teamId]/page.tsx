@@ -32,7 +32,7 @@ export default async function TeamDetailPage(props: PageProps<"/teams/[teamId]">
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{team.name}</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{team.name}</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">{team.tagline}</p>
       </div>
 
@@ -82,7 +82,7 @@ export default async function TeamDetailPage(props: PageProps<"/teams/[teamId]">
           <SectionHeading title="University connections" subtitle="MEng Computer Science with Artificial Intelligence" />
           <div className="grid gap-3 sm:grid-cols-2">
             {team.universityConnections.map((c) => (
-              <div key={c.area} className="rounded-md bg-slate-50 p-3 dark:bg-slate-800">
+              <div key={c.area} className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
                 <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{c.area}</p>
                 <p className="text-sm text-slate-600 dark:text-slate-400">{c.connection}</p>
               </div>
@@ -102,7 +102,7 @@ export default async function TeamDetailPage(props: PageProps<"/teams/[teamId]">
         <div className="grid gap-3 sm:grid-cols-2">
           {recommendedLearning.map((topic) => (
             <Link key={topic.id} href={`/learn/${topic.id}`} className="block">
-              <Card className="h-full transition hover:border-blue-400">
+              <Card className="h-full" interactive>
                 <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{topic.title}</p>
                 <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{topic.shortDescription}</p>
               </Card>

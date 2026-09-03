@@ -32,7 +32,7 @@ export default function AssignmentsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Training Assignments</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Training Assignments</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
           Curated templates bundling required learning paths, assessments, and investigations — activate one to get a
           focused, trackable list of what to work through next.
@@ -60,14 +60,14 @@ export default function AssignmentsPage() {
                 {isActive ? (
                   <button
                     onClick={clearAssignment}
-                    className="shrink-0 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                    className="shrink-0 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                   >
                     Deactivate
                   </button>
                 ) : (
                   <button
                     onClick={() => selectAssignment(assignment.id)}
-                    className="shrink-0 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                    className="shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                   >
                     Activate
                   </button>
@@ -83,7 +83,7 @@ export default function AssignmentsPage() {
                   {assignment.requiredPathIds.map((id) => {
                     const path = getPathById(id);
                     return path ? (
-                      <span key={id} className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 dark:border-slate-700 dark:text-slate-400">
+                      <span key={id} className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 dark:border-slate-700 dark:text-slate-400">
                         {path.title}
                       </span>
                     ) : null;
@@ -99,7 +99,7 @@ export default function AssignmentsPage() {
                       <Link
                         key={id}
                         href={`/quizzes/${id}`}
-                        className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+                        className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
                       >
                         {quiz.title}
                       </Link>
@@ -116,7 +116,7 @@ export default function AssignmentsPage() {
                       <Link
                         key={id}
                         href={`/tickets/investigate/${id}`}
-                        className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+                        className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
                       >
                         {scenario.title}
                       </Link>

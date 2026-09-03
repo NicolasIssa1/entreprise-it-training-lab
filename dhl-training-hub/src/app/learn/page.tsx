@@ -75,7 +75,7 @@ export default function LearnPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Enterprise IT Learning</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Enterprise IT Learning</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
           Learn the concepts behind Infrastructure, Applications, Support &amp; Network, and enterprise IT service
           management.
@@ -100,8 +100,8 @@ export default function LearnPage() {
             title={completedCount === 0 ? "Suggested start" : "Continue learning"}
             subtitle={`Next up in ${suggested!.pathTitle}`}
           />
-          <Link href={`/learn/${suggestedTopic.id}`} className="block">
-            <Card className="transition hover:border-blue-400">
+          <Link href={`/learn/${suggestedTopic.id}`} className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
+            <Card interactive>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <Badge variant="neutral">{suggestedTopic.category}</Badge>
@@ -145,7 +145,7 @@ export default function LearnPage() {
                       <Link
                         key={id}
                         href={`/learn/${id}`}
-                        className={`rounded-md border px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+                        className={`rounded-lg border px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
                           done
                             ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300"
                             : "border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
@@ -174,7 +174,7 @@ export default function LearnPage() {
                           <Link
                             key={s.id}
                             href={`/tickets/investigate/${s.id}`}
-                            className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+                            className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
                           >
                             Practice: {s.title}
                           </Link>
