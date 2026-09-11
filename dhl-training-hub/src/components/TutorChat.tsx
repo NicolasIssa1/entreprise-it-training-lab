@@ -12,15 +12,20 @@ import { Disclaimer } from "@/components/Disclaimer";
 import { SyncErrorNotice } from "@/components/SyncErrorNotice";
 import { TutorMessageBubble } from "@/components/TutorMessageBubble";
 import { ProductMark } from "@/components/ProductMark";
+import { TutorModeSelector } from "@/components/tutor/TutorModeSelector";
+import { TutorSuggestedActions } from "@/components/tutor/TutorSuggestedActions";
+import { TutorHistoryMenu } from "@/components/tutor/TutorHistoryMenu";
 import { buttonClass } from "@/lib/ui";
 import { useTutorConversation } from "@/lib/tutorConversation";
 import { useTutorProgressSummary } from "@/lib/ai/useTutorProgressSummary";
 import { getTopicById } from "@/lib/data/learning";
 import { getQuizById } from "@/lib/data/quizzes";
 import { getScenarioById } from "@/lib/data/investigations";
+import { getAutomationLabScenarioById } from "@/lib/data/automationLab";
 import { useQuizAttempts } from "@/lib/quizAttempts";
 import { useInvestigationProgress, useInvestigationCompletions } from "@/lib/investigationProgress";
-import { TUTOR_MODES, TutorMessage, TutorMode } from "@/lib/types";
+import { useAutomationLabAttempts } from "@/lib/automationLabProgress";
+import { HintLevel, InterviewCategory, TroubleshootCategory, TUTOR_MODES, TutorConversation, TutorMessage, TutorMode } from "@/lib/types";
 import { TutorApiRequest, TutorApiResponse } from "@/lib/ai/types";
 import { TUTOR_PROMPT_MAX_LENGTH } from "@/lib/ai/tutorLinks";
 
@@ -33,14 +38,36 @@ const SUGGESTED_QUESTIONS = [
   "How do I troubleshoot a slow application?",
 ];
 
+/** Per-direct-mode empty-state copy (Phase 14 section 13's "context-aware
+ * greeting") — shown only for the 7 user-selectable modes, when starting a
+ * fresh conversation with no page deep-link context. */
+const MODE_GREETING: Partial<Record<TutorMode, { headline: string; hint: string }>> = {
+  coach: { headline: "What would you like to be guided through?", hint: "I'll ask questions rather than just tell you the answer." },
+  "quiz-me": { headline: "Ready for some adaptive practice questions?", hint: "Pick a skill area above, or leave it general." },
+  troubleshoot: { headline: "Pick a category above to start a fictional IT incident.", hint: "You'll investigate it step by step — nothing is dumped up front." },
+  "project-mentor": { headline: "Tell me about the project you're planning or reviewing.", hint: "I'll ask probing questions and calibrate hints to your chosen level." },
+  interview: { headline: "Pick a category above for a realistic mock interview.", hint: "One question at a time, with feedback and a rubric-based summary at the end." },
+  review: { headline: "Share your reasoning, answer, or project thinking to review.", hint: "I'll assess it against the relevant skill area." },
+};
+
+const DIRECT_MODE_VALUES = new Set<string>(["tutor", "coach", "quiz-me", "troubleshoot", "project-mentor", "interview", "review"]);
+
 const MODE_LABEL: Record<TutorMode, string> = {
-  tutor: "General Tutor",
+  tutor: "Explain",
   "topic-tutor": "Topic Tutor",
   "quiz-coach": "Quiz Coach",
   "quiz-review": "Quiz Review",
   "investigation-coach": "Investigation Coach",
   "investigation-review": "Investigation Review",
   "progress-coach": "Progress Coach",
+  "automation-coach": "Automation Lab Coach",
+  "automation-review": "Automation Lab Review",
+  coach: "Coach",
+  "quiz-me": "Quiz Me",
+  troubleshoot: "Troubleshoot",
+  "project-mentor": "Project Mentor",
+  interview: "Interview",
+  review: "Review",
 };
 
 function friendlyErrorMessage(errorCode: string | undefined): string {
@@ -53,12 +80,25 @@ export function TutorChat() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const progressSummary = useTutorProgressSummary();
-  const { messages, ensureConversation, addMessage, startNewConversation, syncError } = useTutorConversation();
+  const {
+    messages,
+    ensureConversation,
+    addMessage,
+    startNewConversation,
+    syncError,
+    conversation,
+    conversationHistoryAvailable,
+    conversationList,
+    switchConversation,
+    deleteConversation,
+    clearAllConversations,
+  } = useTutorConversation();
 
   const topicId = searchParams.get("topic") ?? undefined;
   const quizId = searchParams.get("quiz") ?? undefined;
   const questionId = searchParams.get("question") ?? undefined;
   const scenarioId = searchParams.get("scenario") ?? undefined;
+  const automationScenarioId = searchParams.get("automationScenario") ?? undefined;
   const modeParam = searchParams.get("mode") ?? undefined;
   // Read once, at mount, via the lazy useState initializer below — a
   // suggested question from an "Ask Tutor about X" link (see
@@ -71,20 +111,59 @@ export function TutorChat() {
   const topic = topicId ? getTopicById(topicId) : undefined;
   const quiz = quizId ? getQuizById(quizId) : undefined;
   const scenario = scenarioId ? getScenarioById(scenarioId) : undefined;
+  const automationScenario = automationScenarioId ? getAutomationLabScenarioById(automationScenarioId) : undefined;
 
   const { latest: latestQuizAttempt } = useQuizAttempts(quizId);
   const investigationCompletions = useInvestigationCompletions();
   const { progress: investigationProgress } = useInvestigationProgress(scenario?.id ?? "__none__", scenario?.startNodeId ?? "__none__");
   const scenarioCompleted = scenario ? investigationCompletions.some((c) => c.scenarioId === scenario.id) : false;
+  const { latest: latestAutomationAttempt } = useAutomationLabAttempts(automationScenario?.id);
+
+  // Phase 14: no page deep-link means the learner picks a mode directly.
+  const hasDeepLinkContext = !!(topic || quiz || scenario || automationScenario);
+  // Lazy initializer, read once on mount — if the URL already named one of
+  // the 7 direct modes (e.g. a future "Ask Tutor in Coach mode" link), the
+  // picker starts on it instead of always defaulting to Explain.
+  const [directMode, setDirectMode] = useState<TutorMode>(() => (modeParam && DIRECT_MODE_VALUES.has(modeParam) ? (modeParam as TutorMode) : "tutor"));
+  const [troubleshootCategory, setTroubleshootCategory] = useState<TroubleshootCategory | null>(null);
+  const [interviewCategory, setInterviewCategory] = useState<InterviewCategory | null>(null);
+  const [hintLevel, setHintLevel] = useState<HintLevel>(1);
+  const [quizMeSkillId, setQuizMeSkillId] = useState("");
 
   const resolvedMode: TutorMode = useMemo(() => {
     if (modeParam && (TUTOR_MODES as readonly string[]).includes(modeParam)) return modeParam as TutorMode;
     if (scenario) return scenarioCompleted ? "investigation-review" : "investigation-coach";
+    if (automationScenario) return latestAutomationAttempt ? "automation-review" : "automation-coach";
     if (topic) return "topic-tutor";
-    return "tutor";
-  }, [modeParam, scenario, scenarioCompleted, topic]);
+    return directMode;
+  }, [modeParam, scenario, scenarioCompleted, automationScenario, latestAutomationAttempt, topic, directMode]);
 
   const [aiConfigured, setAiConfigured] = useState<boolean | null>(null);
+  /** The most recently sent request body, kept only so the error state's
+   * Retry button can re-POST it without re-adding a duplicate user message
+   * bubble (the message is already in the transcript by the time a request
+   * can fail) — see postAndHandleResponse/retryLastMessage below. Cleared on
+   * success. A ref, not state: it's write-only plumbing for retry, never
+   * itself rendered. */
+  const pendingRequestRef = useRef<TutorApiRequest | null>(null);
+  // "Stick to bottom" auto-scroll (root cause of the page-jump bug this
+  // replaces): the old code called `bottomRef.current?.scrollIntoView(...)`,
+  // which — per spec — doesn't just scroll the nearest scrollable ancestor,
+  // it walks EVERY scrollable ancestor up to the document, adjusting each to
+  // satisfy block:"end" alignment. Once the outer page itself is taller than
+  // the viewport (any Tutor page with the sidebar cards visible), if the
+  // window happened to be scrolled further down than strictly required for
+  // that alignment, satisfying it meant scrolling the WINDOW UP — exactly
+  // the "whole page jumps upward" symptom. The fix: scroll only the chat
+  // container's own scrollTop directly (via a ref to the container itself,
+  // not a descendant), which can never bubble to ancestor scroll containers.
+  // `stuckToBottom` tracks whether the user is currently at/near the bottom
+  // (updated by the container's own onScroll) so a response arriving while
+  // they've scrolled up to read history doesn't yank them back down — the
+  // "Jump to latest" affordance is shown instead, purely derived from this
+  // during render (never set from inside the scroll-effect itself, which
+  // only ever performs the DOM scroll — see the effect below).
+  const [stuckToBottom, setStuckToBottom] = useState(true);
   // Lazy initializer — runs exactly once, on mount, which is what makes this
   // safe: it can never overwrite text Nicolas has already typed, and it
   // never fires a request on its own (it only ever sets local textarea
@@ -99,7 +178,7 @@ export function TutorChat() {
   const [input, setInput] = useState(() => (initialPromptParam ?? "").slice(0, TUTOR_PROMPT_MAX_LENGTH));
   const [sending, setSending] = useState(false);
   const [requestError, setRequestError] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -109,9 +188,38 @@ export function TutorChat() {
       .catch(() => setAiConfigured(false));
   }, []);
 
+  /** Scrolls only the chat container itself — see stuckToBottom's doc
+   * comment above for why this must never be scrollIntoView. */
+  function scrollToLatest(behavior: ScrollBehavior = "smooth") {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el.scrollTo({ top: el.scrollHeight, behavior: prefersReducedMotion ? "auto" : behavior });
+  }
+
+  function handleContainerScroll() {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    setStuckToBottom(distanceFromBottom < 64);
+  }
+
+  function jumpToLatest() {
+    setStuckToBottom(true);
+    scrollToLatest();
+  }
+
+  // Follows new content (a just-sent message, the typing indicator, or the
+  // reply) only while the user is at/near the bottom — a pure DOM side
+  // effect (the intended use of an effect), never a setState call. If
+  // they've scrolled up to read earlier messages, this simply does nothing;
+  // "Jump to latest" below is derived straight from `stuckToBottom` at
+  // render time rather than tracked as separate state.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages.length, sending]);
+    if (stuckToBottom) scrollToLatest();
+  }, [messages.length, sending, stuckToBottom]);
+
+  const showJumpToLatest = !stuckToBottom && messages.length > 0;
 
   // Once, on mount, if a prompt arrived via the URL: focus the composer with
   // the cursor at the end (so Nicolas can just start typing to extend it),
@@ -145,6 +253,10 @@ export function TutorChat() {
     setInput("");
     setRequestError(null);
     setSending(true);
+    // Sending is an explicit "return to latest" action — always follow the
+    // conversation from here, even if the user had scrolled up to read
+    // earlier messages.
+    setStuckToBottom(true);
 
     const conv = await ensureConversation();
     const userMessage: TutorMessage = {
@@ -165,6 +277,7 @@ export function TutorChat() {
       currentTopicId: topic?.id,
       currentQuizId: quiz?.id,
       currentScenarioId: scenario?.id,
+      currentAutomationScenarioId: automationScenario?.id,
       history,
       progressSummary,
     };
@@ -198,6 +311,44 @@ export function TutorChat() {
       };
     }
 
+    if (resolvedMode === "automation-coach" && automationScenario) {
+      body.automationCoachStatus = {
+        scenarioBrief: automationScenario.scenarioBrief,
+        toolsInvolved: automationScenario.toolsInvolved,
+      };
+    }
+
+    if (resolvedMode === "automation-review" && automationScenario && latestAutomationAttempt) {
+      const { score } = latestAutomationAttempt;
+      body.automationReviewContext = {
+        scenarioId: automationScenario.id,
+        overallScore: score.overall,
+        correctLabels: score.correct.map((b) => b.label),
+        missingLabels: score.missing.map((b) => b.label),
+        incorrectlyIncludedLabels: score.incorrectlyIncluded.map((b) => b.label),
+        modelWorkflowSummary: automationScenario.modelWorkflowSummary,
+      };
+    }
+
+    // Phase 14 — direct-mode session parameters, each only sent when
+    // actually relevant to the resolved mode.
+    if (resolvedMode === "troubleshoot" && troubleshootCategory) body.troubleshootCategory = troubleshootCategory;
+    if (resolvedMode === "interview" && interviewCategory) body.interviewCategory = interviewCategory;
+    if (resolvedMode === "project-mentor") body.hintLevel = hintLevel;
+    if (resolvedMode === "quiz-me" && quizMeSkillId) body.quizMeSkillId = quizMeSkillId;
+
+    pendingRequestRef.current = body;
+    await postAndHandleResponse(body, conv);
+  }
+
+  /** Shared by sendMessage and the error state's Retry button — the user's
+   * message bubble is added exactly once (in sendMessage, before this is
+   * first called), so retrying only re-attempts the network call with the
+   * exact same already-built request body, never a second copy of the
+   * user's message. */
+  async function postAndHandleResponse(body: TutorApiRequest, conv: TutorConversation) {
+    setSending(true);
+    setRequestError(null);
     try {
       const res = await fetch("/api/tutor", {
         method: "POST",
@@ -221,14 +372,25 @@ export function TutorChat() {
         createdAt: new Date().toISOString(),
       };
       addMessage(assistantMessage, conv);
+      pendingRequestRef.current = null;
     } catch {
       setRequestError(friendlyErrorMessage(undefined));
     } finally {
       setSending(false);
+      // Restore focus to the composer once it's re-enabled, so the learner
+      // can keep typing the next question without re-clicking — the
+      // textarea was disabled (and so lost focus) for the duration of the
+      // request.
+      textareaRef.current?.focus();
     }
   }
 
-  const contextLabel = topic?.title ?? quiz?.title ?? scenario?.title ?? null;
+  function retryLastMessage() {
+    if (!pendingRequestRef.current || !conversation) return;
+    postAndHandleResponse(pendingRequestRef.current, conversation);
+  }
+
+  const contextLabel = topic?.title ?? quiz?.title ?? scenario?.title ?? automationScenario?.title ?? null;
 
   return (
     <div className="space-y-6">
@@ -260,39 +422,86 @@ export function TutorChat() {
           />
           <Card className="flex flex-1 flex-col">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3 dark:border-slate-800">
-              <Badge variant="accent">{MODE_LABEL[resolvedMode]}</Badge>
-              {messages.length > 0 && (
-                <button
-                  onClick={startNewConversation}
-                  className="text-xs font-medium text-slate-500 hover:underline dark:text-slate-400"
-                >
-                  Start new conversation
-                </button>
+              {!hasDeepLinkContext && messages.length === 0 ? (
+                <TutorModeSelector
+                  directMode={directMode}
+                  onDirectModeChange={setDirectMode}
+                  troubleshootCategory={troubleshootCategory}
+                  onTroubleshootCategoryChange={setTroubleshootCategory}
+                  interviewCategory={interviewCategory}
+                  onInterviewCategoryChange={setInterviewCategory}
+                  hintLevel={hintLevel}
+                  onHintLevelChange={setHintLevel}
+                  quizMeSkillId={quizMeSkillId}
+                  onQuizMeSkillIdChange={setQuizMeSkillId}
+                  disabled={aiConfigured === false}
+                />
+              ) : (
+                <Badge variant="accent">{MODE_LABEL[resolvedMode]}</Badge>
               )}
+              <div className="flex items-center gap-3">
+                {conversationHistoryAvailable && (
+                  <TutorHistoryMenu
+                    conversations={conversationList}
+                    activeConversationId={conversation?.id}
+                    onSwitch={(id) => {
+                      setStuckToBottom(true);
+                      switchConversation(id);
+                    }}
+                    onDelete={deleteConversation}
+                    onClearAll={clearAllConversations}
+                  />
+                )}
+                {messages.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setStuckToBottom(true);
+                      startNewConversation();
+                    }}
+                    className="text-xs font-medium text-slate-500 hover:underline dark:text-slate-400"
+                  >
+                    Start new conversation
+                  </button>
+                )}
+              </div>
             </div>
 
-            <div className="flex-1 space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "32rem" }}>
+            <div className="relative min-h-0 flex-1">
+              <div
+                ref={scrollContainerRef}
+                onScroll={handleContainerScroll}
+                className="h-full space-y-4 overflow-y-auto pr-1"
+                style={{ maxHeight: "32rem" }}
+              >
               {messages.length === 0 && (
                 <div className="flex h-full flex-col items-center justify-center gap-4 py-8 text-center">
                   <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-sm shadow-blue-900/25">
                     <ProductMark size={26} />
                   </span>
                   <div>
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Ask me anything about enterprise IT</p>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Grounded in this app&rsquo;s own curriculum — try a question below.</p>
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      {!hasDeepLinkContext && MODE_GREETING[directMode] ? MODE_GREETING[directMode]!.headline : "Ask me anything about enterprise IT"}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      {!hasDeepLinkContext && MODE_GREETING[directMode]
+                        ? MODE_GREETING[directMode]!.hint
+                        : "Grounded in this app's own curriculum — try a question below."}
+                    </p>
                   </div>
-                  <div className="flex max-w-md flex-wrap justify-center gap-2">
-                    {SUGGESTED_QUESTIONS.map((q) => (
-                      <button
-                        key={q}
-                        onClick={() => sendMessage(q)}
-                        disabled={aiConfigured === false}
-                        className="rounded-lg border border-slate-300 px-3 py-1.5 text-left text-xs text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:border-blue-800 dark:hover:bg-blue-950/30"
-                      >
-                        {q}
-                      </button>
-                    ))}
-                  </div>
+                  {(hasDeepLinkContext || directMode === "tutor") && (
+                    <div className="flex max-w-md flex-wrap justify-center gap-2">
+                      {SUGGESTED_QUESTIONS.map((q) => (
+                        <button
+                          key={q}
+                          onClick={() => sendMessage(q)}
+                          disabled={aiConfigured === false}
+                          className="rounded-lg border border-slate-300 px-3 py-1.5 text-left text-xs text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:border-blue-800 dark:hover:bg-blue-950/30"
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -310,11 +519,23 @@ export function TutorChat() {
                 </div>
               )}
               {requestError && (
-                <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">
-                  {requestError}
-                </p>
+                <div role="alert" className="flex items-center justify-between gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">
+                  <span>{requestError}</span>
+                  <button type="button" onClick={retryLastMessage} disabled={sending} className="shrink-0 font-medium underline disabled:opacity-50">
+                    Retry
+                  </button>
+                </div>
               )}
-              <div ref={bottomRef} />
+            </div>
+
+            {showJumpToLatest && (
+              <button
+                onClick={jumpToLatest}
+                className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-md shadow-slate-900/10 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              >
+                ↓ Jump to latest
+              </button>
+            )}
             </div>
 
             <form
@@ -372,7 +593,7 @@ export function TutorChat() {
                 </div>
               )}
             </dl>
-            {(resolvedMode === "investigation-coach" || resolvedMode === "quiz-coach") && (
+            {(resolvedMode === "investigation-coach" || resolvedMode === "quiz-coach" || resolvedMode === "automation-coach" || resolvedMode === "coach") && (
               <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:bg-slate-900/60 dark:text-slate-400">
                 Coach mode: the Tutor will guide with questions here rather than give away the answer.
               </p>
@@ -388,11 +609,13 @@ export function TutorChat() {
             </Card>
           )}
 
+          <TutorSuggestedActions />
+
           <Card>
             <SectionHeading title="What the Tutor can see" />
             <ul className="space-y-1.5 text-xs text-slate-500 dark:text-slate-400">
               <li>• This application&rsquo;s own Learn topics relevant to your question</li>
-              <li>• Which lessons/assessments/investigations you&rsquo;ve completed, and your skill levels</li>
+              <li>• Which lessons/assessments/investigations you&rsquo;ve completed, your skill levels, readiness, milestones, and certificates</li>
               <li>• The current lesson, quiz question, or investigation you linked in from</li>
               <li className="font-medium text-slate-600 dark:text-slate-300">Never your Daily Log or CV Tracker entries, name, or email</li>
             </ul>

@@ -8,6 +8,7 @@ import { securityQuiz } from "./security";
 import { troubleshootingQuiz } from "./troubleshooting";
 import { businessLogisticsQuiz } from "./businessLogistics";
 import { bpoAutomationQuiz } from "./bpoAutomation";
+import { enterpriseAutomationQuiz } from "./enterpriseAutomation";
 import { pathCheckpointQuizzes } from "./pathCheckpoints";
 
 // Quiz library (Phase 4/7 + post-Phase-10 BPO expansion) — one Foundation
@@ -25,6 +26,7 @@ export const quizzes: Quiz[] = [
   troubleshootingQuiz,
   businessLogisticsQuiz,
   bpoAutomationQuiz,
+  enterpriseAutomationQuiz,
   ...pathCheckpointQuizzes,
 ];
 

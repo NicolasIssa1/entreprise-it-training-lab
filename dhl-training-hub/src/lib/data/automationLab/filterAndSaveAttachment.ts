@@ -1,0 +1,58 @@
+import { AutomationLabScenario } from "@/lib/types";
+
+// Automation Lab practice exercise 1 — smaller, single-tool-pair, meant as a first
+// exercise before attempting a full Enterprise Project. Fictional data — see root CLAUDE.md.
+export const filterAndSaveAttachmentScenario: AutomationLabScenario = {
+  id: "filter-and-save-attachment",
+  title: "Filter and Save an Email Attachment to SharePoint",
+  description: "A short first exercise: react to an email, filter to the right one, and save its attachment to the correct SharePoint location.",
+  isEnterpriseProject: false,
+  difficulty: "Foundation",
+  estimatedMinutes: 8,
+  scenarioBrief:
+    "A shared team inbox receives a mix of emails. Build a workflow that reacts only to the ones carrying a specific kind of spreadsheet attachment, and saves that attachment to the correct shared SharePoint location — without saving the same file twice.",
+  toolsInvolved: ["Outlook", "Power Automate", "SharePoint"],
+  relatedTopicIds: ["power-automate-fundamentals", "outlook-email-workflow-automation", "sharepoint-fundamentals"],
+  likelyTeams: ["applications"],
+  learningObjectives: [
+    "Practice the basic trigger → condition → action shape of a flow",
+    "Choose the correct filter condition among plausible-looking alternatives",
+    "Recognize duplicate protection as a default habit, not an afterthought",
+  ],
+  blocks: [
+    { id: "trigger-new-email", category: "trigger", role: "essential", idealPosition: 1,
+      label: "Trigger: when a new email arrives in the shared inbox",
+      description: "Starts the flow the moment a new email lands.",
+      feedback: "Correct — reacting to the actual event (a new email) is the right shape here." },
+    { id: "trigger-manual", category: "trigger", role: "distractor",
+      label: "Manual trigger: run only when someone clicks a button",
+      description: "Starts the flow only when a person opens it and runs it themselves.",
+      feedback: "This depends on someone remembering to run it — not a good fit for reacting to emails as they arrive." },
+    { id: "condition-attachment-type", category: "condition", role: "essential", idealPosition: 2,
+      label: "Condition: attachment file type = .xlsx",
+      description: "Only continues for emails carrying an Excel spreadsheet attachment.",
+      feedback: "Correct — this matches \"a specific kind of spreadsheet attachment\" from the brief." },
+    { id: "condition-subject-fyi", category: "condition", role: "distractor",
+      label: "Condition: subject contains \"FYI\"",
+      description: "Only continues if the subject line includes the word \"FYI\".",
+      feedback: "Nothing in the brief mentions subject wording — this filter doesn't identify the right emails and would likely miss or wrongly include messages." },
+    { id: "action-get-attachment", category: "action", role: "essential", idealPosition: 3,
+      label: "Get the attachment from the email",
+      description: "Retrieves the file so it can be saved.",
+      feedback: "Correct — a necessary step once the right email is identified." },
+    { id: "action-save-sharepoint", category: "action", role: "essential", idealPosition: 4,
+      label: "Save the attachment to the correct SharePoint library",
+      description: "Stores the file in the shared, permissioned location.",
+      feedback: "Correct — matches the brief's requirement to save it to the correct shared location." },
+    { id: "logic-duplicate-check", category: "logic", role: "recommended", idealPosition: 5,
+      label: "Check for duplicates before saving",
+      description: "Confirms the same file hasn't already been saved.",
+      feedback: "Good habit — this is exactly the \"don't save the same file twice\" requirement from the brief." },
+    { id: "action-save-onedrive", category: "action", role: "distractor",
+      label: "Save attachment to a personal OneDrive folder",
+      description: "Stores the file in one person's private cloud storage.",
+      feedback: "The brief specifically asks for the correct shared SharePoint location — personal storage isn't shared with the team." },
+  ],
+  modelWorkflowSummary:
+    "A trigger reacts to a new email in the shared inbox, a condition filters to attachments that are actually .xlsx spreadsheets, the flow checks whether the file was already saved, then gets the attachment and saves it to the correct SharePoint library.",
+};

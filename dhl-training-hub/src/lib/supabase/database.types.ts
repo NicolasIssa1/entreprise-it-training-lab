@@ -25,6 +25,14 @@ export interface Database {
           id: string;
           display_name: string | null;
           local_migration_version: number;
+          /** Entitlement tier (Phase 11) — "free" | "pro" | "enterprise".
+           * Protected by a DB trigger (see 0004_premium.sql); deliberately not
+           * included in Update below since no client code should ever try to
+           * write it. */
+          tier: string;
+          /** Enterprise Admin role (Phase 12) — "learner" | "manager" | "admin".
+           * Same trigger-protected, not-in-Update pattern as tier. */
+          role: string;
           created_at: string;
           updated_at: string;
         };
@@ -203,6 +211,7 @@ export interface Database {
           what_learned: string;
           suggested_cv_wording: string;
           evidence_notes: string;
+          source: string | null;
           created_at: string;
         };
         Insert: {
@@ -216,6 +225,28 @@ export interface Database {
           what_learned?: string;
           suggested_cv_wording?: string;
           evidence_notes?: string;
+          source?: string | null;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      automation_lab_attempts: {
+        Row: {
+          id: string;
+          user_id: string;
+          scenario_id: string;
+          completed_at: string;
+          submitted_block_ids: unknown;
+          score: unknown;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          user_id: string;
+          scenario_id: string;
+          completed_at: string;
+          submitted_block_ids: unknown;
+          score: unknown;
         };
         Update: Record<string, never>;
         Relationships: [];
@@ -258,6 +289,38 @@ export interface Database {
         };
         Relationships: [];
       };
+      milestone_unlocks: {
+        Row: {
+          user_id: string;
+          milestone_id: string;
+          unlocked_at: string;
+        };
+        Insert: {
+          user_id: string;
+          milestone_id: string;
+          unlocked_at?: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      certificates: {
+        Row: {
+          user_id: string;
+          program_id: string;
+          certificate_ref: string;
+          issued_at: string;
+          skills_summary: unknown;
+        };
+        Insert: {
+          user_id: string;
+          program_id: string;
+          certificate_ref: string;
+          issued_at?: string;
+          skills_summary: unknown;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
       tutor_messages: {
         Row: {
           id: string;
@@ -282,8 +345,197 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      organizations: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          org_type: string;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Record<string, never>; // creation only via the create_organization() RPC
+        Update: {
+          name?: string;
+        };
+        Relationships: [];
+      };
+      organization_members: {
+        Row: {
+          id: string;
+          organization_id: string;
+          user_id: string;
+          role: string;
+          status: string;
+          invited_by: string | null;
+          joined_at: string;
+        };
+        Insert: Record<string, never>; // no client insert path — see the RPC functions
+        Update: Record<string, never>; // no client update path — see update_member_role()/remove_member()
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      organization_invites: {
+        Row: {
+          id: string;
+          organization_id: string;
+          email: string;
+          role: string;
+          status: string;
+          invited_by: string;
+          token: string;
+          created_at: string;
+          accepted_at: string | null;
+          accepted_by: string | null;
+        };
+        Insert: Record<string, never>; // creation only via the invite_to_organization() RPC
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      cohorts: {
+        Row: {
+          id: string;
+          organization_id: string;
+          name: string;
+          description: string;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          organization_id: string;
+          name: string;
+          description?: string;
+          created_by: string;
+        };
+        Update: {
+          name?: string;
+          description?: string;
+        };
+        Relationships: [];
+      };
+      cohort_members: {
+        Row: {
+          id: string;
+          cohort_id: string;
+          user_id: string;
+          added_at: string;
+        };
+        Insert: {
+          cohort_id: string;
+          user_id: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      organization_programmes: {
+        Row: {
+          id: string;
+          organization_id: string;
+          title: string;
+          audience: string;
+          purpose: string;
+          estimated_scope: string;
+          required_path_ids: unknown;
+          required_quiz_ids: unknown;
+          required_scenario_ids: unknown;
+          recommended_topic_ids: unknown;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          organization_id: string;
+          title: string;
+          audience?: string;
+          purpose?: string;
+          estimated_scope?: string;
+          required_path_ids?: unknown;
+          required_quiz_ids?: unknown;
+          required_scenario_ids?: unknown;
+          recommended_topic_ids?: unknown;
+          created_by: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      organization_assignments: {
+        Row: {
+          id: string;
+          organization_id: string;
+          target_type: string;
+          target_id: string;
+          requirement_type: string;
+          requirement_id: string;
+          requirement_title: string;
+          due_date: string | null;
+          instructions: string;
+          assigned_by: string;
+          assigned_at: string;
+        };
+        Insert: {
+          organization_id: string;
+          target_type: string;
+          target_id: string;
+          requirement_type: string;
+          requirement_id: string;
+          requirement_title: string;
+          due_date?: string | null;
+          instructions?: string;
+          assigned_by: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      organization_settings: {
+        Row: {
+          organization_id: string;
+          display_name: string | null;
+          settings: unknown;
+          updated_at: string;
+        };
+        Insert: Record<string, never>; // created only alongside create_organization()
+        Update: {
+          display_name?: string | null;
+          settings?: unknown;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      create_organization: {
+        Args: { p_name: string; p_slug: string; p_org_type: string };
+        Returns: string;
+      };
+      invite_to_organization: {
+        Args: { p_organization_id: string; p_email: string; p_role: string };
+        Returns: string;
+      };
+      accept_organization_invite: {
+        Args: { p_token: string };
+        Returns: string;
+      };
+      get_invite_preview: {
+        Args: { p_token: string };
+        Returns: { organization_name: string; role: string; email: string; status: string }[];
+      };
+      update_member_role: {
+        Args: { p_organization_id: string; p_target_user_id: string; p_new_role: string };
+        Returns: undefined;
+      };
+      remove_member: {
+        Args: { p_organization_id: string; p_target_user_id: string };
+        Returns: undefined;
+      };
+    };
   };
 }

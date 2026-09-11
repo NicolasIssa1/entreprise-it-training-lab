@@ -2,16 +2,14 @@ import Link from "next/link";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Badge } from "@/components/Badge";
-import { PageHeader } from "@/components/PageHeader";
+import { DashboardHero } from "@/components/DashboardHero";
 import { DashboardNotes } from "@/components/DashboardNotes";
 import { DashboardProgressSummary } from "@/components/DashboardProgressSummary";
 import { CurrentAssignmentCard } from "@/components/CurrentAssignmentCard";
+import { EnterpriseAutomationCard } from "@/components/EnterpriseAutomationCard";
 import { CompanyContextCard } from "@/components/CompanyContextCard";
-import { AskTutorLink } from "@/components/AskTutorLink";
-import { BeakerIcon, LayersIcon, BookIcon, BriefcaseIcon, ArrowRightIcon } from "@/components/icons";
+import { LayersIcon, BookIcon, BriefcaseIcon, ArrowRightIcon } from "@/components/icons";
 import { dashboardData } from "@/lib/data/dashboard";
-import { getTeamById } from "@/lib/data/teams";
-import { internshipState } from "@/lib/data/internshipState";
 import { buttonClass } from "@/lib/ui";
 
 const QUICK_ACCESS = [
@@ -39,29 +37,9 @@ const QUICK_ACCESS = [
 ];
 
 export default function DashboardPage() {
-  const team = getTeamById(dashboardData.currentTeam);
-
   return (
     <div className="space-y-8">
-      <PageHeader
-        eyebrow={`Day ${dashboardData.dayNumber} · ${team?.name}`}
-        title={`Welcome back — continue building your enterprise IT skills.`}
-        description={dashboardData.progressSummary}
-        actions={
-          <>
-            <Link href="/tickets" className={buttonClass("primary")}>
-              <BeakerIcon size={15} />
-              Continue Learning
-            </Link>
-            <AskTutorLink params={{}} variant="button">
-              Ask AI Tutor
-            </AskTutorLink>
-          </>
-        }
-      />
-      <p className="-mt-6 px-1 text-xs text-slate-400">
-        {internshipState.organization} &middot; {internshipState.role} &middot; {internshipState.department}
-      </p>
+      <DashboardHero />
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
@@ -105,6 +83,8 @@ export default function DashboardPage() {
       <DashboardProgressSummary />
 
       <CurrentAssignmentCard />
+
+      <EnterpriseAutomationCard />
 
       <CompanyContextCard />
 

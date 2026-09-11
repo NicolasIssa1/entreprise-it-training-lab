@@ -2,6 +2,7 @@ import { TrainingAssignment } from "@/lib/types";
 import { learningPaths } from "@/lib/data/learning";
 import { quizzes } from "@/lib/data/quizzes";
 import { investigationScenarios } from "@/lib/data/investigations";
+import { automationLabScenarios } from "@/lib/data/automationLab";
 
 // Training Assignment templates (Phase 9 Part D). Static/config-driven, just a
 // named bundle of required learning path / quiz / investigation ids — not a new
@@ -66,6 +67,18 @@ export const trainingAssignments: TrainingAssignment[] = [
     requiredScenarioIds: ["excel-reporting-missing-rows", "approval-flow-duplicate-notifications", "previously-working-flow-fails"],
     recommendedTopicIds: ["bpo-method-lifecycle", "requirements-gathering", "automation-governance-and-ownership"],
   },
+  {
+    id: "enterprise-automation-foundation",
+    title: "Enterprise Automation Foundation",
+    audience: "Anyone learning the Microsoft 365 automation stack (SharePoint, Power Automate, Excel, Outlook, Power BI) and wanting hands-on practice building a real end-to-end workflow.",
+    purpose:
+      "Covers the Enterprise Automation Learning Path plus one Enterprise Project — the Supplier Daily Report Automation build — practicing the full trigger-through-reporting chain, including duplicate protection and error handling.",
+    estimatedScope: "1 learning path, 1 assessment, 1 Enterprise Project — roughly 1-2 weeks of part-time study.",
+    requiredPathIds: ["enterprise-automation-foundations"],
+    requiredQuizIds: ["quiz-enterprise-automation-foundation"],
+    requiredScenarioIds: ["supplier-daily-report-automation"],
+    recommendedTopicIds: ["sharepoint-fundamentals", "power-automate-fundamentals", "power-bi-fundamentals"],
+  },
 ];
 
 export function getAssignmentById(id: string): TrainingAssignment | undefined {
@@ -83,7 +96,10 @@ function validateAssignments(): void {
   const ids = new Set<string>();
   const pathIds = new Set(learningPaths.map((p) => p.id));
   const quizIds = new Set(quizzes.map((q) => q.id));
-  const scenarioIds = new Set(investigationScenarios.map((s) => s.id));
+  // requiredScenarioIds may reference either an Advanced Investigation or an
+  // Automation Lab scenario id (see computeAssignmentProgress in
+  // lib/assignmentProgress.ts, which checks completion against both).
+  const scenarioIds = new Set([...investigationScenarios.map((s) => s.id), ...automationLabScenarios.map((s) => s.id)]);
 
   for (const assignment of trainingAssignments) {
     if (ids.has(assignment.id)) errors.push(`Duplicate assignment id: "${assignment.id}"`);
@@ -99,7 +115,7 @@ function validateAssignments(): void {
       if (!quizIds.has(id)) errors.push(`Assignment "${assignment.id}" references unknown quiz id "${id}"`);
     }
     for (const id of assignment.requiredScenarioIds) {
-      if (!scenarioIds.has(id)) errors.push(`Assignment "${assignment.id}" references unknown investigation scenario id "${id}"`);
+      if (!scenarioIds.has(id)) errors.push(`Assignment "${assignment.id}" references unknown investigation/automation lab scenario id "${id}"`);
     }
   }
 

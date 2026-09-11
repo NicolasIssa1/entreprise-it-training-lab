@@ -8,6 +8,7 @@ import { buildAssignmentTutorPrompt } from "@/lib/ai/tutorPromptTemplates";
 import { useLearningProgress } from "@/lib/learningProgress";
 import { useQuizAttempts } from "@/lib/quizAttempts";
 import { useInvestigationCompletions } from "@/lib/investigationProgress";
+import { useAutomationLabAttempts, getAutomationLabCompletions } from "@/lib/automationLabProgress";
 import { useSelectedAssignment } from "@/lib/assignmentSelection";
 import { computeAssignmentProgress } from "@/lib/assignmentProgress";
 
@@ -22,6 +23,7 @@ export function CurrentAssignmentCard() {
   const { completed } = useLearningProgress();
   const { allAttempts } = useQuizAttempts();
   const investigationCompletions = useInvestigationCompletions();
+  const { allAttempts: allAutomationLabAttempts } = useAutomationLabAttempts();
   const { selectedAssignment } = useSelectedAssignment();
 
   if (!selectedAssignment) {
@@ -44,7 +46,13 @@ export function CurrentAssignmentCard() {
     );
   }
 
-  const progress = computeAssignmentProgress(selectedAssignment, completed, allAttempts, investigationCompletions);
+  const progress = computeAssignmentProgress(
+    selectedAssignment,
+    completed,
+    allAttempts,
+    investigationCompletions,
+    getAutomationLabCompletions(allAutomationLabAttempts),
+  );
 
   return (
     <Card>

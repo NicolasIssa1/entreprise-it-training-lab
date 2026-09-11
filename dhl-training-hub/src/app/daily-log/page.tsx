@@ -14,8 +14,10 @@ import { EmptyState } from "@/components/EmptyState";
 import { useDailyLogEntries } from "@/lib/dailyLog";
 import { teamQuestions } from "@/lib/data/questions";
 import { teams, getTeamLabel } from "@/lib/data/teams";
-import { internshipState } from "@/lib/data/internshipState";
-import { toggleButtonClass } from "@/lib/ui";
+import { internshipState, trainingCalendar } from "@/lib/data/internshipState";
+import { useInternshipProgress } from "@/lib/useInternshipProgress";
+import { getInternshipDayNumber, isInternshipWorkingDay } from "@/lib/internshipCalendar";
+import { inputClass, toggleButtonClass } from "@/lib/ui";
 import { DailyLogEntry, TeamId } from "@/lib/types";
 
 const TEAM_OPTIONS: { value: string; label: string }[] = [
@@ -23,12 +25,16 @@ const TEAM_OPTIONS: { value: string; label: string }[] = [
   ...teams.map((t) => ({ value: t.id, label: t.name })),
 ];
 
-// Defaults come from the shared internship state (see internshipState.ts) — never
-// hardcode day/team here. Still fully editable per entry via the form fields below.
+// date starts "" — a deliberately generic, SSR-safe default (identical on
+// server and client) that resolves to today live at render time (see
+// DailyLogContent's effectiveDate) once the learner hasn't overridden it.
+// dayNumber is never stored in form state at all — it's always derived from
+// whichever date is in effect, so it can never drift out of sync with it.
+// Never hard-code a date/day here; that hand-maintenance was the actual
+// "stuck on Day 2" bug.
 function emptyForm() {
   return {
-    date: internshipState.currentDate,
-    dayNumber: internshipState.currentDayNumber,
+    date: "",
     team: internshipState.currentTeam as TeamId | "General",
     observed: "",
     learned: "",
@@ -56,6 +62,7 @@ function DailyLogContent() {
   const researchTopic = searchParams.get("research");
 
   const { entries, addEntry, removeEntry, syncError } = useDailyLogEntries();
+  const { progress } = useInternshipProgress(trainingCalendar);
   const [form, setForm] = useState(() => {
     const initial = emptyForm();
     if (researchTopic) {
@@ -65,9 +72,23 @@ function DailyLogContent() {
   });
   const [activeQuestionsTeam, setActiveQuestionsTeam] = useState<TeamId>(internshipState.currentTeam);
 
+  // form.date starts "" (see emptyForm) and only ever becomes non-empty once
+  // the learner explicitly edits the date picker — so "effective date" is
+  // simply "their explicit choice, or today if they haven't chosen one yet,"
+  // computed fresh on every render rather than copied into state via an
+  // effect (which is unnecessary here — see useInternshipProgress's own
+  // effect for where the actual client/clock synchronization already
+  // happens; this just reads its result). Both dayNumber and the
+  // non-working-day check are derived from whichever date is actually in
+  // effect, so they always stay in sync with it, including across a
+  // mid-session day rollover for anyone who hasn't touched the date field.
+  const effectiveDate = form.date || progress?.today || "";
+  const effectiveDayNumber = effectiveDate ? getInternshipDayNumber(effectiveDate, trainingCalendar) : 0;
+  const isNonWorkingDaySelected = !!effectiveDate && !isInternshipWorkingDay(effectiveDate, trainingCalendar);
+
   function handleAddEntry() {
     if (!form.observed && !form.learned) return;
-    const entry: DailyLogEntry = { id: crypto.randomUUID(), ...form };
+    const entry: DailyLogEntry = { id: crypto.randomUUID(), ...form, date: effectiveDate, dayNumber: effectiveDayNumber };
     addEntry(entry);
     setForm(emptyForm());
   }
@@ -83,13 +104,21 @@ function DailyLogContent() {
         <SectionHeading title="New entry" />
         <div className="space-y-4">
           <FormSection title="When">
-            <InputField label="Date" type="date" value={form.date} onChange={(v) => setForm({ ...form, date: v })} />
-            <InputField
-              label="Day number"
-              type="number"
-              value={form.dayNumber}
-              onChange={(v) => setForm({ ...form, dayNumber: Number(v) })}
-            />
+            <InputField label="Date" type="date" value={effectiveDate} onChange={(v) => setForm({ ...form, date: v })} />
+            <div>
+              <label className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Day number</label>
+              <input type="number" value={effectiveDayNumber} disabled className={`${inputClass} disabled:opacity-70`} />
+              <p className="mt-1 text-xs text-slate-400">
+                {isNonWorkingDaySelected
+                  ? "Calculated automatically — this date falls on a non-working day, so it shows the most recent working day."
+                  : "Calculated automatically from the date."}
+              </p>
+              {isNonWorkingDaySelected && (
+                <div className="mt-1.5">
+                  <Badge variant="warning">Non-working day</Badge>
+                </div>
+              )}
+            </div>
             <div className="sm:col-span-2">
               <SelectField
                 label="Team"

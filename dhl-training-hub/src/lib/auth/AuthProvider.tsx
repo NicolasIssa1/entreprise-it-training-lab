@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/client";
-import { ensureProfile } from "@/lib/repositories/profileRepository";
+import { ensureProfile, Profile } from "@/lib/repositories/profileRepository";
 import { migrateLocalDataToCloud } from "@/lib/migration";
 
 interface AuthActionResult {
@@ -16,6 +16,11 @@ interface AuthContextValue {
   isConfigured: boolean;
   user: User | null;
   session: Session | null;
+  /** Entitlement/tier data (Phase 11) — null while loading or signed out.
+   * Refetched once per signed-in user (not on every render); a future billing
+   * flow that changes tier server-side would need the user to refresh or
+   * sign back in to see it, an acceptable trade-off with no payments yet. */
+  profile: Profile | null;
   /** True only while the initial session check is in flight — never true
    * indefinitely, even if Supabase is unreachable (see the effect below). */
   loading: boolean;
@@ -47,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(isSupabaseConfigured);
   const [migrationMessage, setMigrationMessage] = useState<string | null>(null);
   const [migratedForUserId, setMigratedForUserId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   // Initial session check + subscribe to future auth changes (sign in/out,
   // token refresh). Local Demo Mode (no client) resolves loading immediately.
@@ -82,8 +88,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     (async () => {
       const profile = await ensureProfile(user.id);
+      if (cancelled) return;
+      setProfile(profile);
       if (!profile || profile.localMigrationVersion >= 1) {
-        if (!cancelled) setMigratedForUserId(user.id);
+        setMigratedForUserId(user.id);
         return;
       }
 
@@ -131,6 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // next session would be a small but real cross-account leak of state.
     setMigratedForUserId(null);
     setMigrationMessage(null);
+    setProfile(null);
   }, []);
 
   const dismissMigrationMessage = useCallback(() => setMigrationMessage(null), []);
@@ -141,6 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isConfigured: isSupabaseConfigured,
         user,
         session,
+        profile,
         loading,
         migrationMessage,
         dismissMigrationMessage,

@@ -4,7 +4,7 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { Disclaimer } from "@/components/Disclaimer";
 
 const TOUR_STEPS = [
-  { step: 1, title: "View the curriculum", description: "Browse the 80-topic Learn library across six categories.", href: "/learn" },
+  { step: 1, title: "View the curriculum", description: "Browse the 107-topic Learn library across eight categories.", href: "/learn" },
   { step: 2, title: "Try a sample lesson", description: "Open a full lesson — simple explanation through practice scenario.", href: "/learn/dns" },
   { step: 3, title: "Try a quiz", description: "Take a scenario-based knowledge assessment.", href: "/quizzes" },
   {
@@ -13,9 +13,15 @@ const TOUR_STEPS = [
     description: "Work through a branching, evidence-driven Advanced Investigation.",
     href: "/tickets",
   },
-  { step: 5, title: "View learner analytics", description: "See the reporting layer over training activity.", href: "/analytics" },
-  { step: 6, title: "View manager preview", description: "A read-only preview of what a manager/trainer might see.", href: "/manager-preview" },
-  { step: 7, title: "Explore the AI Tutor", description: "A curriculum-grounded tutor for Q&A and coaching.", href: "/tutor" },
+  {
+    step: 5,
+    title: "Try the Automation Lab",
+    description: "Build a block-assembly workflow (SharePoint, Power Automate, Excel, Outlook, Power BI) and get graded feedback.",
+    href: "/automation-lab",
+  },
+  { step: 6, title: "View learner analytics", description: "See the reporting layer over training activity.", href: "/analytics" },
+  { step: 7, title: "View manager preview", description: "A read-only preview of what a manager/trainer might see.", href: "/manager-preview" },
+  { step: 8, title: "Explore the AI Tutor", description: "A curriculum-grounded tutor for Q&A and coaching.", href: "/tutor" },
 ];
 
 /**

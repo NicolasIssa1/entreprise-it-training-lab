@@ -1,35 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Card } from "@/components/Card";
 import { SectionHeading } from "@/components/SectionHeading";
+import { useLocalStorageState } from "@/lib/storage";
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { scopedKey } from "@/lib/storageScope";
 import { textareaClass } from "@/lib/ui";
 
-/** Simple free-text notes/reflection boxes, persisted locally so they survive a refresh. */
+const isString = (value: unknown): value is string => typeof value === "string";
+
+/**
+ * Simple free-text notes/reflection boxes, persisted locally so they survive a
+ * refresh. Local-only by design (never synced to Supabase, same scope as
+ * bpoProjectPrep.ts) — but still identity-scoped via scopedKey(), which this
+ * component previously was NOT: it used to read/write two fixed
+ * window.localStorage keys directly, so a second account signed in on the
+ * same browser would see (and could overwrite) the first account's notes —
+ * a real cross-account leak, the same class of bug storageScope.ts's account-
+ * isolation fix exists to prevent, just missed for this one component. See
+ * LEGACY_DOMAIN_KEYS in storageScope.ts for how any already-saved notes are
+ * preserved into the new scoped key rather than silently lost.
+ */
 export function DashboardNotes() {
-  const [notes, setNotes] = useState("");
-  const [reflection, setReflection] = useState("");
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    // One-time hydration read: localStorage isn't available during SSR, so state
-    // starts empty (matching the server-rendered output) and is patched here,
-    // after mount, with whatever was actually saved.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setNotes(window.localStorage.getItem("dashboard-quick-notes") ?? "");
-    setReflection(window.localStorage.getItem("dashboard-reflection") ?? "");
-    setLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (!loaded) return;
-    window.localStorage.setItem("dashboard-quick-notes", notes);
-  }, [notes, loaded]);
-
-  useEffect(() => {
-    if (!loaded) return;
-    window.localStorage.setItem("dashboard-reflection", reflection);
-  }, [reflection, loaded]);
+  const { user } = useAuth();
+  const { state: notes, setState: setNotes } = useLocalStorageState<string>(
+    scopedKey("dashboard-quick-notes", user?.id),
+    "",
+    isString,
+  );
+  const { state: reflection, setState: setReflection } = useLocalStorageState<string>(
+    scopedKey("dashboard-reflection", user?.id),
+    "",
+    isString,
+  );
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">

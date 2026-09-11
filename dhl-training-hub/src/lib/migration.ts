@@ -1,10 +1,13 @@
-import { CvAchievement, DailyLogEntry, InvestigationCompletionRecord, InvestigationProgress, QuizAttempt, TeamId } from "@/lib/types";
+import { AutomationLabAttempt, CertificateRecord, CvAchievement, DailyLogEntry, InvestigationCompletionRecord, InvestigationProgress, MilestoneUnlock, QuizAttempt, TeamId } from "@/lib/types";
 import { bulkUpsertLearningProgress } from "@/lib/repositories/learningProgressRepository";
 import { bulkUpsertQuizAttempts } from "@/lib/repositories/quizAttemptsRepository";
 import { bulkUpsertInvestigationProgress, bulkUpsertInvestigationCompletions } from "@/lib/repositories/investigationRepository";
 import { bulkUpsertDailyLogs } from "@/lib/repositories/dailyLogRepository";
 import { bulkUpsertCvAchievements } from "@/lib/repositories/cvAchievementsRepository";
 import { bulkUpsertTeamChecklists } from "@/lib/repositories/teamChecklistRepository";
+import { bulkUpsertAutomationLabAttempts } from "@/lib/repositories/automationLabRepository";
+import { bulkUpsertMilestoneUnlocks } from "@/lib/repositories/milestonesRepository";
+import { bulkUpsertCertificates } from "@/lib/repositories/certificatesRepository";
 import { markMigrated } from "@/lib/repositories/profileRepository";
 import { scopedKey } from "@/lib/storageScope";
 
@@ -155,6 +158,33 @@ export async function migrateLocalDataToCloud(userId: string): Promise<Migration
     if (keysWithData.length === 0) return false;
     await bulkUpsertTeamChecklists(userId, byTeam);
     for (const key of keysWithData) window.localStorage.removeItem(key);
+    return true;
+  });
+
+  await migrateDomain("automation lab attempts", async () => {
+    const key = demoKey("automation-lab-attempts");
+    const raw = safeParse(window.localStorage.getItem(key), isRecord);
+    if (!raw || Object.keys(raw).length === 0) return false;
+    await bulkUpsertAutomationLabAttempts(userId, raw as Record<string, AutomationLabAttempt[]>);
+    window.localStorage.removeItem(key);
+    return true;
+  });
+
+  await migrateDomain("milestone unlocks", async () => {
+    const key = demoKey("milestone-unlocks");
+    const raw = safeParse(window.localStorage.getItem(key), isArray);
+    if (!raw || raw.length === 0) return false;
+    await bulkUpsertMilestoneUnlocks(userId, raw as MilestoneUnlock[]);
+    window.localStorage.removeItem(key);
+    return true;
+  });
+
+  await migrateDomain("certificates", async () => {
+    const key = demoKey("certificates");
+    const raw = safeParse(window.localStorage.getItem(key), isArray);
+    if (!raw || raw.length === 0) return false;
+    await bulkUpsertCertificates(userId, raw as CertificateRecord[]);
+    window.localStorage.removeItem(key);
     return true;
   });
 

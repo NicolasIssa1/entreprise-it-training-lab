@@ -6,11 +6,13 @@ import { TrainingActivityEvent } from "@/lib/types";
 const TYPE_VARIANT: Record<TrainingActivityEvent["type"], "accent" | "success"> = {
   "quiz-attempt": "accent",
   "investigation-completion": "success",
+  "automation-lab-attempt": "success",
 };
 
 const TYPE_LABEL: Record<TrainingActivityEvent["type"], string> = {
   "quiz-attempt": "Quiz",
   "investigation-completion": "Investigation",
+  "automation-lab-attempt": "Automation Lab",
 };
 
 /**
@@ -23,7 +25,7 @@ export function ActivityTimelineList({ events }: { events: TrainingActivityEvent
     return (
       <EmptyState
         title="No dated training activity yet"
-        description="Completing a quiz or an Advanced Investigation will show up here."
+        description="Completing a quiz, an Advanced Investigation, or an Automation Lab build will show up here."
       />
     );
   }

@@ -6,11 +6,13 @@ import { PageGroupHeading } from "@/components/PageGroupHeading";
 import { Checklist } from "@/components/Checklist";
 import { TeamObservations } from "@/components/TeamObservations";
 import { InvestigationCard } from "@/components/InvestigationCard";
+import { AutomationLabCard } from "@/components/AutomationLabCard";
 import { teams, getTeamById } from "@/lib/data/teams";
 import { getTicketsForTeam } from "@/lib/data/tickets";
 import { getQuestionsForTeam } from "@/lib/data/questions";
 import { getTopicsForTeam } from "@/lib/data/learning";
 import { getScenariosForTeam } from "@/lib/data/investigations";
+import { getAutomationLabScenariosForTeam } from "@/lib/data/automationLab";
 
 export function generateStaticParams() {
   return teams.map((team) => ({ teamId: team.id }));
@@ -28,6 +30,7 @@ export default async function TeamDetailPage(props: PageProps<"/teams/[teamId]">
   const questions = getQuestionsForTeam(team.id)?.questions ?? [];
   const recommendedLearning = getTopicsForTeam(team.id);
   const advancedScenarios = getScenariosForTeam(team.id);
+  const automationScenarios = getAutomationLabScenariosForTeam(team.id);
 
   return (
     <div className="space-y-8">
@@ -169,6 +172,19 @@ export default async function TeamDetailPage(props: PageProps<"/teams/[teamId]">
             <div className="grid gap-3 sm:grid-cols-2">
               {advancedScenarios.map((scenario) => (
                 <InvestigationCard key={scenario.id} scenario={scenario} />
+              ))}
+            </div>
+          </>
+        )}
+        {automationScenarios.length > 0 && (
+          <>
+            <SectionHeading
+              title="Automation Lab Practice"
+              subtitle="Enterprise Automation workflow builds this team is commonly involved in"
+            />
+            <div className="grid gap-3 sm:grid-cols-2">
+              {automationScenarios.map((scenario) => (
+                <AutomationLabCard key={scenario.id} scenario={scenario} />
               ))}
             </div>
           </>

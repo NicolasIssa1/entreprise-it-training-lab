@@ -1,10 +1,32 @@
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { ProductTier, PRODUCT_TIERS, UserRole, USER_ROLES } from "@/lib/types";
 
 export interface Profile {
   id: string;
   displayName: string | null;
   localMigrationVersion: number;
   createdAt: string;
+  /** Entitlement tier (Phase 11). Defaults to "free" — see
+   * supabase/migrations/0004_premium.sql's protect_tier_column trigger: this
+   * column is deliberately NOT writable by ordinary client update calls (no
+   * payment integration exists yet), so nothing in this repository ever
+   * attempts to set it. */
+  tier: ProductTier;
+  /** Enterprise Admin role (Phase 12). Defaults to "learner" — protected by
+   * the same kind of DB trigger as tier (see
+   * supabase/migrations/0005_admin_roles.sql). This gates client-side UI
+   * only; see lib/roleRules.ts's header comment for why that's an
+   * acceptable, honestly-documented limitation for what Phase 12 actually
+   * does. */
+  role: UserRole;
+}
+
+function toTier(value: string | null): ProductTier {
+  return (PRODUCT_TIERS as readonly string[]).includes(value ?? "") ? (value as ProductTier) : "free";
+}
+
+function toRole(value: string | null): UserRole {
+  return (USER_ROLES as readonly string[]).includes(value ?? "") ? (value as UserRole) : "learner";
 }
 
 /** Current migration schema version — bump only if the migration logic itself
@@ -21,6 +43,8 @@ export async function getProfile(userId: string): Promise<Profile | null> {
     displayName: data.display_name,
     localMigrationVersion: data.local_migration_version,
     createdAt: data.created_at,
+    tier: toTier(data.tier),
+    role: toRole(data.role),
   };
 }
 

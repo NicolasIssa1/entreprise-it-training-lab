@@ -1,7 +1,8 @@
-import { InvestigationCompletionRecord, SkillProgress, TrainingOverview } from "@/lib/types";
+import { AutomationLabCompletionRecord, InvestigationCompletionRecord, SkillProgress, TrainingOverview } from "@/lib/types";
 import { learningTopics, learningPaths, getPathProgress } from "@/lib/data/learning";
 import { quizzes } from "@/lib/data/quizzes";
 import { investigationScenarios } from "@/lib/data/investigations";
+import { automationLabScenarios } from "@/lib/data/automationLab";
 import { QuizAttemptsMap } from "@/lib/quizAttempts";
 import { calculateOverallTrainingProgress } from "@/lib/skillProgress";
 
@@ -18,6 +19,7 @@ export function computeTrainingOverview(
   quizAttemptsMap: QuizAttemptsMap,
   investigationCompletions: InvestigationCompletionRecord[],
   skillProgresses: SkillProgress[],
+  automationLabCompletions: AutomationLabCompletionRecord[] = [],
 ): TrainingOverview {
   const topicsCompleted = Object.values(completedTopics).filter(Boolean).length;
   const quizzesAttempted = Object.values(quizAttemptsMap).filter((attempts) => attempts.length > 0).length;
@@ -37,6 +39,8 @@ export function computeTrainingOverview(
     quizzesTotal: quizzes.length,
     investigationsCompleted: investigationCompletions.length,
     investigationsTotal: investigationScenarios.length,
+    automationScenariosCompleted: automationLabCompletions.length,
+    automationScenariosTotal: automationLabScenarios.length,
     pathsInProgress,
     pathsCompleted,
     pathsTotal: learningPaths.length,

@@ -12,6 +12,7 @@ import { AssignmentProgressSummary } from "@/components/AssignmentProgressSummar
 import { useLearningProgress } from "@/lib/learningProgress";
 import { useQuizAttempts } from "@/lib/quizAttempts";
 import { useInvestigationCompletions } from "@/lib/investigationProgress";
+import { useAutomationLabAttempts, getAutomationLabCompletions } from "@/lib/automationLabProgress";
 import { computeTrainingSummary, computeInvestigationAnalytics } from "@/lib/analytics";
 import { getRecommendations } from "@/lib/recommendations";
 import { useSelectedAssignment } from "@/lib/assignmentSelection";
@@ -34,11 +35,13 @@ export default function ManagerPreviewPage() {
   const { allAttempts } = useQuizAttempts();
   const investigationCompletions = useInvestigationCompletions();
   const { selectedAssignment } = useSelectedAssignment();
+  const { allAttempts: allAutomationLabAttempts } = useAutomationLabAttempts();
+  const automationLabCompletions = getAutomationLabCompletions(allAutomationLabAttempts);
 
-  const summary = computeTrainingSummary(completed, allAttempts, investigationCompletions);
+  const summary = computeTrainingSummary(completed, allAttempts, investigationCompletions, allAutomationLabAttempts);
   const investigationAnalytics = computeInvestigationAnalytics(investigationCompletions);
   const assignmentProgress = selectedAssignment
-    ? computeAssignmentProgress(selectedAssignment, completed, allAttempts, investigationCompletions)
+    ? computeAssignmentProgress(selectedAssignment, completed, allAttempts, investigationCompletions, automationLabCompletions)
     : null;
   const recommendations = getRecommendations(
     {
@@ -47,6 +50,7 @@ export default function ManagerPreviewPage() {
       investigationCompletions,
       skillProgresses: summary.skills.map((s) => s.progress),
       assignmentProgress,
+      automationLabCompletions,
     },
     5,
   );
@@ -78,7 +82,7 @@ export default function ManagerPreviewPage() {
 
       <Card>
         <SectionHeading title="Learner summary" />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 text-sm">
           <div>
             <p className="text-xs text-slate-500 dark:text-slate-400">Topics completed</p>
             <p className="font-semibold text-slate-900 dark:text-slate-100">
@@ -95,6 +99,12 @@ export default function ManagerPreviewPage() {
             <p className="text-xs text-slate-500 dark:text-slate-400">Investigations completed</p>
             <p className="font-semibold text-slate-900 dark:text-slate-100">
               {summary.overview.investigationsCompleted}/{summary.overview.investigationsTotal}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Automation Lab builds</p>
+            <p className="font-semibold text-slate-900 dark:text-slate-100">
+              {summary.overview.automationScenariosCompleted}/{summary.overview.automationScenariosTotal}
             </p>
           </div>
           <div>

@@ -45,4 +45,12 @@ export const LEGACY_DOMAIN_KEYS = [
   "tutor-conversation",
   "selected-assignment-id",
   "onboarding-preferences",
+  // Phase 10 stabilisation: DashboardNotes.tsx was missed by the original
+  // account-isolation fix — it read/wrote these two keys directly via plain
+  // window.localStorage, completely unscoped, so a second account on the same
+  // browser could see (and overwrite) the first account's dashboard notes.
+  // Added here so the existing one-time adoption below still preserves
+  // whatever was already saved under the old shared keys.
+  "dashboard-quick-notes",
+  "dashboard-reflection",
 ] as const;

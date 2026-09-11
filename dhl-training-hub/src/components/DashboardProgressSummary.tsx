@@ -11,6 +11,7 @@ import { investigationScenarios } from "@/lib/data/investigations";
 import { useLearningProgress } from "@/lib/learningProgress";
 import { useQuizAttempts } from "@/lib/quizAttempts";
 import { useInvestigationCompletions } from "@/lib/investigationProgress";
+import { useAutomationLabAttempts, getAutomationLabCompletions } from "@/lib/automationLabProgress";
 import { calculateAllSkillProgress, calculateOverallTrainingProgress } from "@/lib/skillProgress";
 import { getRecommendations } from "@/lib/recommendations";
 
@@ -25,11 +26,13 @@ export function DashboardProgressSummary() {
   const { completed, completedCount } = useLearningProgress();
   const { allAttempts } = useQuizAttempts();
   const investigationCompletions = useInvestigationCompletions();
+  const { allAttempts: allAutomationLabAttempts } = useAutomationLabAttempts();
+  const automationLabCompletions = getAutomationLabCompletions(allAutomationLabAttempts);
 
-  const skillProgresses = calculateAllSkillProgress(completed, allAttempts, investigationCompletions);
+  const skillProgresses = calculateAllSkillProgress(completed, allAttempts, investigationCompletions, automationLabCompletions);
   const overall = calculateOverallTrainingProgress(skillProgresses);
   const [topRecommendation] = getRecommendations(
-    { completedTopics: completed, quizAttemptsMap: allAttempts, investigationCompletions, skillProgresses },
+    { completedTopics: completed, quizAttemptsMap: allAttempts, investigationCompletions, skillProgresses, automationLabCompletions },
     1,
   );
   const quizzesAttempted = Object.values(allAttempts).filter((attempts) => attempts.length > 0).length;

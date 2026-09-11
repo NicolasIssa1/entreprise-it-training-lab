@@ -1,5 +1,6 @@
-import { InvestigationCompletionRecord, TrainingSummary } from "@/lib/types";
+import { AutomationLabAttempt, InvestigationCompletionRecord, TrainingSummary } from "@/lib/types";
 import { QuizAttemptsMap } from "@/lib/quizAttempts";
+import { getAutomationLabCompletions } from "@/lib/automationLabProgress";
 import { computeTrainingOverview } from "@/lib/analytics/trainingOverview";
 import { computeSkillAnalytics } from "@/lib/analytics/skillAnalytics";
 import { computeActivityTimeline } from "@/lib/analytics/activityTimeline";
@@ -17,13 +18,16 @@ export function computeTrainingSummary(
   completedTopics: Record<string, boolean>,
   quizAttemptsMap: QuizAttemptsMap,
   investigationCompletions: InvestigationCompletionRecord[],
+  automationLabAttemptsMap: Record<string, AutomationLabAttempt[]> = {},
 ): TrainingSummary {
-  const skills = computeSkillAnalytics(completedTopics, quizAttemptsMap, investigationCompletions);
+  const automationLabCompletions = getAutomationLabCompletions(automationLabAttemptsMap);
+  const skills = computeSkillAnalytics(completedTopics, quizAttemptsMap, investigationCompletions, automationLabCompletions);
   const overview = computeTrainingOverview(
     completedTopics,
     quizAttemptsMap,
     investigationCompletions,
     skills.map((s) => s.progress),
+    automationLabCompletions,
   );
 
   const sortedDesc = [...skills].sort((a, b) => b.progress.overall - a.progress.overall);
@@ -33,7 +37,7 @@ export function computeTrainingSummary(
   const strongestIds = new Set(strongest.map((s) => s.progress.skill.id));
   const focus = sortedAsc.filter((s) => !strongestIds.has(s.progress.skill.id) && s.progress.overall < 75).slice(0, 3);
 
-  const recentActivity = computeActivityTimeline(quizAttemptsMap, investigationCompletions).slice(0, RECENT_ACTIVITY_LIMIT);
+  const recentActivity = computeActivityTimeline(quizAttemptsMap, investigationCompletions, automationLabAttemptsMap).slice(0, RECENT_ACTIVITY_LIMIT);
 
   return {
     overview,

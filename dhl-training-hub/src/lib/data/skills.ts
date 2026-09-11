@@ -1,6 +1,7 @@
-import { InvestigationScenario, LearningCategory, LearningTopic, Quiz, QuizCategory, SkillDefinition, SkillId, SKILL_IDS } from "@/lib/types";
+import { AutomationLabScenario, InvestigationScenario, LearningCategory, LearningTopic, Quiz, QuizCategory, SkillDefinition, SkillId, SKILL_IDS } from "@/lib/types";
 import { getTopicsByCategory, getTopicsByIds, getTopicById } from "@/lib/data/learning";
 import { investigationScenarios } from "@/lib/data/investigations";
+import { getAutomationLabScenariosForCategory } from "@/lib/data/automationLab";
 import { quizzes } from "@/lib/data/quizzes";
 
 // Skill model (Phase 4, extended by the post-Phase-10 BPO expansion) — each skill has evidence derived from existing
@@ -50,6 +51,12 @@ export const skillDefinitions: SkillDefinition[] = [
     description:
       "Understanding a business process before changing it, and the Microsoft Power Automate concepts needed to build, test, and troubleshoot a real automation.",
   },
+  {
+    id: "enterprise-automation",
+    name: "Enterprise Automation",
+    description:
+      "Connecting SharePoint, Power Automate, Excel, Outlook and Power BI into a reliable end-to-end business workflow — the Microsoft 365 automation stack.",
+  },
 ];
 
 export function getSkillById(id: SkillId): SkillDefinition {
@@ -67,6 +74,25 @@ const SKILL_LEARNING_CATEGORY: Partial<Record<SkillId, LearningCategory>> = {
   security: "Security Fundamentals",
   "business-logistics": "Business & Logistics",
   "process-optimization-automation": "BPO & Process Automation",
+  "enterprise-automation": "Enterprise Automation",
+};
+
+/** Skills whose PRACTICAL evidence comes from Automation Lab scenario completions
+ * instead of Advanced Investigations — currently just "enterprise-automation",
+ * which has no investigations of its own. Every other skill is unaffected;
+ * getInvestigationsForSkill/getAutomationLabScenariosForSkill below are each
+ * used for exactly the skills that actually have that kind of practical
+ * content, so nothing is ever double-counted. */
+export const PRACTICAL_SOURCE: Record<SkillId, "investigations" | "automation-lab"> = {
+  itsm: "investigations",
+  infrastructure: "investigations",
+  networking: "investigations",
+  applications: "investigations",
+  security: "investigations",
+  troubleshooting: "investigations",
+  "business-logistics": "investigations",
+  "process-optimization-automation": "investigations",
+  "enterprise-automation": "automation-lab",
 };
 
 /** Troubleshooting is cross-cutting — no Learn category is dedicated to it, so
@@ -83,6 +109,7 @@ export const SKILL_QUIZ_CATEGORY: Record<SkillId, QuizCategory> = {
   troubleshooting: "Enterprise Troubleshooting",
   "business-logistics": "Business & Logistics",
   "process-optimization-automation": "BPO & Process Automation",
+  "enterprise-automation": "Enterprise Automation",
 };
 
 export function getTopicsForSkill(skillId: SkillId): LearningTopic[] {
@@ -109,6 +136,16 @@ export function getInvestigationsForSkill(skillId: SkillId): InvestigationScenar
   return investigationScenarios.filter((s) => s.relatedTopicIds.some((id) => getTopicById(id)?.category === category));
 }
 
+/** Practical evidence source for skills whose PRACTICAL_SOURCE is "automation-lab"
+ * (currently just "enterprise-automation") — category-derived, same pattern as
+ * getInvestigationsForSkill above, via getAutomationLabScenariosForCategory. */
+export function getAutomationLabScenariosForSkill(skillId: SkillId): AutomationLabScenario[] {
+  const category = SKILL_LEARNING_CATEGORY[skillId];
+  if (!category) return [];
+  return getAutomationLabScenariosForCategory(category);
+}
+
+
 // ---------------------------------------------------------------------------
 // Lightweight validation, mirroring the other content modules. Every skill
 // must resolve to at least one topic, one quiz, and one investigation, or the
@@ -129,7 +166,14 @@ function validateSkills(): void {
   for (const skill of skillDefinitions) {
     if (getTopicsForSkill(skill.id).length === 0) errors.push(`Skill "${skill.id}" has no mapped learning topics`);
     if (getQuizzesForSkill(skill.id).length === 0) errors.push(`Skill "${skill.id}" has no mapped quizzes`);
-    if (getInvestigationsForSkill(skill.id).length === 0) errors.push(`Skill "${skill.id}" has no mapped investigations`);
+
+    const practicalCount =
+      PRACTICAL_SOURCE[skill.id] === "automation-lab"
+        ? getAutomationLabScenariosForSkill(skill.id).length
+        : getInvestigationsForSkill(skill.id).length;
+    if (practicalCount === 0) {
+      errors.push(`Skill "${skill.id}" has no mapped practical evidence (investigations or automation lab scenarios)`);
+    }
   }
 
   if (errors.length > 0) {

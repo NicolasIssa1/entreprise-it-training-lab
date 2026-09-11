@@ -15,6 +15,7 @@ import { getScenarioById } from "@/lib/data/investigations";
 import { useLearningProgress } from "@/lib/learningProgress";
 import { useQuizAttempts } from "@/lib/quizAttempts";
 import { useInvestigationCompletions } from "@/lib/investigationProgress";
+import { useAutomationLabAttempts, getAutomationLabCompletions } from "@/lib/automationLabProgress";
 import { useSelectedAssignment } from "@/lib/assignmentSelection";
 import { computeAssignmentProgress } from "@/lib/assignmentProgress";
 
@@ -30,6 +31,8 @@ export default function AssignmentsPage() {
   const { completed } = useLearningProgress();
   const { allAttempts } = useQuizAttempts();
   const investigationCompletions = useInvestigationCompletions();
+  const { allAttempts: allAutomationLabAttempts } = useAutomationLabAttempts();
+  const automationLabCompletions = getAutomationLabCompletions(allAutomationLabAttempts);
   const { assignmentId, assignments, selectAssignment, clearAssignment } = useSelectedAssignment();
 
   return (
@@ -49,7 +52,7 @@ export default function AssignmentsPage() {
       <div className="grid gap-5 lg:grid-cols-2">
         {assignments.map((assignment) => {
           const isActive = assignmentId === assignment.id;
-          const progress = computeAssignmentProgress(assignment, completed, allAttempts, investigationCompletions);
+          const progress = computeAssignmentProgress(assignment, completed, allAttempts, investigationCompletions, automationLabCompletions);
 
           return (
             <Card key={assignment.id} className={isActive ? "border-blue-400 ring-1 ring-blue-400/40" : ""}>

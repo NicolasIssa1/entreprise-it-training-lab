@@ -9,6 +9,7 @@ import { ActivityTimelineList } from "@/components/analytics/ActivityTimelineLis
 import { useLearningProgress } from "@/lib/learningProgress";
 import { useQuizAttempts } from "@/lib/quizAttempts";
 import { useInvestigationCompletions } from "@/lib/investigationProgress";
+import { useAutomationLabAttempts } from "@/lib/automationLabProgress";
 import { computeTrainingSummary } from "@/lib/analytics";
 import { internshipState } from "@/lib/data/internshipState";
 
@@ -23,8 +24,9 @@ export default function AnalyticsSummaryPage() {
   const { completed } = useLearningProgress();
   const { allAttempts } = useQuizAttempts();
   const investigationCompletions = useInvestigationCompletions();
+  const { allAttempts: allAutomationLabAttempts } = useAutomationLabAttempts();
 
-  const summary = computeTrainingSummary(completed, allAttempts, investigationCompletions);
+  const summary = computeTrainingSummary(completed, allAttempts, investigationCompletions, allAutomationLabAttempts);
   const { overview, strongestSkills, focusSkills, recentActivity } = summary;
 
   return (
@@ -51,10 +53,11 @@ export default function AnalyticsSummaryPage() {
 
       <Card className="print:border-slate-300 print:shadow-none">
         <SectionHeading title="Training Overview" />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <SummaryStat label="Topics" value={`${overview.topicsCompleted} / ${overview.topicsTotal}`} />
           <SummaryStat label="Quizzes completed" value={`${overview.quizzesAttempted}`} />
           <SummaryStat label="Investigations completed" value={`${overview.investigationsCompleted}`} />
+          <SummaryStat label="Automation Lab builds" value={`${overview.automationScenariosCompleted}`} />
           <SummaryStat label="Overall progress" value={`${overview.overallProgress}%`} />
         </div>
       </Card>

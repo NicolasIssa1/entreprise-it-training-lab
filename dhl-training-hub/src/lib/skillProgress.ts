@@ -1,5 +1,5 @@
-import { InvestigationCompletionRecord, SkillEvidence, SkillId, SkillLevel, SkillProgress, SKILL_IDS } from "@/lib/types";
-import { getSkillById, getTopicsForSkill, getQuizzesForSkill, getInvestigationsForSkill } from "@/lib/data/skills";
+import { AutomationLabCompletionRecord, InvestigationCompletionRecord, SkillEvidence, SkillId, SkillLevel, SkillProgress, SKILL_IDS } from "@/lib/types";
+import { getSkillById, getTopicsForSkill, getQuizzesForSkill, getInvestigationsForSkill, getAutomationLabScenariosForSkill, PRACTICAL_SOURCE } from "@/lib/data/skills";
 import { bestAttempt, QuizAttemptsMap } from "@/lib/quizAttempts";
 
 /**
@@ -32,6 +32,12 @@ export function calculateSkillProgress(
   completedTopics: Record<string, boolean>,
   quizAttemptsMap: QuizAttemptsMap,
   investigationCompletions: InvestigationCompletionRecord[],
+  /** Optional, additive (Enterprise Automation track) — practical evidence for
+   * skills whose PRACTICAL_SOURCE is "automation-lab" (currently just
+   * "enterprise-automation", which has no Advanced Investigations of its own).
+   * Every existing caller that doesn't pass this behaves exactly as before,
+   * same additive-optional-param pattern Phase 9 used for assignmentProgress. */
+  automationLabCompletions: AutomationLabCompletionRecord[] = [],
 ): SkillProgress {
   const skill = getSkillById(skillId);
 
@@ -47,11 +53,28 @@ export function calculateSkillProgress(
   const knowledgeSum = relevantQuizzes.reduce((sum, q) => sum + (bestAttempt(quizAttemptsMap[q.id] ?? [])?.percentage ?? 0), 0);
   const knowledgePercentage = relevantQuizzes.length === 0 ? 0 : Math.round(knowledgeSum / relevantQuizzes.length);
 
-  const relevantInvestigations = getInvestigationsForSkill(skillId);
-  const completionByScenario = new Map(investigationCompletions.map((c) => [c.scenarioId, c]));
-  const practicalCompleted = relevantInvestigations.filter((s) => completionByScenario.has(s.id)).length;
-  const practicalSum = relevantInvestigations.reduce((sum, s) => sum + (completionByScenario.get(s.id)?.score ?? 0), 0);
-  const practicalPercentage = relevantInvestigations.length === 0 ? 0 : Math.round(practicalSum / relevantInvestigations.length);
+  // Practical evidence: Advanced Investigations for every skill except
+  // "enterprise-automation", which draws from Automation Lab scenario
+  // completions instead (see PRACTICAL_SOURCE in lib/data/skills.ts) — every
+  // other skill's calculation below is byte-for-byte unchanged.
+  let practicalCompleted: number;
+  let practicalPercentage: number;
+  let practicalTotal: number;
+  if (PRACTICAL_SOURCE[skillId] === "automation-lab") {
+    const relevantScenarios = getAutomationLabScenariosForSkill(skillId);
+    const completionByScenario = new Map(automationLabCompletions.map((c) => [c.scenarioId, c]));
+    practicalTotal = relevantScenarios.length;
+    practicalCompleted = relevantScenarios.filter((s) => completionByScenario.has(s.id)).length;
+    const practicalSum = relevantScenarios.reduce((sum, s) => sum + (completionByScenario.get(s.id)?.score ?? 0), 0);
+    practicalPercentage = relevantScenarios.length === 0 ? 0 : Math.round(practicalSum / relevantScenarios.length);
+  } else {
+    const relevantInvestigations = getInvestigationsForSkill(skillId);
+    const completionByScenario = new Map(investigationCompletions.map((c) => [c.scenarioId, c]));
+    practicalTotal = relevantInvestigations.length;
+    practicalCompleted = relevantInvestigations.filter((s) => completionByScenario.has(s.id)).length;
+    const practicalSum = relevantInvestigations.reduce((sum, s) => sum + (completionByScenario.get(s.id)?.score ?? 0), 0);
+    practicalPercentage = relevantInvestigations.length === 0 ? 0 : Math.round(practicalSum / relevantInvestigations.length);
+  }
 
   const overall = Math.round(
     learningPercentage * LEARNING_WEIGHT + knowledgePercentage * KNOWLEDGE_WEIGHT + practicalPercentage * PRACTICAL_WEIGHT,
@@ -60,7 +83,7 @@ export function calculateSkillProgress(
   const evidence: SkillEvidence = {
     learning: { completed: learningCompleted, total: topics.length, percentage: learningPercentage },
     knowledge: { attempted: attemptedQuizzes.length, total: relevantQuizzes.length, percentage: knowledgePercentage },
-    practical: { completed: practicalCompleted, total: relevantInvestigations.length, percentage: practicalPercentage },
+    practical: { completed: practicalCompleted, total: practicalTotal, percentage: practicalPercentage },
   };
 
   return { skill, overall, level: levelForScore(overall), evidence };
@@ -70,8 +93,9 @@ export function calculateAllSkillProgress(
   completedTopics: Record<string, boolean>,
   quizAttemptsMap: QuizAttemptsMap,
   investigationCompletions: InvestigationCompletionRecord[],
+  automationLabCompletions: AutomationLabCompletionRecord[] = [],
 ): SkillProgress[] {
-  return SKILL_IDS.map((id) => calculateSkillProgress(id, completedTopics, quizAttemptsMap, investigationCompletions));
+  return SKILL_IDS.map((id) => calculateSkillProgress(id, completedTopics, quizAttemptsMap, investigationCompletions, automationLabCompletions));
 }
 
 /** Simple mean across every skill — shown as "Overall Training Progress." */

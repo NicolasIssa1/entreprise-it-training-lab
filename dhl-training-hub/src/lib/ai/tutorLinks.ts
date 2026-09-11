@@ -11,6 +11,7 @@ export interface TutorLinkParams {
   quiz?: string;
   question?: string;
   scenario?: string;
+  automationScenario?: string;
   /**
    * A suggested question to pre-fill into the Tutor's composer — plain text
    * only, never sent automatically (see TutorChat.tsx: it only ever lands in
@@ -34,6 +35,7 @@ export function tutorHref(params: TutorLinkParams): string {
   if (params.quiz) search.set("quiz", params.quiz);
   if (params.question) search.set("question", params.question);
   if (params.scenario) search.set("scenario", params.scenario);
+  if (params.automationScenario) search.set("automationScenario", params.automationScenario);
   if (params.prompt) search.set("prompt", params.prompt.slice(0, TUTOR_PROMPT_MAX_LENGTH));
   const qs = search.toString();
   return qs ? `/tutor?${qs}` : "/tutor";

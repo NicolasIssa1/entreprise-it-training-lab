@@ -2,6 +2,7 @@ import { LearningTopic } from "@/lib/types";
 import { learningTopics, getTopicById, getTopicsByIds } from "@/lib/data/learning";
 import { getQuizById } from "@/lib/data/quizzes";
 import { getScenarioById } from "@/lib/data/investigations";
+import { getAutomationLabScenarioById } from "@/lib/data/automationLab";
 
 const MAX_TOPICS = 6;
 
@@ -46,6 +47,7 @@ export interface TutorContextInput {
   currentTopicId?: string;
   currentQuizId?: string;
   currentScenarioId?: string;
+  currentAutomationScenarioId?: string;
   selectedTopicIds?: string[];
 }
 
@@ -81,6 +83,11 @@ export function buildTutorContext(input: TutorContextInput): TutorCurriculumCont
   const scenario = input.currentScenarioId ? getScenarioById(input.currentScenarioId) : undefined;
   if (scenario) {
     for (const t of getTopicsByIds(scenario.relatedTopicIds).slice(0, 4)) picked.set(t.id, t);
+  }
+
+  const automationScenario = input.currentAutomationScenarioId ? getAutomationLabScenarioById(input.currentAutomationScenarioId) : undefined;
+  if (automationScenario) {
+    for (const t of getTopicsByIds(automationScenario.relatedTopicIds).slice(0, 4)) picked.set(t.id, t);
   }
 
   for (const id of input.selectedTopicIds ?? []) {

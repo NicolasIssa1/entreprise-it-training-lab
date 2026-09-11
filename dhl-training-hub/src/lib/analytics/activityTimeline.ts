@@ -1,6 +1,7 @@
-import { InvestigationCompletionRecord, TrainingActivityEvent, WeeklyActivityCount } from "@/lib/types";
+import { AutomationLabAttempt, InvestigationCompletionRecord, TrainingActivityEvent, WeeklyActivityCount } from "@/lib/types";
 import { getQuizById } from "@/lib/data/quizzes";
 import { getScenarioById } from "@/lib/data/investigations";
+import { getAutomationLabScenarioById } from "@/lib/data/automationLab";
 import { QuizAttemptsMap, quizResultGuidance } from "@/lib/quizAttempts";
 import { bucketTimestampsByWeek } from "@/lib/analytics/pureCalculations";
 
@@ -26,6 +27,7 @@ import { bucketTimestampsByWeek } from "@/lib/analytics/pureCalculations";
 export function computeActivityTimeline(
   quizAttemptsMap: QuizAttemptsMap,
   investigationCompletions: InvestigationCompletionRecord[],
+  automationLabAttemptsMap: Record<string, AutomationLabAttempt[]> = {},
 ): TrainingActivityEvent[] {
   const events: TrainingActivityEvent[] = [];
 
@@ -55,6 +57,21 @@ export function computeActivityTimeline(
       description: `${record.score}% training indicator (${record.resultCategory})`,
       href: `/tickets/investigate/${scenario.id}`,
     });
+  }
+
+  for (const [scenarioId, attempts] of Object.entries(automationLabAttemptsMap)) {
+    const scenario = getAutomationLabScenarioById(scenarioId);
+    if (!scenario) continue;
+    for (const attempt of attempts) {
+      events.push({
+        id: `automation-lab-${attempt.attemptId}`,
+        type: "automation-lab-attempt",
+        timestamp: attempt.completedAt,
+        title: `Built ${scenario.title}`,
+        description: `${attempt.score.overall}/100 (${attempt.score.overallCategory})`,
+        href: `/automation-lab/${scenario.id}`,
+      });
+    }
   }
 
   return events.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());

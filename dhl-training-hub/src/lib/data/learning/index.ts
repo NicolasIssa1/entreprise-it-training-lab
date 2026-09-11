@@ -6,6 +6,7 @@ import { applicationsTopics } from "./applications";
 import { securityTopics } from "./security";
 import { businessLogisticsTopics } from "./businessLogistics";
 import { bpoAutomationTopics } from "./bpoAutomation";
+import { enterpriseAutomationTopics } from "./enterpriseAutomation";
 import { learningPaths } from "./paths";
 import { tickets } from "@/lib/data/tickets";
 
@@ -21,6 +22,7 @@ export const learningTopics: LearningTopic[] = [
   ...securityTopics,
   ...businessLogisticsTopics,
   ...bpoAutomationTopics,
+  ...enterpriseAutomationTopics,
 ];
 
 export { learningPaths };
@@ -33,6 +35,7 @@ export const LEARNING_CATEGORIES: LearningCategory[] = [
   "Security Fundamentals",
   "Business & Logistics",
   "BPO & Process Automation",
+  "Enterprise Automation",
 ];
 
 export function getTopicById(id: string): LearningTopic | undefined {
@@ -70,6 +73,7 @@ const CROSS_TEAM_CATEGORIES: LearningCategory[] = [
   "Security Fundamentals",
   "Business & Logistics",
   "BPO & Process Automation",
+  "Enterprise Automation",
 ];
 
 export function getTopicsForTeam(teamId: TeamId): LearningTopic[] {

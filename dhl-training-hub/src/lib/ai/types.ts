@@ -1,4 +1,4 @@
-import { TutorMode } from "@/lib/types";
+import { HintLevel, InterviewCategory, TroubleshootCategory, TutorMode } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
 // Provider-agnostic AI types. Kept separate from lib/types.ts because these
@@ -58,6 +58,18 @@ export interface TutorProgressSummary {
    * never anything that could name a real employer's systems. */
   currentAssignmentTitle?: string;
   onboardingFocusArea?: string;
+  /** Phase 14 — compact additions to the learner-context summary. Every
+   * field is capped/id-based, resolved server-side against real static
+   * content or real SKILL_IDS (see /api/tutor/route.ts's
+   * sanitizeProgressSummary) — never free text the client wrote itself.
+   * Overall readiness is the exact same number /progress and the Skills
+   * Passport already show — never a second, independently-computed figure. */
+  readinessOverall?: number;
+  strongestSkillIds?: string[];
+  weakestSkillIds?: string[];
+  completedProjectTitles?: string[];
+  achievementTitles?: string[];
+  certificateProgrammeTitles?: string[];
 }
 
 /** What the client sends for quiz-review — deliberately just ids + the
@@ -107,18 +119,52 @@ export interface InvestigationReviewRequestContext {
   betterReasoningPath: string;
 }
 
+/** What the client sends for automation-coach — deliberately lighter than
+ * InvestigationCoachStatus: the Automation Lab builder's in-progress block
+ * selection is local component state, never persisted (only a final submitted
+ * attempt is saved — see lib/automationLabProgress.ts), so there is no
+ * "current live selection" to sync from. This just gives the Tutor the same
+ * scenario brief/tools the learner is already looking at. */
+export interface AutomationCoachStatus {
+  scenarioBrief: string;
+  toolsInvolved: string[];
+}
+
+/** What the client sends for automation-review — only usable once a scenario
+ * has at least one submitted attempt, all fields copied from data already
+ * shown on the AutomationLabResult page the learner is looking at. */
+export interface AutomationReviewRequestContext {
+  scenarioId: string;
+  overallScore: number;
+  correctLabels: string[];
+  missingLabels: string[];
+  incorrectlyIncludedLabels: string[];
+  modelWorkflowSummary: string;
+}
+
 export interface TutorApiRequest {
   message: string;
   mode: TutorMode;
   currentTopicId?: string;
   currentQuizId?: string;
   currentScenarioId?: string;
+  currentAutomationScenarioId?: string;
   selectedTopicIds?: string[];
   history?: AiChatMessage[];
   progressSummary?: TutorProgressSummary;
   quizReviewContext?: QuizReviewRequestContext;
   investigationCoachStatus?: InvestigationCoachStatus;
   investigationReviewContext?: InvestigationReviewRequestContext;
+  automationCoachStatus?: AutomationCoachStatus;
+  automationReviewContext?: AutomationReviewRequestContext;
+  /** Phase 14 mode-specific session parameters — each validated against a
+   * fixed allowlist server-side (see /api/tutor/route.ts), never free text. */
+  troubleshootCategory?: TroubleshootCategory;
+  interviewCategory?: InterviewCategory;
+  hintLevel?: HintLevel;
+  /** Quiz Me — a real SkillId to ground questions in, or omitted for a
+   * general mixed session. */
+  quizMeSkillId?: string;
 }
 
 export interface TutorApiResponse {

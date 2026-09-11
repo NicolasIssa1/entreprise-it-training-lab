@@ -93,10 +93,11 @@ export default function PilotPage() {
       <Card>
         <SectionHeading title="The solution" />
         <ul className="grid gap-2 sm:grid-cols-2 text-sm text-slate-700 dark:text-slate-300">
-          <li>• A structured, 80-topic enterprise IT curriculum</li>
+          <li>• A structured, 107-topic enterprise IT curriculum</li>
           <li>• Realistic fictional IT incidents to triage and troubleshoot</li>
           <li>• Scenario-based knowledge assessments</li>
           <li>• Branching, evidence-driven practical investigations</li>
+          <li>• A hands-on Automation Lab (SharePoint, Power Automate, Excel, Outlook, Power BI)</li>
           <li>• Deterministic progress analytics — no black-box scoring</li>
           <li>• An optional AI Tutor grounded in this app&rsquo;s own curriculum</li>
           <li>• Generic business/logistics context connecting IT to the business</li>

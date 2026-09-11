@@ -11,9 +11,11 @@ import { buildProgressTutorPrompt } from "@/lib/ai/tutorPromptTemplates";
 import { learningTopics } from "@/lib/data/learning";
 import { quizzes } from "@/lib/data/quizzes";
 import { investigationScenarios } from "@/lib/data/investigations";
+import { automationLabScenarios } from "@/lib/data/automationLab";
 import { useLearningProgress } from "@/lib/learningProgress";
 import { useQuizAttempts } from "@/lib/quizAttempts";
 import { useInvestigationCompletions } from "@/lib/investigationProgress";
+import { useAutomationLabAttempts, getAutomationLabCompletions } from "@/lib/automationLabProgress";
 import { calculateAllSkillProgress, calculateOverallTrainingProgress } from "@/lib/skillProgress";
 import { getRecommendations } from "@/lib/recommendations";
 
@@ -21,14 +23,17 @@ export default function ProgressPage() {
   const { completed, completedCount } = useLearningProgress();
   const { allAttempts } = useQuizAttempts();
   const investigationCompletions = useInvestigationCompletions();
+  const { allAttempts: allAutomationLabAttempts } = useAutomationLabAttempts();
+  const automationLabCompletions = getAutomationLabCompletions(allAutomationLabAttempts);
 
-  const skillProgresses = calculateAllSkillProgress(completed, allAttempts, investigationCompletions);
+  const skillProgresses = calculateAllSkillProgress(completed, allAttempts, investigationCompletions, automationLabCompletions);
   const overall = calculateOverallTrainingProgress(skillProgresses);
   const recommendations = getRecommendations({
     completedTopics: completed,
     quizAttemptsMap: allAttempts,
     investigationCompletions,
     skillProgresses,
+    automationLabCompletions,
   });
 
   const quizzesAttempted = Object.values(allAttempts).filter((attempts) => attempts.length > 0).length;
@@ -80,6 +85,12 @@ export default function ProgressPage() {
                 {investigationCompletions.length}/{investigationScenarios.length}
               </p>
               <p>Investigations completed</p>
+            </div>
+            <div>
+              <p className="font-semibold text-slate-900 dark:text-slate-100">
+                {automationLabCompletions.length}/{automationLabScenarios.length}
+              </p>
+              <p>Automation Lab builds completed</p>
             </div>
           </div>
         </div>

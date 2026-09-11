@@ -61,9 +61,10 @@ export default function PilotReadinessPage() {
       <Card>
         <SectionHeading title="Product" />
         <ul className="space-y-3">
-          <ChecklistItem label="Curriculum ready" done note="103 Learn topics across 7 categories, validated at build time." />
-          <ChecklistItem label="Quizzes ready" done note="16 scenario-based assessments, 143 questions, validated at build time." />
+          <ChecklistItem label="Curriculum ready" done note="107 Learn topics across 8 categories, validated at build time." />
+          <ChecklistItem label="Quizzes ready" done note="18 scenario-based assessments, 162 questions, validated at build time." />
           <ChecklistItem label="Investigation scenarios ready" done note="13 branching Advanced Investigations, validated at build time." />
+          <ChecklistItem label="Automation Lab ready" done note="7 block-assembly workflow builds (2 practice scenarios, 5 Enterprise Projects), validated at build time." />
           <ChecklistItem
             label="AI Tutor ready"
             done={aiConfigured === true}
@@ -84,7 +85,7 @@ export default function PilotReadinessPage() {
         <SectionHeading title="Security" />
         <ul className="space-y-3">
           <ChecklistItem label="Secrets excluded from Git" done note="See the repository audit in the Phase 9 completion report." />
-          <ChecklistItem label="Row Level Security enabled on every table" done note="supabase/migrations/0001_init.sql and 0002_tutor.sql." />
+          <ChecklistItem label="Row Level Security enabled on every table" done note="supabase/migrations/0001_init.sql, 0002_tutor.sql, and 0003_automation_lab.sql." />
           <ChecklistItem label="Private/public data boundaries kept separate" done note="Company context, Daily Log, and CV Tracker never reach Analytics or the AI Tutor automatically." />
           <ChecklistItem label="No real company data in the codebase" done note="All tickets, scenarios, and quiz content are fictional and generic." />
         </ul>

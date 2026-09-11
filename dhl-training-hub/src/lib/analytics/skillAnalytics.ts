@@ -1,13 +1,15 @@
-import { InvestigationCompletionRecord, Recommendation, SkillAnalyticsEntry } from "@/lib/types";
+import { AutomationLabCompletionRecord, InvestigationCompletionRecord, Recommendation, SkillAnalyticsEntry } from "@/lib/types";
 import { calculateAllSkillProgress } from "@/lib/skillProgress";
 import { getRecommendations } from "@/lib/recommendations";
+import { PRACTICAL_SOURCE } from "@/lib/data/skills";
 import { QuizAttemptsMap } from "@/lib/quizAttempts";
 
-function activitySummaryFor(evidence: SkillAnalyticsEntry["progress"]["evidence"]): string {
+function activitySummaryFor(evidence: SkillAnalyticsEntry["progress"]["evidence"], skillId: SkillAnalyticsEntry["progress"]["skill"]["id"]): string {
+  const practicalNoun = PRACTICAL_SOURCE[skillId] === "automation-lab" ? "project" : "investigation";
   const parts = [
     `${evidence.learning.completed}/${evidence.learning.total} lesson${evidence.learning.total === 1 ? "" : "s"}`,
     `${evidence.knowledge.attempted}/${evidence.knowledge.total} assessment${evidence.knowledge.total === 1 ? "" : "s"} attempted`,
-    `${evidence.practical.completed}/${evidence.practical.total} investigation${evidence.practical.total === 1 ? "" : "s"} completed`,
+    `${evidence.practical.completed}/${evidence.practical.total} ${practicalNoun}${evidence.practical.total === 1 ? "" : "s"} completed`,
   ];
   return parts.join(", ");
 }
@@ -24,10 +26,11 @@ export function computeSkillAnalytics(
   completedTopics: Record<string, boolean>,
   quizAttemptsMap: QuizAttemptsMap,
   investigationCompletions: InvestigationCompletionRecord[],
+  automationLabCompletions: AutomationLabCompletionRecord[] = [],
 ): SkillAnalyticsEntry[] {
-  const skillProgresses = calculateAllSkillProgress(completedTopics, quizAttemptsMap, investigationCompletions);
+  const skillProgresses = calculateAllSkillProgress(completedTopics, quizAttemptsMap, investigationCompletions, automationLabCompletions);
   const recommendations = getRecommendations(
-    { completedTopics, quizAttemptsMap, investigationCompletions, skillProgresses },
+    { completedTopics, quizAttemptsMap, investigationCompletions, skillProgresses, automationLabCompletions },
     // Generous limit — we filter per skill below, so we want the fuller
     // candidate list, not just the top few shown on /progress.
     20,
@@ -41,6 +44,6 @@ export function computeSkillAnalytics(
   return skillProgresses.map((progress) => ({
     progress,
     recommendedAction: bySkill.get(progress.skill.id) ?? null,
-    activitySummary: activitySummaryFor(progress.evidence),
+    activitySummary: activitySummaryFor(progress.evidence, progress.skill.id),
   }));
 }

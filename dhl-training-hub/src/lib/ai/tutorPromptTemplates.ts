@@ -1,4 +1,4 @@
-import { InvestigationScenario, LearningTopic, Quiz, QuizQuestion, TrainingAssignment } from "@/lib/types";
+import { AutomationLabScenario, InvestigationScenario, LearningTopic, Quiz, QuizQuestion, TrainingAssignment } from "@/lib/types";
 
 /**
  * Builds the natural-language question that pre-fills the Tutor's composer
@@ -55,6 +55,19 @@ export function buildInvestigationCoachPrompt(scenario: InvestigationScenario): 
  * discuss what happened. */
 export function buildInvestigationReviewPrompt(scenario: InvestigationScenario): string {
   return `Can you walk me through the reasoning path for the "${scenario.title}" investigation and explain what I could have done differently?`;
+}
+
+/** Mid-build — coach mode, so the prompt asks to be guided rather than told
+ * which blocks are correct (reinforces the app's own non-disclosure rule at
+ * the UI layer, not just the system prompt). */
+export function buildAutomationCoachPrompt(scenario: AutomationLabScenario): string {
+  return `Help me think through building the "${scenario.title}" workflow — please guide me with questions about triggers, conditions, and safeguards rather than telling me which blocks are correct.`;
+}
+
+/** Post-submission review — an attempt exists, so this can safely ask to
+ * discuss what happened. */
+export function buildAutomationReviewPrompt(scenario: AutomationLabScenario): string {
+  return `Can you walk me through what I got right and wrong in my "${scenario.title}" workflow, and explain the model solution?`;
 }
 
 /** Generic progress-coach entry (Dashboard/Progress/Analytics) — deliberately

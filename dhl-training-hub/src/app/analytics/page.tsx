@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { MetricCard } from "@/components/MetricCard";
 import { Disclaimer } from "@/components/Disclaimer";
 import { EmptyState } from "@/components/EmptyState";
-import { BookIcon, LayersIcon, ChartIcon, BeakerIcon } from "@/components/icons";
+import { BookIcon, LayersIcon, ChartIcon, BeakerIcon, BoltIcon } from "@/components/icons";
 import { AskTutorLink } from "@/components/AskTutorLink";
 import { buildProgressTutorPrompt } from "@/lib/ai/tutorPromptTemplates";
 import { SkillAnalyticsCard } from "@/components/analytics/SkillAnalyticsCard";
@@ -20,6 +20,7 @@ import { TrendSparkline } from "@/components/analytics/TrendSparkline";
 import { useLearningProgress } from "@/lib/learningProgress";
 import { useQuizAttempts } from "@/lib/quizAttempts";
 import { useInvestigationCompletions } from "@/lib/investigationProgress";
+import { useAutomationLabAttempts, getAutomationLabCompletions } from "@/lib/automationLabProgress";
 import {
   computeTrainingOverview,
   computeSkillAnalytics,
@@ -34,14 +35,16 @@ export default function AnalyticsPage() {
   const { completed } = useLearningProgress();
   const { allAttempts } = useQuizAttempts();
   const investigationCompletions = useInvestigationCompletions();
+  const { allAttempts: allAutomationLabAttempts } = useAutomationLabAttempts();
+  const automationLabCompletions = getAutomationLabCompletions(allAutomationLabAttempts);
 
-  const skills = computeSkillAnalytics(completed, allAttempts, investigationCompletions);
-  const overview = computeTrainingOverview(completed, allAttempts, investigationCompletions, skills.map((s) => s.progress));
+  const skills = computeSkillAnalytics(completed, allAttempts, investigationCompletions, automationLabCompletions);
+  const overview = computeTrainingOverview(completed, allAttempts, investigationCompletions, skills.map((s) => s.progress), automationLabCompletions);
   const quizAnalytics = computeQuizAnalytics(allAttempts);
   const attemptedQuizAnalytics = quizAnalytics.filter((q) => q.attemptCount > 0);
   const investigationAnalytics = computeInvestigationAnalytics(investigationCompletions);
   const pathAnalytics = computeLearningPathAnalytics(completed, allAttempts, investigationCompletions);
-  const timeline = computeActivityTimeline(allAttempts, investigationCompletions);
+  const timeline = computeActivityTimeline(allAttempts, investigationCompletions, allAutomationLabAttempts);
   const weeklyActivity = computeWeeklyActivityCounts(timeline);
 
   return (
@@ -83,7 +86,7 @@ export default function AnalyticsPage() {
       </Disclaimer>
 
       <PageGroupHeading label="Training Overview" />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <MetricCard
           label="Topics completed"
           value={`${overview.topicsCompleted}/${overview.topicsTotal}`}
@@ -108,6 +111,12 @@ export default function AnalyticsPage() {
           value={`${overview.investigationsCompleted}/${overview.investigationsTotal}`}
           icon={<BeakerIcon size={16} />}
           accentClass="bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-300"
+        />
+        <MetricCard
+          label="Automation Lab builds"
+          value={`${overview.automationScenariosCompleted}/${overview.automationScenariosTotal}`}
+          icon={<BoltIcon size={16} />}
+          accentClass="bg-teal-100 text-teal-600 dark:bg-teal-950 dark:text-teal-300"
         />
       </div>
       <Card>

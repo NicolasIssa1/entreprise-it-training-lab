@@ -47,13 +47,16 @@ export interface Ticket {
   topicIds: string[];
 }
 
+/** Curated "today" content shown on the Dashboard, deliberately narrower than
+ * it used to be: it no longer carries dayNumber/currentTeam/progressSummary,
+ * which were the hand-maintained fields behind the "stuck on Day 2" bug — the
+ * Dashboard hero now derives day/date live via useInternshipProgress
+ * (see lib/useInternshipProgress.ts) instead of reading a stored narrative
+ * that had to be remembered and edited every day. */
 export interface DashboardData {
-  dayNumber: number;
-  currentTeam: TeamId;
   todaysGoals: string[];
   todaysQuestions: string[];
   todaysPractice: string;
-  progressSummary: string;
 }
 
 export interface TeamQuestions {
@@ -104,7 +107,8 @@ export type LearningCategory =
   | "Applications"
   | "Security Fundamentals"
   | "Business & Logistics"
-  | "BPO & Process Automation";
+  | "BPO & Process Automation"
+  | "Enterprise Automation";
 
 export type LearningLevel = "Foundation" | "Intermediate";
 
@@ -180,6 +184,12 @@ export interface CvAchievement {
   whatLearned: string;
   suggestedCvWording: string;
   evidenceNotes: string;
+  /** Where this achievement came from. Undefined/"internship" = a real internship
+   * observation logged by hand (the original CV Tracker behavior). "portfolio-project"
+   * = generated from a completed Enterprise Project in the Automation Lab — always
+   * rendered with a visible "Portfolio / simulated project" badge so it's never
+   * mistaken for real internship work. See root CLAUDE.md's CV honesty rule. */
+  source?: "internship" | "portfolio-project";
 }
 
 // ---------------------------------------------------------------------------
@@ -372,6 +382,111 @@ export interface InvestigationCompletionRecord {
 }
 
 // ---------------------------------------------------------------------------
+// Automation Lab (Enterprise Automation track). A hands-on, block-assembly
+// workflow builder sitting alongside Advanced Investigations — genuinely
+// different interaction model (construct-and-submit vs. branching dialogue), so
+// it gets its own type rather than being forced into InvestigationScenario's
+// node-graph shape. The grading *philosophy* is the same as Investigations,
+// though: each scenario tags its own fictional content (here, blocks tagged
+// `role`), and lib/automationLabScoring.ts is a generic engine that only reads
+// those tags — never a hand-written per-scenario answer key. All scenario
+// content is fictional generic enterprise automation training material (e.g.
+// "Global Logistics Co.", "Supplier ABC") — see root CLAUDE.md.
+// ---------------------------------------------------------------------------
+
+export type AutomationBlockCategory = "trigger" | "action" | "condition" | "logic";
+
+/** essential = must be in a correct workflow; recommended = good practice, partial
+ * credit if missing (e.g. duplicate protection, error handling); distractor = a
+ * plausible-looking block that is wrong or unnecessary for this scenario —
+ * including it costs points. Every block a scenario offers carries exactly one
+ * of these, and the generic scoring engine only ever reads this tag. */
+export type AutomationBlockRole = "essential" | "recommended" | "distractor";
+
+export interface AutomationBlock {
+  id: string;
+  category: AutomationBlockCategory;
+  label: string;
+  description: string;
+  role: AutomationBlockRole;
+  /** Shown in the result screen's Correct/Missing/Distractor lists regardless of
+   * outcome — explanations, not just a label. */
+  feedback: string;
+  /** 1-based position in the model solution. Only set for essential/recommended
+   * blocks (distractors don't belong in any solution, so have no position). */
+  idealPosition?: number;
+}
+
+export interface AutomationLabScenario {
+  id: string;
+  title: string;
+  description: string;
+  /** false = Automation Lab practice exercise, true = Enterprise Project capstone
+   * (see /projects). Both are built with the same engine/UI — this only changes
+   * which listing page shows the scenario and whether it carries CV fields. */
+  isEnterpriseProject: boolean;
+  difficulty: LearningLevel;
+  estimatedMinutes: number;
+  /** The business ask, shown before the learner starts building. */
+  scenarioBrief: string;
+  /** e.g. ["Outlook","Power Automate","SharePoint","Excel","Power BI"] — shown as badges. */
+  toolsInvolved: string[];
+  relatedTopicIds: string[];
+  likelyTeams: TeamId[];
+  learningObjectives: string[];
+  /** The full offered palette for this scenario — essential + recommended + a few
+   * distractors. Self-contained per scenario, like each ticket/investigation
+   * defines its own fictional evidence, rather than one shared global catalog. */
+  blocks: AutomationBlock[];
+  /** Narrative walkthrough of the ideal solution, shown on the result screen. */
+  modelWorkflowSummary: string;
+  /** Only set when isEnterpriseProject is true. */
+  projectAudience?: string;
+  /** Only set when isEnterpriseProject is true — the Feature 6 CV connection.
+   * Always rendered with a "Portfolio / simulated project" label; never implies
+   * real deployment. See CvAchievement.source. */
+  cvDescription?: string;
+  skillsDemonstrated?: string[];
+}
+
+export interface AutomationLabCategoryScore {
+  label: string;
+  score: number; // 0-100
+  weight: number; // 0-1, sums to 1
+}
+
+export interface AutomationLabScore {
+  categories: AutomationLabCategoryScore[];
+  overall: number; // 0-100, weighted
+  overallCategory: PerformanceCategory; // reuses the same Excellent/Strong/Developing/Needs Review bands
+  correct: AutomationBlock[];
+  missing: AutomationBlock[]; // essential/recommended blocks not included
+  incorrectlyIncluded: AutomationBlock[]; // distractor blocks the learner included
+  orderingNotes: string[];
+  /** Essential + recommended blocks in idealPosition order — rendered via the
+   * existing FlowDiagram component on the result screen. */
+  modelOrder: AutomationBlock[];
+}
+
+export interface AutomationLabAttempt {
+  attemptId: string;
+  scenarioId: string;
+  completedAt: string; // ISO date string
+  submittedBlockIds: string[]; // learner's built, ordered sequence
+  score: AutomationLabScore;
+}
+
+/** Lightweight completion shape mirroring InvestigationCompletionRecord — derived
+ * at read time from the best attempt per scenario (see
+ * lib/automationLabProgress.ts's getAutomationLabCompletions), never a second
+ * stored "completions" domain. */
+export interface AutomationLabCompletionRecord {
+  scenarioId: string;
+  completedAt: string;
+  score: number;
+}
+
+// ---------------------------------------------------------------------------
 // Quizzes (Phase 4). Content lives in src/lib/data/quizzes/ — a knowledge-check
 // layer on top of the Learn library and Advanced Investigations. All content is
 // fictional generic enterprise IT training material — see root CLAUDE.md.
@@ -452,6 +567,7 @@ export const SKILL_IDS = [
   "troubleshooting",
   "business-logistics",
   "process-optimization-automation",
+  "enterprise-automation",
 ] as const;
 export type SkillId = (typeof SKILL_IDS)[number];
 
@@ -507,8 +623,56 @@ export const TUTOR_MODES = [
   "investigation-coach",
   "investigation-review",
   "progress-coach",
+  "automation-coach",
+  "automation-review",
+  // Phase 14 — AI Learning Coach 2.0. Additive top-level modes the learner
+  // picks directly from the Tutor's own mode selector — distinct from the
+  // modes above, which are always set by a trusted deep link from a specific
+  // page (e.g. an active quiz/investigation/automation attempt) and never
+  // shown in the picker. "tutor" itself is reused/relabeled "Explain" in the
+  // UI rather than duplicated, since its existing behavior already is that.
+  "coach",
+  "quiz-me",
+  "troubleshoot",
+  "project-mentor",
+  "interview",
+  "review",
 ] as const;
 export type TutorMode = (typeof TUTOR_MODES)[number];
+
+/** Fictional-only troubleshoot scenario categories (Phase 14) — the learner
+ * picks one, the Tutor generates and runs a progressive-disclosure scenario
+ * within it. See lib/ai/tutorPrompt.ts's troubleshoot mode instructions for
+ * the "fictional, generic, no real company" rule this list is used under. */
+export const TROUBLESHOOT_CATEGORIES = [
+  "dns",
+  "authentication",
+  "networking",
+  "email-delivery",
+  "permissions",
+  "endpoint",
+  "cloud-availability",
+  "automation-workflow",
+] as const;
+export type TroubleshootCategory = (typeof TROUBLESHOOT_CATEGORIES)[number];
+
+/** Mock-interview categories (Phase 14). Never used to fabricate a hiring
+ * probability — see lib/ai/tutorPrompt.ts's interview mode instructions. */
+export const INTERVIEW_CATEGORIES = [
+  "graduate-it",
+  "infrastructure",
+  "cybersecurity",
+  "automation",
+  "applications-support",
+  "general-enterprise-it",
+] as const;
+export type InterviewCategory = (typeof INTERVIEW_CATEGORIES)[number];
+
+/** Project Mentor's reveal-level control (Phase 14) — sent per-message, never
+ * stored, so a learner can dial it up/down turn to turn. */
+export const HINT_LEVELS = [1, 2, 3] as const;
+export type HintLevel = (typeof HINT_LEVELS)[number];
+export const HINT_LEVEL_LABELS: Record<HintLevel, string> = { 1: "Nudge", 2: "Strong hint", 3: "Explanation" };
 
 export type TutorRole = "user" | "assistant";
 
@@ -574,6 +738,8 @@ export interface TrainingOverview {
   quizzesTotal: number;
   investigationsCompleted: number;
   investigationsTotal: number;
+  automationScenariosCompleted: number;
+  automationScenariosTotal: number;
   pathsInProgress: number;
   pathsCompleted: number;
   pathsTotal: number;
@@ -641,7 +807,7 @@ export interface LearningPathAnalyticsEntry {
   nextTopic: LearningTopic | null;
 }
 
-export type TrainingActivityEventType = "quiz-attempt" | "investigation-completion";
+export type TrainingActivityEventType = "quiz-attempt" | "investigation-completion" | "automation-lab-attempt";
 
 export interface TrainingActivityEvent {
   id: string;
@@ -793,3 +959,336 @@ export const BPO_PROJECT_PREP_FIELDS = [
 ] as const;
 export type BpoProjectPrepFieldId = (typeof BPO_PROJECT_PREP_FIELDS)[number]["id"];
 export type BpoProjectPrepNotes = Partial<Record<BpoProjectPrepFieldId, string>>;
+
+// ---------------------------------------------------------------------------
+// Phase 11 — Premium Product Layer. Entitlements, Readiness Score, Skill-Gap
+// Engine, Professional Milestones, Certificates, and structured CV Evidence.
+// Every score/status here is DERIVED from the same evidence sources
+// skillProgress.ts already reads (completed topics, quiz attempts,
+// investigation completions, automation lab completions) — never a second,
+// independently-stored readiness/competency truth. See root CLAUDE.md's
+// repeated "never a second stored score" rule. Milestone/Certificate
+// *unlock timestamps* are the one genuinely new kind of persisted state this
+// phase adds (lib/data/milestones.ts, lib/data/certificatePrograms.ts) —
+// eligibility itself is always recomputed live; only the moment it was first
+// observed is recorded, exactly like InvestigationCompletionRecord already
+// records a real completedAt rather than inventing one.
+// ---------------------------------------------------------------------------
+
+export const PRODUCT_TIERS = ["free", "pro", "enterprise"] as const;
+export type ProductTier = (typeof PRODUCT_TIERS)[number];
+
+export type SkillGapClassification = "strength" | "developing" | "gap";
+
+export interface SkillGapEntry {
+  progress: SkillProgress;
+  classification: SkillGapClassification;
+}
+
+export interface ReadinessMomentum {
+  activityCount30d: number;
+  description: string;
+}
+
+/** The Readiness Score / Skill-Gap Engine bundle shown on /passport. Not a
+ * new number — `overall` is the same calculateOverallTrainingProgress mean
+ * /progress and /analytics already show; this just packages it with the
+ * strength/developing/gap classification and a real-activity momentum note. */
+export interface ReadinessProfile {
+  overall: number;
+  skills: SkillGapEntry[];
+  strengths: SkillGapEntry[];
+  developing: SkillGapEntry[];
+  gaps: SkillGapEntry[];
+  /** False only when literally zero evidence exists anywhere — used to show an
+   * honest "not enough activity yet" state instead of a misleading 0%. */
+  hasSufficientData: boolean;
+  recentMomentum: ReadinessMomentum;
+}
+
+export type MilestoneCategory = "learning" | "knowledge" | "practical" | "path" | "assignment";
+
+/** Static, hand-authored definition — the actual unlock RULE lives in
+ * lib/data/milestones.ts's eligibility map, read against a
+ * MilestoneEvaluationContext built from existing progress data. No cartoon
+ * badge art, no XP — see root CLAUDE.md's gamification ban. */
+export interface MilestoneDefinition {
+  id: string;
+  title: string;
+  description: string;
+  category: MilestoneCategory;
+  /** Shown even before the milestone is earned, so a locked milestone still
+   * tells the learner exactly what would unlock it. */
+  criteriaDescription: string;
+}
+
+/** The only new persisted fact for milestones — WHEN eligibility was first
+ * observed. Never itself the truth of whether the milestone is earned; that's
+ * always recomputed live (see lib/data/milestones.ts). */
+export interface MilestoneUnlock {
+  milestoneId: string;
+  unlockedAt: string; // ISO date string
+}
+
+/** A certificate program maps 1:1 onto an existing Learning Path — awarded on
+ * 100% path completion plus (if the path has one) a passing score on any of
+ * its related quizzes. skillNames is precomputed from static content (which
+ * skills draw learning evidence from this path's topics), not user data. */
+export interface CertificateProgramDefinition {
+  id: string;
+  title: string;
+  pathId: string;
+  description: string;
+  skillNames: string[];
+}
+
+/** Unlike a milestone, a certificate's issuedAt/certificateRef must stay fixed
+ * once earned — re-deriving them live every render would let a certificate's
+ * date silently drift if the underlying data model ever changed, which is
+ * wrong for something meant to be printed/shared. So this is a genuine,
+ * intentional record, not just a timestamp cache. */
+export interface CertificateRecord {
+  programId: string;
+  certificateRef: string;
+  issuedAt: string; // ISO date string
+  skillsSummary: string[];
+}
+
+/** Structured CV/portfolio evidence + an interview-ready STAR narrative,
+ * derived from a completed Enterprise Project (Automation Lab). Reuses the
+ * existing "Add to CV Tracker" prefill flow (see cv-tracker/page.tsx) rather
+ * than building a second CV feature — addToCvHref is that same query-param
+ * link. Every field traces back to data the learner actually produced or to
+ * this scenario's own static content; nothing here is invented. */
+export interface CvEvidenceItem {
+  id: string;
+  title: string;
+  kind: "enterprise-project";
+  dateCompleted: string;
+  score: number;
+  toolsOrSkills: string[];
+  cvWording: string;
+  interviewStory: { situation: string; task: string; action: string; result: string };
+  addToCvHref: string;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 12 — Enterprise Admin. Everything here operates on ONE of two kinds of
+// learner: the real signed-in user's own account (isYou: true, computed via
+// the exact same hooks/engines every other page already uses) or a fictional,
+// clearly-labeled demo roster member (isYou: false — see
+// lib/data/admin/demoLearners.ts). This is deliberately NOT real multi-tenant
+// architecture: there is no cross-user Supabase query anywhere in this phase,
+// no other real account's data is ever read, and RLS is untouched — the same
+// "read-only preview of the signed-in learner's own data, never another
+// user's" boundary Phase 8's /manager-preview already established, just
+// extended with a fictional cohort around it. Real multi-tenant organization
+// isolation is Phase 13's job. See root CLAUDE.md's Phase 12 section.
+// ---------------------------------------------------------------------------
+
+export const USER_ROLES = ["learner", "manager", "admin"] as const;
+export type UserRole = (typeof USER_ROLES)[number];
+
+/** A learner as shown in the Enterprise Admin area. Evidence fields are
+ * shaped exactly like the real per-user evidence sources
+ * (learning-topic-progress / quiz-attempts / investigation-completions /
+ * automation-lab-attempts) so every existing derivation engine
+ * (calculateAllSkillProgress, computeAssignmentProgress,
+ * computeTrainingOverview, computeActivityTimeline, getRecommendations) can
+ * run against a demo learner exactly as it would against a real one — no
+ * parallel/fabricated aggregate numbers, only fabricated INPUT evidence that
+ * real engines then honestly derive numbers from. */
+export interface AdminLearnerRecord {
+  id: string;
+  name: string;
+  /** True only for the real signed-in user's own account. */
+  isYou: boolean;
+  cohortIds: string[];
+  programmeId: string | null;
+  joinedDate: string; // ISO date
+  completedTopics: Record<string, boolean>;
+  quizAttemptsMap: Record<string, QuizAttempt[]>;
+  investigationCompletions: InvestigationCompletionRecord[];
+  automationLabCompletions: AutomationLabCompletionRecord[];
+  automationLabAttemptsMap: Record<string, AutomationLabAttempt[]>;
+  /** Derived as the max timestamp across all generated/real evidence — null
+   * only when the learner has recorded no activity at all. */
+  lastActivityAt: string | null;
+}
+
+/** Cohorts are local, admin-scoped planning data (see lib/adminCohorts.ts) —
+ * not a new Supabase table. There is no real multi-user membership to sync:
+ * membership only ever references fictional demo learners or the admin's own
+ * "You" record, so cloud persistence would add real multi-tenant surface
+ * area for no actual benefit yet. isCustom distinguishes the 3 built-in demo
+ * cohorts from ones the admin creates locally. */
+export interface AdminCohort {
+  id: string;
+  name: string;
+  description: string;
+  memberLearnerIds: string[];
+  isCustom: boolean;
+}
+
+export type AdminAssignmentTargetType = "learner" | "cohort";
+export type AdminAssignmentRequirementType = "path" | "quiz" | "investigation" | "automation-scenario";
+export type AdminAssignmentStatus = "assigned" | "started" | "completed" | "overdue";
+
+/** An assignment record issued by the admin — local-only for the same reason
+ * cohorts are (see above). Status is always derived at render time by
+ * cross-referencing the target learner's actual evidence against
+ * requirementId/dueDate — never stored as a fourth, independently-tracked
+ * status field. requirementTitle is a display-only snapshot so the UI never
+ * needs a second lookup that could go stale if content changes later. */
+export interface AdminAssignmentRecord {
+  id: string;
+  targetType: AdminAssignmentTargetType;
+  targetId: string;
+  requirementType: AdminAssignmentRequirementType;
+  requirementId: string;
+  requirementTitle: string;
+  dueDate: string | null;
+  instructions: string;
+  assignedAt: string;
+}
+
+/** A custom, locally-defined Programme — the same shape as the existing
+ * static TrainingAssignment (Phase 9), reused deliberately rather than
+ * duplicated (see lib/data/admin/programmes.ts). Local-only for the same
+ * reason cohorts/assignments are. */
+export type AdminCustomProgramme = TrainingAssignment;
+
+export type AdminAttentionFlagKind = "overdue-assignment" | "low-quiz-performance" | "inactive" | "repeated-unsuccessful-attempts" | "major-competency-gap";
+
+/** A deterministic, explainable risk flag (see lib/adminRiskSignals.ts) —
+ * never an opaque AI-generated score. Every flag names exactly which rule
+ * fired and why. */
+export interface AdminAttentionFlag {
+  learnerId: string;
+  kind: AdminAttentionFlagKind;
+  severity: "high" | "medium";
+  reason: string;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 13 — Multi-Tenant SaaS Architecture. Real organizations, real
+// membership, real cross-user data — the actual authorization boundary is
+// Postgres RLS (see supabase/migrations/0006_multi_tenant.sql), never these
+// TypeScript types or any client-side check. These types describe the SAME
+// entities Phase 12's local/fictional AdminCohort/AdminAssignmentRecord/
+// AdminCustomProgramme describe, prefixed "Org" to keep the two families
+// visually distinct — Phase 12's types stay exactly as they were and keep
+// powering the fictional demo experience; these new "Org" types back real,
+// RLS-protected organization data. lib/adminRoster.ts (etc.) is what merges
+// both into the single AdminLearnerRecord shape the existing /admin/* pages
+// already render, so those pages needed no rewrite for this phase.
+// ---------------------------------------------------------------------------
+
+export const ORGANIZATION_ROLES = ["owner", "admin", "manager", "learner"] as const;
+export type OrganizationRole = (typeof ORGANIZATION_ROLES)[number];
+
+export const ORGANIZATION_TYPES = ["company", "university", "training_provider", "other"] as const;
+export type OrganizationType = (typeof ORGANIZATION_TYPES)[number];
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  orgType: OrganizationType;
+  createdBy: string;
+  createdAt: string;
+}
+
+export type OrganizationMemberStatus = "active" | "removed";
+
+/** One row = one user's role within one organization — the trust anchor
+ * every RLS policy in 0006_multi_tenant.sql ultimately reduces to. Never
+ * mutated by a raw client update — see updateOrganizationMemberRole /
+ * removeOrganizationMember in lib/repositories/organizationRepository.ts,
+ * both of which call a SECURITY DEFINER RPC that re-validates authorization
+ * server-side, never a direct table write. */
+export interface OrganizationMembership {
+  id: string;
+  organizationId: string;
+  userId: string;
+  role: OrganizationRole;
+  status: OrganizationMemberStatus;
+  joinedAt: string;
+}
+
+/** A membership row joined with the member's display name — used for the
+ * roster UI. displayName may be null if a member hasn't set one. */
+export interface OrganizationMemberProfile extends OrganizationMembership {
+  displayName: string | null;
+}
+
+export type OrganizationInviteStatus = "pending" | "accepted" | "revoked";
+
+/** A real invite RECORD — never a real email send, since no email service is
+ * configured in this environment. The UI must always label this "not sent"
+ * and surface the shareable join link instead. See root CLAUDE.md's Phase
+ * 13 section. */
+export interface OrganizationInvite {
+  id: string;
+  organizationId: string;
+  email: string;
+  role: Exclude<OrganizationRole, "owner">;
+  status: OrganizationInviteStatus;
+  invitedBy: string;
+  token: string;
+  createdAt: string;
+}
+
+export interface InvitePreview {
+  organizationName: string;
+  role: Exclude<OrganizationRole, "owner">;
+  email: string;
+  status: OrganizationInviteStatus;
+}
+
+/** Real, organization-scoped cohort — distinct from Phase 12's fictional
+ * demo cohorts (lib/data/admin/demoLearners.ts), which remain local-only. */
+export interface OrgCohort {
+  id: string;
+  organizationId: string;
+  name: string;
+  description: string;
+  createdBy: string;
+  createdAt: string;
+  memberUserIds: string[];
+}
+
+/** Real, organization-scoped custom Programme — same shape as the existing
+ * static TrainingAssignment (Phase 9/12), stored server-side per organization
+ * instead of locally. */
+export interface OrgProgramme {
+  id: string;
+  organizationId: string;
+  title: string;
+  audience: string;
+  purpose: string;
+  estimatedScope: string;
+  requiredPathIds: string[];
+  requiredQuizIds: string[];
+  requiredScenarioIds: string[];
+  recommendedTopicIds: string[];
+  createdBy: string;
+  createdAt: string;
+}
+
+/** Real, organization-scoped assignment — mirrors Phase 12's local-only
+ * AdminAssignmentRecord shape exactly, so the existing status-derivation
+ * logic (lib/adminAssignmentStatusRules.ts) works unchanged for either. */
+export interface OrgAssignment {
+  id: string;
+  organizationId: string;
+  targetType: AdminAssignmentTargetType;
+  targetId: string;
+  requirementType: AdminAssignmentRequirementType;
+  requirementId: string;
+  requirementTitle: string;
+  dueDate: string | null;
+  instructions: string;
+  assignedBy: string;
+  assignedAt: string;
+}

@@ -6,6 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { displayProductName, product } from "@/lib/product";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { ProductMarkTile } from "@/components/ProductMark";
+import { useHasAdminAreaAccess } from "@/lib/roles";
+import { useOrganizations } from "@/lib/organizations";
+import { organizationRoleAtLeast } from "@/lib/organizationRoleRules";
 
 // Grouped for scannability (Phase 10) — flat list of 12 links was hard to scan.
 // Kept as an upgraded top nav rather than a sidebar for this visual pass: with
@@ -23,6 +26,8 @@ const NAV_GROUPS: { label: string; links: { href: string; label: string }[] }[] 
       { href: "/learn", label: "Learn" },
       { href: "/teams", label: "Teams" },
       { href: "/tickets", label: "Ticket Simulator" },
+      { href: "/automation-lab", label: "Automation Lab" },
+      { href: "/projects", label: "Enterprise Projects" },
       { href: "/quizzes", label: "Assessments" },
     ],
   },
@@ -32,6 +37,7 @@ const NAV_GROUPS: { label: string; links: { href: string; label: string }[] }[] 
       { href: "/progress", label: "Progress" },
       { href: "/analytics", label: "Analytics" },
       { href: "/assignments", label: "Assignments" },
+      { href: "/passport", label: "Skills Passport" },
     ],
   },
   {
@@ -66,6 +72,13 @@ export function Nav() {
   const router = useRouter();
   const { isConfigured, user, loading, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const hasDemoAdminAccess = useHasAdminAreaAccess();
+  const { memberships } = useOrganizations();
+  const hasAdminAccess = hasDemoAdminAccess || memberships.some((m) => organizationRoleAtLeast(m.membership.role, "manager"));
+
+  const navGroups = hasAdminAccess
+    ? [...NAV_GROUPS, { label: "Admin", links: [{ href: "/admin", label: "Enterprise Admin" }] }]
+    : NAV_GROUPS;
 
   async function handleSignOut() {
     await signOut();
@@ -87,7 +100,7 @@ export function Nav() {
 
         {/* Desktop / wide nav: grouped inline links with dividers between groups */}
         <nav className="hidden flex-1 flex-wrap items-center gap-x-1 gap-y-1 lg:flex" aria-label="Main">
-          {NAV_GROUPS.map((group, groupIndex) => (
+          {navGroups.map((group, groupIndex) => (
             <div key={group.label} className="flex items-center gap-1">
               {groupIndex > 0 && (
                 <span className="mx-1 h-4 w-px bg-slate-200 dark:bg-slate-700" aria-hidden="true" />
@@ -198,7 +211,7 @@ export function Nav() {
             </div>
           )}
           <div className="flex flex-col gap-4">
-            {NAV_GROUPS.map((group) => (
+            {navGroups.map((group) => (
               <div key={group.label}>
                 <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                   {group.label}

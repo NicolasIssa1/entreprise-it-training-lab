@@ -1,7 +1,7 @@
-import { AssignmentProgress, InvestigationCompletionRecord, Recommendation, SkillProgress } from "@/lib/types";
+import { AssignmentProgress, AutomationLabCompletionRecord, InvestigationCompletionRecord, Recommendation, SkillProgress } from "@/lib/types";
 import { getTopicById, learningPaths, getNextIncompleteTopicId, getPathProgress } from "@/lib/data/learning";
 import { quizzes } from "@/lib/data/quizzes";
-import { getInvestigationsForSkill, getQuizzesForSkill } from "@/lib/data/skills";
+import { getInvestigationsForSkill, getAutomationLabScenariosForSkill, getQuizzesForSkill, PRACTICAL_SOURCE } from "@/lib/data/skills";
 import { getScenarioById } from "@/lib/data/investigations";
 import { latestAttempt, QuizAttemptsMap } from "@/lib/quizAttempts";
 
@@ -15,6 +15,10 @@ export interface RecommendationInput {
    * content rather than the engine being rewritten. Never required — every
    * existing caller that doesn't pass this behaves exactly as before. */
   assignmentProgress?: AssignmentProgress | null;
+  /** Optional, additive (Enterprise Automation track) — same "never required"
+   * rule as assignmentProgress above. Powers the never-completed-automation-lab
+   * generator below for the "enterprise-automation" skill. */
+  automationLabCompletions?: AutomationLabCompletionRecord[];
 }
 
 /**
@@ -31,6 +35,7 @@ export function getRecommendations(input: RecommendationInput, limit = 5): Recom
     ...weakQuizTopicRecommendations(input),
     ...lowScoringInvestigationRecommendations(input),
     ...neverCompletedInvestigationRecommendations(input),
+    ...neverCompletedAutomationLabRecommendations(input),
     ...neverAttemptedQuizRecommendations(input),
     ...pathContinuationRecommendations(input),
   ];
@@ -127,6 +132,7 @@ function neverCompletedInvestigationRecommendations({ skillProgresses, investiga
   const out: Recommendation[] = [];
   const completedIds = new Set(investigationCompletions.map((c) => c.scenarioId));
   for (const sp of skillProgresses) {
+    if (PRACTICAL_SOURCE[sp.skill.id] !== "investigations") continue;
     if (sp.evidence.practical.completed > 0) continue;
     if (sp.evidence.learning.percentage < 25 && sp.evidence.knowledge.percentage < 25) continue;
     const scenario = getInvestigationsForSkill(sp.skill.id).find((s) => !completedIds.has(s.id));
@@ -137,6 +143,30 @@ function neverCompletedInvestigationRecommendations({ skillProgresses, investiga
       title: `Practice: ${scenario.title}`,
       description: `Apply what you've learned in ${sp.skill.name} to a realistic investigation — practical performance counts most toward your training indicator.`,
       href: `/tickets/investigate/${scenario.id}`,
+      skillId: sp.skill.id,
+    });
+  }
+  return out;
+}
+
+/** Mirrors neverCompletedInvestigationRecommendations, for the skill(s) whose
+ * practical evidence comes from Automation Lab scenario completions instead of
+ * Advanced Investigations (currently just "enterprise-automation"). */
+function neverCompletedAutomationLabRecommendations({ skillProgresses, automationLabCompletions }: RecommendationInput): Recommendation[] {
+  const out: Recommendation[] = [];
+  const completedIds = new Set((automationLabCompletions ?? []).map((c) => c.scenarioId));
+  for (const sp of skillProgresses) {
+    if (PRACTICAL_SOURCE[sp.skill.id] !== "automation-lab") continue;
+    if (sp.evidence.practical.completed > 0) continue;
+    if (sp.evidence.learning.percentage < 25 && sp.evidence.knowledge.percentage < 25) continue;
+    const scenario = getAutomationLabScenariosForSkill(sp.skill.id).find((s) => !completedIds.has(s.id));
+    if (!scenario) continue;
+    out.push({
+      id: `never-automated-${sp.skill.id}`,
+      priority: 80,
+      title: `Practice: ${scenario.title}`,
+      description: `Apply what you've learned in ${sp.skill.name} to a hands-on Automation Lab build — practical performance counts most toward your training indicator.`,
+      href: `/automation-lab/${scenario.id}`,
       skillId: sp.skill.id,
     });
   }

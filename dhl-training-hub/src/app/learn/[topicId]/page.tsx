@@ -11,6 +11,7 @@ import { AskTutorLink } from "@/components/AskTutorLink";
 import { RelatedTopics } from "@/components/RelatedTopics";
 import { RelatedTickets } from "@/components/RelatedTickets";
 import { RelatedInvestigations } from "@/components/RelatedInvestigations";
+import { RelatedAutomationLab } from "@/components/RelatedAutomationLab";
 import { RelatedQuizzes } from "@/components/RelatedQuizzes";
 import { TroubleshootingFramework } from "@/components/TroubleshootingFramework";
 import { categoryColor } from "@/lib/colors";
@@ -19,6 +20,7 @@ import { learningTopics, getTopicById, getTopicsByIds } from "@/lib/data/learnin
 import { getTeamLabel } from "@/lib/data/teams";
 import { getTicketsForTopic } from "@/lib/data/tickets";
 import { getScenariosForTopic } from "@/lib/data/investigations";
+import { getAutomationLabScenariosForTopic } from "@/lib/data/automationLab";
 import { getQuizzesForTopic } from "@/lib/data/quizzes";
 
 export function generateStaticParams() {
@@ -196,6 +198,12 @@ export default async function LearningTopicPage(props: PageProps<"/learn/[topicI
       {getScenariosForTopic(topic.id).length > 0 && (
         <LearningSection title="Advanced Practice" subtitle="Multi-step branching investigations connected to this topic">
           <RelatedInvestigations topicId={topic.id} />
+        </LearningSection>
+      )}
+
+      {getAutomationLabScenariosForTopic(topic.id).length > 0 && (
+        <LearningSection title="Automation Lab Practice" subtitle="Hands-on workflow builds connected to this topic">
+          <RelatedAutomationLab topicId={topic.id} />
         </LearningSection>
       )}
 

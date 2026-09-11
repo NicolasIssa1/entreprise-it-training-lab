@@ -228,3 +228,32 @@ export function FlaskFlowIcon({ className, size = 18 }: IconProps) {
     </svg>
   );
 }
+
+export function LockIcon({ className, size = 18 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} className={className} aria-hidden="true">
+      <rect x="5" y="11" width="14" height="9" rx="1.8" />
+      <path d="M8 11V7.5a4 4 0 0 1 8 0V11" />
+    </svg>
+  );
+}
+
+export function UsersIcon({ className, size = 18 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} className={className} aria-hidden="true">
+      <circle cx="9" cy="8" r="3" />
+      <path d="M3.5 19.5c.7-3 2.9-4.8 5.5-4.8s4.8 1.8 5.5 4.8" />
+      <path d="M15.5 5.3a3 3 0 0 1 0 5.8" />
+      <path d="M15.5 14.8c2.2.4 3.9 2 4.5 4.7" />
+    </svg>
+  );
+}
+
+export function AwardIcon({ className, size = 18 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} className={className} aria-hidden="true">
+      <circle cx="12" cy="9" r="5.5" />
+      <path d="M9 13.5 7.5 20l4.5-2.3 4.5 2.3-1.5-6.5" />
+    </svg>
+  );
+}

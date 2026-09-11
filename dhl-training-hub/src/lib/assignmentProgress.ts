@@ -1,7 +1,8 @@
-import { AssignmentProgress, AssignmentRequirementProgress, InvestigationCompletionRecord, TrainingAssignment } from "@/lib/types";
+import { AssignmentProgress, AssignmentRequirementProgress, AutomationLabCompletionRecord, InvestigationCompletionRecord, TrainingAssignment } from "@/lib/types";
 import { getPathById, getPathProgress, getNextIncompleteTopicId, getTopicById } from "@/lib/data/learning";
 import { getQuizById } from "@/lib/data/quizzes";
 import { getScenarioById } from "@/lib/data/investigations";
+import { getAutomationLabScenarioById } from "@/lib/data/automationLab";
 import { QuizAttemptsMap } from "@/lib/quizAttempts";
 
 function requirementProgress(completed: number, total: number): AssignmentRequirementProgress {
@@ -19,13 +20,18 @@ function requirementProgress(completed: number, total: number): AssignmentRequir
  *    (mirrors the "quizzesAttempted" evidence used throughout the app —
  *    assignment completion tracks engagement against the required list, not a
  *    pass/fail score)
- *  - a required investigation counts as done once it has a completion record
+ *  - a required investigation/automation lab scenario counts as done once it
+ *    has a completion record (requiredScenarioIds may reference either an
+ *    Advanced Investigation or an Automation Lab scenario id — both are
+ *    checked, since assignments like "Enterprise Automation Foundation"
+ *    require an Automation Lab project rather than an investigation)
  */
 export function computeAssignmentProgress(
   assignment: TrainingAssignment,
   completedTopics: Record<string, boolean>,
   quizAttemptsMap: QuizAttemptsMap,
   investigationCompletions: InvestigationCompletionRecord[],
+  automationLabCompletions: AutomationLabCompletionRecord[] = [],
 ): AssignmentProgress {
   const pathsCompleted = assignment.requiredPathIds.filter((id) => {
     const path = getPathById(id);
@@ -36,7 +42,10 @@ export function computeAssignmentProgress(
 
   const quizzesCompleted = assignment.requiredQuizIds.filter((id) => (quizAttemptsMap[id]?.length ?? 0) > 0).length;
 
-  const completedScenarioIds = new Set(investigationCompletions.map((c) => c.scenarioId));
+  const completedScenarioIds = new Set([
+    ...investigationCompletions.map((c) => c.scenarioId),
+    ...automationLabCompletions.map((c) => c.scenarioId),
+  ]);
   const investigationsCompleted = assignment.requiredScenarioIds.filter((id) => completedScenarioIds.has(id)).length;
 
   const paths = requirementProgress(pathsCompleted, assignment.requiredPathIds.length);
@@ -95,15 +104,26 @@ function findNextRequiredAction(
 
   for (const scenarioId of assignment.requiredScenarioIds) {
     if (completedScenarioIds.has(scenarioId)) continue;
-    const scenario = getScenarioById(scenarioId);
-    if (!scenario) continue;
-    return {
-      id: `assignment-${assignment.id}-scenario-${scenarioId}`,
-      priority: 100,
-      title: `Practice: ${scenario.title}`,
-      description: `Required investigation for "${assignment.title}".`,
-      href: `/tickets/investigate/${scenario.id}`,
-    };
+    const investigation = getScenarioById(scenarioId);
+    if (investigation) {
+      return {
+        id: `assignment-${assignment.id}-scenario-${scenarioId}`,
+        priority: 100,
+        title: `Practice: ${investigation.title}`,
+        description: `Required investigation for "${assignment.title}".`,
+        href: `/tickets/investigate/${investigation.id}`,
+      };
+    }
+    const automationScenario = getAutomationLabScenarioById(scenarioId);
+    if (automationScenario) {
+      return {
+        id: `assignment-${assignment.id}-scenario-${scenarioId}`,
+        priority: 100,
+        title: `Practice: ${automationScenario.title}`,
+        description: `Required Automation Lab project for "${assignment.title}".`,
+        href: `/automation-lab/${automationScenario.id}`,
+      };
+    }
   }
 
   return null;

@@ -146,4 +146,18 @@ export const learningPaths: LearningPath[] = [
       "automation-governance-and-ownership",
     ],
   },
+  {
+    id: "enterprise-automation-foundations",
+    title: "Enterprise Automation Foundations",
+    purpose:
+      "The Microsoft 365 automation stack in the order it's actually used: SharePoint (storage) → Power Automate (orchestration) → Excel (structured data) → Outlook (the event source) → Power BI (reporting), reusing the existing Power Automate/Excel topics from BPO & Process Automation rather than repeating them.",
+    topicIds: [
+      "enterprise-automation-overview",
+      "sharepoint-fundamentals",
+      "power-automate-fundamentals",
+      "excel-automation-patterns",
+      "outlook-email-workflow-automation",
+      "power-bi-fundamentals",
+    ],
+  },
 ];

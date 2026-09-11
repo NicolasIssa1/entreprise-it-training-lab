@@ -1,7 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ONBOARDING_FOCUS_AREAS, SKILL_IDS, SKILL_LEVELS, TUTOR_MODES, TutorMode } from "@/lib/types";
+import {
+  HINT_LEVELS,
+  HintLevel,
+  INTERVIEW_CATEGORIES,
+  InterviewCategory,
+  ONBOARDING_FOCUS_AREAS,
+  SKILL_IDS,
+  SKILL_LEVELS,
+  SkillId,
+  TROUBLESHOOT_CATEGORIES,
+  TroubleshootCategory,
+  TUTOR_MODES,
+  TutorMode,
+} from "@/lib/types";
 import {
   AiChatMessage,
+  AutomationCoachStatus,
+  AutomationReviewRequestContext,
   InvestigationCoachStatus,
   InvestigationReviewRequestContext,
   QuizReviewContext,
@@ -17,7 +32,10 @@ import { checkRateLimit } from "@/lib/ai/rateLimit";
 import { getTopicById } from "@/lib/data/learning";
 import { getQuizById } from "@/lib/data/quizzes";
 import { getScenarioById } from "@/lib/data/investigations";
+import { getAutomationLabScenarioById, automationLabScenarios } from "@/lib/data/automationLab";
 import { trainingAssignments } from "@/lib/data/assignments";
+import { milestoneDefinitions } from "@/lib/data/milestones";
+import { certificatePrograms } from "@/lib/data/certificatePrograms";
 
 // Phase 6 Part P/T: hard input/cost limits enforced server-side, independent
 // of whatever the client already caps — never trust the client alone.
@@ -91,6 +109,33 @@ function sanitizeProgressSummary(raw: unknown): TutorProgressSummary | undefined
       ? r.onboardingFocusArea
       : undefined;
 
+  // Phase 14 — same "validate against real static data, never trust free
+  // text" rule as every field above. readinessOverall is just a bounded
+  // number; every *Ids field is checked against SKILL_IDS; every *Titles
+  // field is checked against the real titles it could honestly be.
+  const readinessOverall =
+    typeof r.readinessOverall === "number" && r.readinessOverall >= 0 && r.readinessOverall <= 100 ? Math.round(r.readinessOverall) : undefined;
+
+  const asSkillIds = (v: unknown) =>
+    Array.isArray(v) ? v.filter((id): id is string => typeof id === "string" && (SKILL_IDS as readonly string[]).includes(id)).slice(0, 3) : [];
+  const strongestSkillIds = asSkillIds(r.strongestSkillIds);
+  const weakestSkillIds = asSkillIds(r.weakestSkillIds);
+
+  const realProjectTitles = new Set(automationLabScenarios.filter((s) => s.isEnterpriseProject).map((s) => s.title));
+  const completedProjectTitles = Array.isArray(r.completedProjectTitles)
+    ? r.completedProjectTitles.filter((t): t is string => typeof t === "string" && realProjectTitles.has(t)).slice(0, 3)
+    : [];
+
+  const realMilestoneTitles = new Set(milestoneDefinitions.map((m) => m.title));
+  const achievementTitles = Array.isArray(r.achievementTitles)
+    ? r.achievementTitles.filter((t): t is string => typeof t === "string" && realMilestoneTitles.has(t)).slice(0, 3)
+    : [];
+
+  const realCertificateTitles = new Set(certificatePrograms.map((p) => p.title));
+  const certificateProgrammeTitles = Array.isArray(r.certificateProgrammeTitles)
+    ? r.certificateProgrammeTitles.filter((t): t is string => typeof t === "string" && realCertificateTitles.has(t)).slice(0, 3)
+    : [];
+
   return {
     completedTopicIds,
     quizBestPercentages,
@@ -99,7 +144,29 @@ function sanitizeProgressSummary(raw: unknown): TutorProgressSummary | undefined
     topRecommendationTitles,
     currentAssignmentTitle,
     onboardingFocusArea,
+    readinessOverall,
+    strongestSkillIds,
+    weakestSkillIds,
+    completedProjectTitles,
+    achievementTitles,
+    certificateProgrammeTitles,
   };
+}
+
+function sanitizeTroubleshootCategory(raw: unknown): TroubleshootCategory | undefined {
+  return typeof raw === "string" && (TROUBLESHOOT_CATEGORIES as readonly string[]).includes(raw) ? (raw as TroubleshootCategory) : undefined;
+}
+
+function sanitizeInterviewCategory(raw: unknown): InterviewCategory | undefined {
+  return typeof raw === "string" && (INTERVIEW_CATEGORIES as readonly string[]).includes(raw) ? (raw as InterviewCategory) : undefined;
+}
+
+function sanitizeHintLevel(raw: unknown): HintLevel | undefined {
+  return typeof raw === "number" && (HINT_LEVELS as readonly number[]).includes(raw) ? (raw as HintLevel) : undefined;
+}
+
+function sanitizeQuizMeSkillId(raw: unknown): SkillId | undefined {
+  return typeof raw === "string" && (SKILL_IDS as readonly string[]).includes(raw) ? (raw as SkillId) : undefined;
 }
 
 /** Resolves quiz review context entirely from static curriculum data — the
@@ -180,6 +247,46 @@ function sanitizeInvestigationReviewContext(
   };
 }
 
+/** Mirrors sanitizeInvestigationCoachStatus — deliberately lighter (see
+ * AutomationCoachStatus's doc comment): there is no live in-progress
+ * selection to validate, just the scenario's own static brief/tools. */
+function sanitizeAutomationCoachStatus(raw: unknown): AutomationCoachStatus | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const r = raw as Partial<AutomationCoachStatus>;
+  if (typeof r.scenarioBrief !== "string") return undefined;
+
+  return {
+    scenarioBrief: r.scenarioBrief.slice(0, MAX_TEXT_FIELD),
+    toolsInvolved: Array.isArray(r.toolsInvolved)
+      ? r.toolsInvolved.filter((t): t is string => typeof t === "string").slice(0, MAX_ARRAY_ITEMS).map((t) => t.slice(0, 60))
+      : [],
+  };
+}
+
+/** Mirrors sanitizeInvestigationReviewContext — requires a real Automation Lab
+ * scenario id. Block labels are free client-supplied strings (unlike quiz
+ * review, which resolves everything server-side) — same documented, low-stakes
+ * trade-off already accepted for investigation-review context (see
+ * docs/AI-TUTOR.md's trust boundary note), capped and length-limited here. */
+function sanitizeAutomationReviewContext(raw: unknown): AutomationReviewRequestContext | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const r = raw as Partial<AutomationReviewRequestContext>;
+  if (typeof r.scenarioId !== "string" || !getAutomationLabScenarioById(r.scenarioId)) return undefined;
+  if (typeof r.overallScore !== "number" || typeof r.modelWorkflowSummary !== "string") return undefined;
+
+  const capArray = (v: unknown) =>
+    Array.isArray(v) ? v.filter((x): x is string => typeof x === "string").slice(0, MAX_ARRAY_ITEMS).map((x) => x.slice(0, 200)) : [];
+
+  return {
+    scenarioId: r.scenarioId,
+    overallScore: Math.max(0, Math.min(100, Math.round(r.overallScore))),
+    correctLabels: capArray(r.correctLabels),
+    missingLabels: capArray(r.missingLabels),
+    incorrectlyIncludedLabels: capArray(r.incorrectlyIncludedLabels),
+    modelWorkflowSummary: r.modelWorkflowSummary.slice(0, MAX_TEXT_FIELD),
+  };
+}
+
 export async function GET() {
   return NextResponse.json({ configured: isAiConfigured() });
 }
@@ -212,6 +319,10 @@ export async function POST(request: NextRequest) {
   const currentQuizId = typeof body.currentQuizId === "string" && getQuizById(body.currentQuizId) ? body.currentQuizId : undefined;
   const currentScenarioId =
     typeof body.currentScenarioId === "string" && getScenarioById(body.currentScenarioId) ? body.currentScenarioId : undefined;
+  const currentAutomationScenarioId =
+    typeof body.currentAutomationScenarioId === "string" && getAutomationLabScenarioById(body.currentAutomationScenarioId)
+      ? body.currentAutomationScenarioId
+      : undefined;
 
   const selectedTopicIds = Array.isArray(body.selectedTopicIds)
     ? body.selectedTopicIds.filter((id): id is string => typeof id === "string" && !!getTopicById(id)).slice(0, MAX_SELECTED_TOPICS)
@@ -223,12 +334,20 @@ export async function POST(request: NextRequest) {
   const investigationCoachStatus = mode === "investigation-coach" ? sanitizeInvestigationCoachStatus(body.investigationCoachStatus) : undefined;
   const investigationReviewContext =
     mode === "investigation-review" ? sanitizeInvestigationReviewContext(body.investigationReviewContext) : undefined;
+  const automationCoachStatus = mode === "automation-coach" ? sanitizeAutomationCoachStatus(body.automationCoachStatus) : undefined;
+  const automationReviewContext =
+    mode === "automation-review" ? sanitizeAutomationReviewContext(body.automationReviewContext) : undefined;
+  const troubleshootCategory = mode === "troubleshoot" ? sanitizeTroubleshootCategory(body.troubleshootCategory) : undefined;
+  const interviewCategory = mode === "interview" ? sanitizeInterviewCategory(body.interviewCategory) : undefined;
+  const hintLevel = mode === "project-mentor" ? sanitizeHintLevel(body.hintLevel) : undefined;
+  const quizMeSkillId = mode === "quiz-me" ? sanitizeQuizMeSkillId(body.quizMeSkillId) : undefined;
 
   const { topics } = buildTutorContext({
     userMessage: message,
     currentTopicId,
     currentQuizId,
     currentScenarioId,
+    currentAutomationScenarioId,
     selectedTopicIds,
   });
 
@@ -239,6 +358,12 @@ export async function POST(request: NextRequest) {
     quizReviewContext,
     investigationCoachStatus,
     investigationReviewContext,
+    automationCoachStatus,
+    automationReviewContext,
+    troubleshootCategory,
+    interviewCategory,
+    hintLevel,
+    quizMeSkillId,
   });
 
   try {

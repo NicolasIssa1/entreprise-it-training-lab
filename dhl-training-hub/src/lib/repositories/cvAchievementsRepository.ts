@@ -11,6 +11,7 @@ function toAchievement(row: {
   what_learned: string;
   suggested_cv_wording: string;
   evidence_notes: string;
+  source: string | null;
 }): CvAchievement {
   return {
     id: row.id,
@@ -22,6 +23,7 @@ function toAchievement(row: {
     whatLearned: row.what_learned,
     suggestedCvWording: row.suggested_cv_wording,
     evidenceNotes: row.evidence_notes,
+    source: row.source === "internship" || row.source === "portfolio-project" ? row.source : undefined,
   };
 }
 
@@ -37,6 +39,7 @@ function toRow(userId: string, achievement: CvAchievement) {
     what_learned: achievement.whatLearned,
     suggested_cv_wording: achievement.suggestedCvWording,
     evidence_notes: achievement.evidenceNotes,
+    source: achievement.source ?? null,
   };
 }
 
